@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {TOKEN_URL, CLIENT_ID, CLIENT_SECRET, REDIRECT_URI, REFRESH_TOKEN} from "@env";
+import {TOKEN_URL, CLIENT_ID, CLIENT_SECRET, REFRESH_TOKEN} from "@env";
   
 
 const getAccessFromRefresh = async () => {
@@ -18,10 +18,8 @@ const getAccessFromRefresh = async () => {
     });
 
     const data = await response.json();
-    console.log("data = ",data)
 
     if (data.access_token) {
-      console.log("inner if")
       await AsyncStorage.setItem('access_token', data.access_token);
       return data.access_token.trim();
     } else {

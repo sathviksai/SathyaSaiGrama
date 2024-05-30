@@ -1,32 +1,11 @@
 import {View, Text, TouchableOpacity, StyleSheet} from 'react-native';
-import React, { useEffect } from 'react';
-import { useContext } from 'react';
 import UserContext from '../../context/UserContext';
-import { getAccessFromRefresh } from '../components/RefreshToken';
-
-
-
+import { useContext } from 'react';
 
 
 const Invite = ({navigation}) => {
 
-  const {accessToken, setAccessToken} = useContext(UserContext);
-
-  const setToken = () => {
-    getAccessFromRefresh()
-    .then((res) => {
-      setAccessToken(res)
-      console.log(accessToken)
-    })
-  }
-
-  useEffect(()=>{
-    setInterval(async() => {
-      setToken();
-    }, 300000)
-  }, [])
-
-
+  const {userEmail, L1ID} = useContext(UserContext)
   
   return (
     <View style={styles.container}>
@@ -37,6 +16,8 @@ const Invite = ({navigation}) => {
           eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
           faucibus pulvinar elementum integer enim neque volutpat ac tincidunt.
           Arcu bibendum at varius vel
+
+          {userEmail} and {L1ID}
         </Text>
       </View>
       <>
