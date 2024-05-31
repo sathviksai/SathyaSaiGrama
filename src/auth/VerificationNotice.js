@@ -16,8 +16,6 @@ const VerificationNotice = ({ route, navigation }) => {
       if (user) {
         await user.reload();
         if (user.emailVerified) {
-          setUserEmail(route.params.email)
-          setL1ID(route.params.id)
           navigation.navigate('Footer');
           clearInterval(interval);
         }

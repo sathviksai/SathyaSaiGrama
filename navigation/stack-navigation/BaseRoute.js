@@ -7,26 +7,34 @@ import { AuthContext, AuthProvider } from '../../src/auth/AuthProvider';
 import ApprovalTab from '../../src/screens/approval/ApprovalTab';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { NavigationContainer } from '@react-navigation/native';
-import { getAccessFromRefresh } from '../../src/components/RefreshToken';
 import FooterTab from '../tab-navigation/FooterTab';
 import UserContext from '../../context/UserContext';
 import VerificationNotice from '../../src/auth/VerificationNotice';
+import {DATABASE_ID, COLLECTION_ID, APPWRITE_FUNCTION_PROJECT_ID, APPWRITE_API_KEY} from "@env"
 
 const BaseRoute = () => {
   const { setAccessToken } = useContext(UserContext);
 
-  const setToken = async () => {
-    try {
-      const res = await getAccessFromRefresh();
-      setAccessToken(res);
-    } catch (error) {
-      console.error('Error refreshing token:', error);
+
+  const getAppWriteToken = async () => {
+    let res = await fetch(`https://cloud.appwrite.io/v1/databases/${DATABASE_ID}/collections/${COLLECTION_ID}/documents`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Appwrite-Project': APPWRITE_FUNCTION_PROJECT_ID,
+        'X-Appwrite-Key': APPWRITE_API_KEY
+      }
     }
-  };
+    );
+    res = await res.json()
+    setAccessToken(res.documents[0].Token)
+  }
+
+
 
   useEffect(() => {
-    const intervalId = setInterval(setToken, 300000); // Adjust the interval as needed (e.g., 300000 for 5 minutes)
-    return () => clearInterval(intervalId); // Clean up the interval on component unmount
+    const intervalId = setInterval(getAppWriteToken, 300000); 
+    return () => clearInterval(intervalId);
   }, []);
 
   return (
@@ -38,6 +46,7 @@ const BaseRoute = () => {
 
 const Routes = () => {
   const { user } = useContext(AuthContext);
+  // console.log("user data : ", user)
   const Stack = createNativeStackNavigator();
 
   return (
