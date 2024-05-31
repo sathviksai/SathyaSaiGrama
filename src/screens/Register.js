@@ -1,61 +1,42 @@
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert, KeyboardAvoidingView,ActivityIndicator } from 'react-native';
-import React, { useEffect } from 'react'
+import React, { useContext} from 'react'
 import { useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import {auth} from '../auth/firebaseConfig';
-import { getAccessFromRefresh } from '../components/RefreshToken';
 import {createUserWithEmailAndPassword, sendEmailVerification} from 'firebase/auth'
-import {APP_OWNER_NAME, APP_LINK_NAME, BASE_APP_URL} from "@env"
+import { getData } from '../components/ApiRequest';
+import UserContext from '../../context/UserContext';
 
-const Register = ({ navigation }) => {
+
+const Register = ({navigation}) => {
 
   const [loading, setLoading] = useState(false);
   const { control, handleSubmit, formState: { errors } } = useForm()
   const [password, setPassword] = useState()
+  const {getAccessToken} = useContext(UserContext)
+
 
   const handleRegForm = async (userCred) => {
     setLoading(true);
     console.log(userCred.email)
-    //check data exists
-    const appOwnerName = APP_OWNER_NAME // Replace with your actual Zoho app owner name
-    const appLinkName = APP_LINK_NAME; // Replace with your actual app link name
-    const reportName = 'All_App_Users'; // Replace with your actual report name
-    const url = `${BASE_APP_URL}/${appOwnerName}/${appLinkName}/report/${reportName}?criteria=Email=="${userCred.email}"`; // Replace with your actual Zoho Creator URL
+      const response = await getData('All_App_Users', 'Email', userCred.email, getAccessToken());
+      if(!response.ok){
+        Alert.alert("Somthing went wrong!")
+      }
+      const res = await response.json();
 
-    
-    console.log(url)
-    try {
-      const access_token = await getAccessFromRefresh()
-      console.log(access_token)
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: {
-          Authorization: `Zoho-oauthtoken ${access_token}`
-        },
-        params: { 
-          criteria:`Email=="${userCred.email}"`
-        }
-      });    
-
-      console.log('res: ',response)
-      const data = await response.json();
-      if (data.data && data.data.length > 0) { 
+      if (res.data && res.data.length > 0) { 
         //authentication       
-        console.log("true")
-        console.log(userCred.email,userCred.password)
         try {
-          const userCredential = await createUserWithEmailAndPassword(auth,userCred.email,userCred.password);
+          await createUserWithEmailAndPassword(auth,userCred.email,userCred.password);
           sendEmailVerification(auth.currentUser)
-          const email = userCred.email;
-          const id = data.data.json().ID;
-          console.log(id)
           setLoading(false);
-          navigation.navigate('VerficationNotice',{email,id});
+          navigation.navigate('VerificationNotice', {email: userCred.email, id: res.data[0].ID})
         } catch (error) {
           setLoading(false);
           if (error.message === 'Network request failed') 
             Alert.alert('Network Error', 'Failed to fetch data. Please check your network connection and try again.');
-          if (error.code === 'auth/email-already-in-use') {
+          else if (error.code === 'auth/email-already-in-use') {
             Alert.alert('That email address is already in use!');
           } else if (error.code === 'auth/invalid-email') {
             Alert.alert('That email address is invalid!');
@@ -69,15 +50,7 @@ const Register = ({ navigation }) => {
         Alert.alert("data not exist")
         console.log(("false"))
       }
-    }catch (error) {
-      setLoading(false);
-      if (error.message === 'Network request failed') 
-        Alert.alert('Network Error', 'Failed to fetch data. Please check your network connection and try again.');
-      console.error('Error checking data:', error);
-    }
-    
   }
-  
 
   return (
     <KeyboardAvoidingView behavior='padding'
@@ -190,6 +163,8 @@ main:{
 },
 redirect:{
   flexDirection:'row',
+  marginTop:20,
+  marginBottom:10
 },
 inputBox: {
     borderWidth: 1,
