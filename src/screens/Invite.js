@@ -1,11 +1,41 @@
 import {View, Text, TouchableOpacity, StyleSheet} from 'react-native';
 import UserContext from '../../context/UserContext';
-import { useContext } from 'react';
+import { useContext, useEffect } from 'react';
+import { AuthContext } from '../auth/AuthProvider';
+import { getDataWithString } from '../components/ApiRequest';
+
 
 
 const Invite = ({navigation}) => {
 
-  const {userEmail, L1ID} = useContext(UserContext)
+  const { user } = useContext(AuthContext)
+
+  const {userEmail, L1ID, setUserEmail, setL1ID, getAccessToken} = useContext(UserContext)
+
+  useEffect(() => {
+    const setData = async () => {
+      try {
+        const res = await getDataWithString('All_App_Users', 'Email', user.email, getAccessToken());
+        console.log('Response from getDataWithString:', res);
+
+        if (res && res.data && res.data.length > 0) {
+          const userId = res.data[0].ID;
+          setL1ID(userId);
+          setUserEmail(user.email);
+          console.log('L1ID set to:', userId);
+        } else {
+          console.error('Unexpected response structure or empty data:', res);
+        }
+      } catch (error) {
+        console.error('Error in setData:', error);
+      }
+    };
+
+    if (user) {
+      setData();
+    }
+  }, [ ]); 
+
   
   return (
     <View style={styles.container}>
@@ -18,6 +48,8 @@ const Invite = ({navigation}) => {
           Arcu bibendum at varius vel
 
           {userEmail} and {L1ID}
+
+          Alredy loged user {user?.email}
         </Text>
       </View>
       <>

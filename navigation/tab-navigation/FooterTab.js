@@ -8,12 +8,15 @@ import Profile from '../../src/screens/Profile';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import VisitorFills from '../../src/screens/VisitorFills';
 import FillByYourSelf from '../../src/screens/FillByYourSelf';
-
+import MyProfile from '../../src/screens/MyProfile'
+import Notifications from '../../src/screens/Notifications';
+import Settings from '../../src/screens/Settings';
 
 const Tab = createBottomTabNavigator();
 
 
 const InviteStack = createNativeStackNavigator();
+const ProfileStack= createNativeStackNavigator();
 
 function InviteStackScreen() {
   return (
@@ -31,7 +34,26 @@ function InviteStackScreen() {
   );
 }
 
-
+function ProfileStackScreen() {
+    return (
+      <ProfileStack.Navigator screenOptions={{ headerShown: false }}>
+      <ProfileStack.Screen name="Profile" component={Profile} />
+        <ProfileStack.Screen
+          name="MyProfile"
+          component={MyProfile} 
+        />
+        <ProfileStack.Screen
+          name="Notifications"
+          component={Notifications}
+        />
+        <ProfileStack.Screen
+          name="Settings"
+          component={Settings}
+        />
+      </ProfileStack.Navigator>
+    );
+  }
+  
 
 
 function FooterTab({navigation}) {
@@ -121,8 +143,8 @@ function FooterTab({navigation}) {
                 }}
             />
             <Tab.Screen
-                name="Profile"
-                component={Profile}
+                name="ProfileStackScreen"
+                component={ProfileStackScreen}
                 options={{
                     headerShown: false,
                     headerTitleAlign: 'center',

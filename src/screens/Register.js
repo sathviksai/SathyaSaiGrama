@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import {auth} from '../auth/firebaseConfig';
 import {createUserWithEmailAndPassword, sendEmailVerification} from 'firebase/auth'
-import { getData } from '../components/ApiRequest';
+import { getDataWithString } from '../components/ApiRequest';
 import UserContext from '../../context/UserContext';
 
 
@@ -19,11 +19,8 @@ const Register = ({navigation}) => {
   const handleRegForm = async (userCred) => {
     setLoading(true);
     console.log(userCred.email)
-      const response = await getData('All_App_Users', 'Email', userCred.email, getAccessToken());
-      if(!response.ok){
-        Alert.alert("Somthing went wrong!")
-      }
-      const res = await response.json();
+      const res = await getDataWithString('All_App_Users', 'Email', userCred.email, getAccessToken());
+      console.log("response object returned ", res)
 
       if (res.data && res.data.length > 0) { 
         //authentication       
@@ -31,7 +28,7 @@ const Register = ({navigation}) => {
           await createUserWithEmailAndPassword(auth,userCred.email,userCred.password);
           sendEmailVerification(auth.currentUser)
           setLoading(false);
-          navigation.navigate('VerificationNotice', {email: userCred.email, id: res.data[0].ID})
+          navigation.navigate('VerificationNotice')
         } catch (error) {
           setLoading(false);
           if (error.message === 'Network request failed') 

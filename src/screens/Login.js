@@ -12,24 +12,20 @@ import React, { useState, useContext } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { auth } from '../auth/firebaseConfig';
 import { signInWithEmailAndPassword, sendEmailVerification } from 'firebase/auth'
-import { getData } from '../components/ApiRequest';
+import { getDataWithString } from '../components/ApiRequest';
 import UserContext from '../../context/UserContext';
 
 const Login = ({ navigation }) => {
 
     const [loading, setLoading] = useState(false);
     const { control, handleSubmit, formState: { errors } } = useForm()
-    const { getAccessToken, setUserEmail, setL1ID } = useContext(UserContext)
+    const { getAccessToken } = useContext(UserContext)
 
 
     const handleLoginForm = async (userCred) => {
 
         try {
-            const response = await getData('All_App_Users', 'Email', userCred.email, getAccessToken());
-            if (!response.ok) {
-                Alert.alert("Somthing went wrong!")
-            }
-            const res = await response.json();
+            const res = await getDataWithString('All_App_Users', 'Email', userCred.email, getAccessToken());
 
             setLoading(true);
             const userCredential = await signInWithEmailAndPassword(auth, userCred.email, userCred.password);
@@ -37,13 +33,13 @@ const Login = ({ navigation }) => {
             setLoading(false);
             if (user.emailVerified) {
                 // Email is verified, navigate to home
-                setUserEmail(userCred.email);
-                setL1ID(res.data[0].ID);                
+                // setUserEmail(userCred.email);
+                // setL1ID(Number(res.data[0].ID));                
                 navigation.navigate('Footer');
             } else {
                 // Email is not verified, display message and send verification email (if needed)
                 await sendEmailVerification(auth.currentUser);
-                navigation.navigate('VerificationNotice', {email: userCred.email, id: res.data[0].ID})
+                navigation.navigate('VerificationNotice')
             }
         } catch (error) {
             setLoading(false);
@@ -113,7 +109,6 @@ const Login = ({ navigation }) => {
                     <View style={styles.redirect}>
                         <Text style={{ fontWeight: "bold", marginEnd: 8 }}>Don't have an account?</Text>
                         <TouchableOpacity onPress={() => {
-                            console.log("navigation in login: ", navigation)
                             navigation.navigate('Register')
                         }}>
                             <Text style={{ color: "blue", fontWeight: "bold" }}>SignUp</Text>

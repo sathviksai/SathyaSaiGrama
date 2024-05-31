@@ -1,13 +1,16 @@
 import { StyleSheet, Text, View,TouchableOpacity,Alert } from 'react-native'
-import React from 'react'
+import React, { useContext } from 'react'
 import {auth} from '../auth/firebaseConfig';
 import {signOut } from "firebase/auth";
+import { AuthContext } from '../auth/AuthProvider';
 
 const Profile = ({navigation}) => {
+  const { user,setUser } = useContext(AuthContext);
   const onLogout = () => {
     signOut(auth)
     .then(response => {
       console.log('response :', response);
+      setUser(null)
       navigation.navigate('Login')
       Alert.alert('User signed out!');
     })
