@@ -7,6 +7,7 @@ import UserContext from '../../context/UserContext';
 import RNRestart from 'react-native-restart';
 import { getDataWithInt, getDataWithString, getDataWithStringAndInt, getDataWithoutStringAndWithInt } from '../components/ApiRequest';
 import { AuthContext } from '../auth/AuthProvider';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Profile = ({navigation}) => {
   const { getAccessToken, userEmail, L1ID } = useContext(UserContext)
@@ -14,9 +15,10 @@ const Profile = ({navigation}) => {
 
   const onLogout = () => {
     signOut(auth)
-      .then(response => {
+      .then(async (response) => {
         console.log('response :', response);
         setUser(null);
+        await AsyncStorage.removeItem("existedUser");
         RNRestart.Restart(); 
       })
       .catch(error => {

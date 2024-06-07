@@ -8,52 +8,105 @@ import {
     ActivityIndicator,
     KeyboardAvoidingView,
 } from 'react-native';
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { auth } from '../auth/firebaseConfig';
 import { signInWithEmailAndPassword, sendEmailVerification } from 'firebase/auth'
-import { getDataWithString } from '../components/ApiRequest';
+import { getDataWithInt, getDataWithString } from '../components/ApiRequest';
 import UserContext from '../../context/UserContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Login = ({ navigation }) => {
 
+
     const [loading, setLoading] = useState(false);
     const { control, handleSubmit, formState: { errors } } = useForm()
-    const { getAccessToken } = useContext(UserContext)
+    const { getAccessToken, userType, setUserType, accessToken, setUserEmail, setL1ID, loggedUser, setLoggedUser } = useContext(UserContext)
+    const [currentUserId, setCurrentUserId] = useState(null)
+
+
+
+    const fetchDataFromOffice = async (id) => {
+        console.log("access token and id in fetchDataFromOffice in login: ", accessToken, id);
+        const res = await getDataWithInt("All_Offices", "Approver_app_user_lookup", id, accessToken);
+        if (res && res.data) {
+            setUserType("L2")
+        }
+        else {
+            setUserType("L1")
+        }
+        console.log("response in fetchDataFromOffice in login: ".res)
+    }
+
+
+
+
+    useEffect(() => {
+
+        const storeData = async () => {
+            if (currentUserId) {
+                console.log("Inside the useEffect of login")
+                await AsyncStorage.setItem("existedUser", JSON.stringify({ userId: currentUserId, role: userType }));
+                console.log("login data saved into local storage")
+                let existedUser = await AsyncStorage.getItem("existedUser");
+                existedUser = JSON.parse(existedUser)
+                console.log("Existed user in Base route useEffect:", existedUser)
+                setLoggedUser(existedUser);
+                navigation.navigate("FooterTab");
+            }
+        };
+
+        if(userType){
+            console.log("Before store data called in useEffect in Login")
+            storeData()
+            console.log("After store data called in useEffect in Login")
+        }
+
+    }, [userType, currentUserId]);
+
+
 
 
     const handleLoginForm = async (userCred) => {
 
-        try {
-            const res = await getDataWithString('All_App_Users', 'Email', userCred.email, getAccessToken());
+        setLoading(true);
+        const res = await getDataWithString('All_App_Users', 'Email', userCred.email, accessToken);
+        console.log("Whether user exis or not in login: ", res)
+        if (res && res.data) {
+            try {
+                fetchDataFromOffice(res.data[0].ID)
+                const userCredential = await signInWithEmailAndPassword(auth, userCred.email, userCred.password);
+                const user = userCredential.user;
+                setLoading(false);
+                if (user.emailVerified) {
+                    setL1ID(res.data[0].ID)
+                    setUserEmail(userCred.email)
+                    setCurrentUserId(res.data[0].ID)
+                } else {
+                    // Email is not verified, display message and send verification email (if needed)
+                    await sendEmailVerification(auth.currentUser);
+                    navigation.navigate('VerificationNotice', { id: res.data[0].ID })
+                }
 
-            setLoading(true);
-            const userCredential = await signInWithEmailAndPassword(auth, userCred.email, userCred.password);
-            const user = userCredential.user;
-            setLoading(false);
-            if (user.emailVerified) {
-                // Email is verified, navigate to home
-                // setUserEmail(userCred.email);
-                // setL1ID(Number(res.data[0].ID));                
-                navigation.navigate('Footer');
-            } else {
-                // Email is not verified, display message and send verification email (if needed)
-                await sendEmailVerification(auth.currentUser);
-                navigation.navigate('VerificationNotice')
+            } catch (error) {
+                setLoading(false);
+                if (error.message === 'Network request failed')
+                    Alert.alert('Network Error', 'Failed to fetch data. Please check your network connection and try again.');
+                else if (error.code === 'auth/email-already-in-use') {
+                    Alert.alert('That email address is already in use!');
+                } else if (error.code === 'auth/invalid-email') {
+                    Alert.alert('That email address is invalid!');
+                } else {
+                    Alert.alert('Error in creating account:', error.message);
+                }
+                console.log('Error in auth: ', error);
             }
-        } catch (error) {
-            setLoading(false);
-            if (error.message === 'Network request failed')
-                Alert.alert('Network Error', 'Failed to fetch data. Please check your network connection and try again.');
-            if (error.code === 'auth/too-many-requests') {
-                Alert.alert('Too many requests. Please try again later.');
-            }
-            else {
-                console.error('Login Error:', error);
-                // Handle login errors (e.g., invalid credentials)
-                Alert.alert('Error', 'Login failed. Please check your email and password.');
-            }
+
+        } else {
+            setLoading(false)
+            Alert.alert("Data not exists")
         }
+
     }
 
     return (

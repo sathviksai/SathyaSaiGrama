@@ -42,7 +42,7 @@ const Denied = ({ navigation }) => {
         <FlatList
           data={denieds}
           renderItem={({ item }) => (
-            <ApprovalComponent navigation={navigation} key={item.ID} user={item} fetchData={fetchData}/>
+            <ApprovalComponent navigation={navigation} key={item.ID} user={item} />
           )}
           keyExtractor={(item) => item.ID.toString()}
           refreshControl={

@@ -3,27 +3,67 @@ import { View, Text, Button, StyleSheet, Alert, TouchableOpacity } from 'react-n
 import { auth } from './firebaseConfig';
 import { sendEmailVerification } from 'firebase/auth';
 import UserContext from '../../context/UserContext';
+import { getDataWithInt } from '../components/ApiRequest';
+import { AuthContext } from './AuthProvider';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const VerificationNotice = ({ route, navigation }) => {
+
+  const { id } = route.params
+  console.log("Id in verification notice: ", id)
   const user = auth.currentUser;
-  const { setUserEmail, setL1ID } = useContext(UserContext)
+  const { setUserEmail, setL1ID, accessToken, userType, setUserType, setLoggedUser } = useContext(UserContext)
+  const { setUser } = useContext(AuthContext)
+
+
   useEffect(() => {
+
+    const fetchDataFromOffice = async () => {
+
+      console.log("inside useEffect ofVerificationNotice: ", accessToken, id);
+      const res = await getDataWithInt("All_Offices", "Approver_app_user_lookup", id, accessToken);
+      if (res.data) {
+        setUserType("L2")
+      }
+      else {
+        setUserType("L1")
+      }
+    }
+
+    fetchDataFromOffice()
+
+  }, [])
+
+
+  useEffect(() => {
+
     const interval = setInterval(() => {
       checkEmailVerification();
     }, 5000);
 
     const checkEmailVerification = async () => {
+
+
       if (user) {
         await user.reload();
-        if (user.emailVerified) {
-          navigation.navigate('Footer');
+        if (user.emailVerified && userType) {
+          setUserEmail(user.email)
+          setL1ID(id)
           clearInterval(interval);
+          if (userType) {
+            await AsyncStorage.setItem("existedUser", JSON.stringify({ userId: id, role: userType }));
+            let existedUser = await AsyncStorage.getItem("existedUser");
+            existedUser = JSON.parse(existedUser)
+            console.log("Existed user in Base route useEffect:", existedUser)
+            setLoggedUser(existedUser);
+            navigation.navigate('FooterTab');
+          }
         }
       }
     };
 
     return () => clearInterval(interval); // Clean up interval on component unmount
-  }, []);
+  }, [userType]);
 
   const handleResendVerification = async () => {
     if (user) {

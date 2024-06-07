@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Invite from '../../src/screens/Invite';
-import { ActivityIndicator } from 'react-native';
+import { ActivityIndicator, Alert } from 'react-native';
 
 import { StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native';
 import ApprovalTab from '../../src/screens/approval/ApprovalTab';
@@ -16,10 +16,12 @@ import VerifyDetails from '../../src/screens/approval/VerifyDetails';
 import EditVerifyDetails from '../../src/screens/approval/EditVerifydetails';
 import UserContext from '../../context/UserContext';
 import { AuthContext } from '../../src/auth/AuthProvider';
-import { getDataWithString } from '../../src/components/ApiRequest';
+import { getDataWithString, getDataWithInt } from '../../src/components/ApiRequest';
 import Edit from '../../src/screens/Edit';
 import AddData from '../../src/screens/AddData';
 import FamilyMemberVerifyDetails from '../../src/screens/FamilyMemberVerifyDetails';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import RNRestart from 'react-native-restart';
 
 const Tab = createBottomTabNavigator();
 const InviteStack = createNativeStackNavigator();
@@ -44,35 +46,35 @@ function InviteStackScreen() {
 
 function ProfileStackScreen() {
     return (
-      <ProfileStack.Navigator screenOptions={{ headerShown: false }}>
-      <ProfileStack.Screen name="Profile" component={Profile} />
-        <ProfileStack.Screen
-          name="MyProfile"
-          component={MyProfile} 
-        />
-        <ProfileStack.Screen
-          name="Notifications"
-          component={Notifications}
-        />
-        <ProfileStack.Screen
-          name="Settings"
-          component={Settings}
-        />
-        <ProfileStack.Screen
-          name="Edit"
-          component={Edit}
-        />
-        <ProfileStack.Screen
-          name="AddData"
-          component={AddData}
-        />
-        <ProfileStack.Screen
-          name="FamilyMemberVerifyDetails"
-          component={FamilyMemberVerifyDetails}
-        />
-      </ProfileStack.Navigator>
+        <ProfileStack.Navigator screenOptions={{ headerShown: false }}>
+            <ProfileStack.Screen name="Profile" component={Profile} />
+            <ProfileStack.Screen
+                name="MyProfile"
+                component={MyProfile}
+            />
+            <ProfileStack.Screen
+                name="Notifications"
+                component={Notifications}
+            />
+            <ProfileStack.Screen
+                name="Settings"
+                component={Settings}
+            />
+            <ProfileStack.Screen
+                name="Edit"
+                component={Edit}
+            />
+            <ProfileStack.Screen
+                name="AddData"
+                component={AddData}
+            />
+            <ProfileStack.Screen
+                name="FamilyMemberVerifyDetails"
+                component={FamilyMemberVerifyDetails}
+            />
+        </ProfileStack.Navigator>
     );
-  }
+}
 
 
 
@@ -87,55 +89,66 @@ const ApprovalStack = () => {
 
 }
 
+const L1ApprovalStack = () => {
+    return (
+        <ApproveStack.Navigator screenOptions={{ headerShown: false }}>
+            <ApproveStack.Screen name="ApprovalTab" component={ApprovalTab} />
+            <ApproveStack.Screen name="VerifyDetails" component={VerifyDetails} />
+            <ApproveStack.Screen name="EditVerifydetails" component={EditVerifyDetails} />
+        </ApproveStack.Navigator>
+    )
+
+}
+
 
 
 function FooterTab({ navigation }) {
 
-
-    const { user } = useContext(AuthContext)
     const [loading, setLoading] = useState(true)
 
+    const { user, setUser } = useContext(AuthContext)
+    const { setUserEmail, setL1ID, accessToken, userType, setUserType, loggedUser, setLoggedUser } = useContext(UserContext)
+    console.log("Logged user data in footer: ", loggedUser)
 
-    const { userEmail, L1ID, setUserEmail, setL1ID, getAccessToken, accessToken } = useContext(UserContext)
-    console.log("Again footer called")
+    // useEffect(()=>{
 
-    useEffect(() => {
+    //     const fetchDataFromOffice = async (existedUser) => {
 
-        const setData = async () => {
-            console.log("User email in footer:", user.email)
-            try {
-                console.log("Access token in footer:", getAccessToken())
-                const res = await getDataWithString('All_App_Users', 'Email', user.email, accessToken);
-                console.log('Response from getDataWithString:', res);
+    //         console.log("access token and id in footer: ", accessToken, existedUser.userId);
+    //         const res = await getDataWithInt("All_Offices", "Approver_app_user_lookup", existedUser.userId, accessToken);
+    //         if (res.data) {
+    //             await AsyncStorage.removeItem("existedUser");
+    //             setUserType("L2")
+    //             await AsyncStorage.setItem("existedUser", JSON.stringify({userId: existedUser.userId, role: "L2"}))
+    //         }
+    //         else {
+    //             await AsyncStorage.removeItem("existedUser");
+    //             setUserType("L1")
+    //             await AsyncStorage.setItem("existedUser", JSON.stringify({userId: existedUser.userId, role: "L1"}))
+    //         }
 
-                if (res && res.data && res.data.length > 0) {
-                    const userId = res.data[0].ID;
-                    const mail = res.data[0].Email;
-                    setL1ID(userId);
-                    setUserEmail(mail);
-                    console.log('L1ID set to:', userId);
-                } else {
-                    console.error('Unexpected response structure or empty data:', res);
-                }
-            } catch (error) {
-                console.error('Error in setData:', error);
-            }
-        };
+    //         let exist = await AsyncStorage.getItem("existedUser");
+    //         exist = JSON.parse(exist)
+    //         setLoggedUser(exist);
+    //         if(exist && userType && (userType!=exist.role)){
+    //             Alert.alert("Your account has been deleted!")
+    //             setUser(null);
+    //             await AsyncStorage.removeItem("existedUser");
+    //             setTimeout(()=>{
+    //                 RNRestart.Restart(); 
+    //             },1000)
+    //         }
+    //     }
+    //     if(loggedUser != null){
+    //         fetchDataFromOffice(loggedUser)
+    //     }
 
-        setData();
-
-    }, []);
-
-    useEffect(()=>{
-        setLoading(false)
-        console.log("Use effect in footer: ", L1ID, userEmail)
-    },[L1ID])
-
+    // },[ ])
 
     return (
         <>
-            {loading ? (
-                <ActivityIndicator size="large" color="#752A26" style={styles.loadingContainer} />
+            { !loggedUser ? (
+                <ActivityIndicator size="large" color="red" style={styles.loadingContainer} />
             ) : (
                 <Tab.Navigator
                     screenOptions={{
@@ -215,12 +228,49 @@ function FooterTab({ navigation }) {
                                             fontSize: 12,
                                             fontFamily: 'Inter',
                                         }}>
-                                        APPROVALS
+                                        My Approvals
                                     </Text>
                                 </View>
                             ),
                         }}
                     />
+                    {
+                        loggedUser.role === "L2" ? (
+                            <Tab.Screen
+                                name="L1ApprovalStack"
+                                component={L1ApprovalStack}
+                                options={{
+                                    headerShown: false,
+                                    tabBarIcon: ({ focused }) => (
+                                        <View style={styles.iconContainer}>
+                                            <Image
+                                                source={
+                                                    focused
+                                                        ? require('../../src/assets/approvedDark.png')
+                                                        : require('../../src/assets/approved.png')
+                                                }
+                                                resizeMode="contain"
+                                                style={{
+                                                    width: 30,
+                                                    height: 30,
+                                                    tintColor: focused ? '#752a26' : 'black',
+                                                    marginBottom: 5,
+                                                }}
+                                            />
+                                            <Text
+                                                style={{
+                                                    color: focused ? '#752a26' : 'black',
+                                                    fontSize: 12,
+                                                    fontFamily: 'Inter',
+                                                }}>
+                                                L1 Requests
+                                            </Text>
+                                        </View>
+                                    ),
+                                }}
+                            />
+                        ) : null
+                    }
                     <Tab.Screen
                         name="ProfileStackScreen"
                         component={ProfileStackScreen}
@@ -260,10 +310,12 @@ function FooterTab({ navigation }) {
                         }}
                     />
                 </Tab.Navigator>
-            )}
+            )
+            }
         </>
     );
 }
+
 export default FooterTab;
 const styles = StyleSheet.create({
     iconContainer: {
