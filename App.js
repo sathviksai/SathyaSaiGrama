@@ -2,12 +2,17 @@ import BaseRoute from "./navigation/stack-navigation/BaseRoute";
 import UserContext from "./context/UserContext";
 import { useContext, useEffect, useState } from "react";
 import { DATABASE_ID, COLLECTION_ID, APPWRITE_FUNCTION_PROJECT_ID, APPWRITE_API_KEY } from "@env"
-import {StyleSheet, ActivityIndicator } from "react-native";
+import {StyleSheet, ActivityIndicator, Alert } from "react-native";
+import { AuthContext, AuthProvider } from "./src/auth/AuthProvider";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 const App = () => {
 
-  const { setAccessToken, getAccessToken, accessToken } = useContext(UserContext)
+
+  const { user } = useContext(AuthContext);
+
+  const { setAccessToken, getAccessToken, accessToken, setLoggedUser } = useContext(UserContext)
   const [loading, setLoading] = useState(true)
 
 
@@ -39,6 +44,21 @@ const App = () => {
 
     fetchToken();
   }, []);
+
+
+  useEffect(()=>{
+
+    const checkUserExist = async () =>{
+      let existedUser = await AsyncStorage.getItem("existedUser");
+      existedUser = JSON.parse(existedUser)
+      console.log("Existed user in App.js:", existedUser)
+      if(existedUser){
+        setLoggedUser(existedUser);
+      }
+    }
+
+    checkUserExist();
+  }, [])
 
   useEffect(() => {
     if (accessToken) {

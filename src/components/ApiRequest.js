@@ -5,6 +5,7 @@ import { Alert } from "react-native";
 export const getDataWithInt = async (reportName, criteria, value, token) => {
   try {
     const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/${reportName}?criteria=${criteria}==${value}`;
+    console.log("url in getDataWithInt: ",url)
     const response = await fetch(url, {
       method: 'GET',
       headers: {
@@ -14,7 +15,9 @@ export const getDataWithInt = async (reportName, criteria, value, token) => {
         criteria: `${criteria}==${value}`
       }
     });
-    return await response.json();
+    const res = await response.json();
+    console.log("Response in getDataWithInt: ", res)
+    return res
   }
   catch (err) {
     if (err.message === 'Network request failed')
@@ -27,8 +30,34 @@ export const getDataWithInt = async (reportName, criteria, value, token) => {
 }
 
 
+// export const getDataWithString = async (reportName, criteria, value, token) => {
+
+//   try {
+//     const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/${reportName}?criteria=${criteria}=="${value}"`;
+//     const response = await fetch(url, {
+//       method: 'GET',
+//       headers: {
+//         Authorization: `Zoho-oauthtoken ${token}`
+//       },
+//       params: {
+//         criteria: `${criteria}=="${value}"`
+//       }
+//     });
+//     return await response.json();
+//   }
+//   catch (err) {
+//     if (err.message === 'Network request failed')
+//       Alert.alert('Network Error', 'Failed to fetch data. Please check your network connection and try again.', err);
+//     else {
+//       Alert.alert("Error: ", err)
+//       console.log(err)
+//     }
+//   }
+// }
+
 export const getDataWithString = async (reportName, criteria, value, token) => {
   try {
+    console.log("token in getDataWithString: ", token, value)
     const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/${reportName}?criteria=${criteria}=="${value}"`;
     const response = await fetch(url, {
       method: 'GET',
@@ -43,7 +72,7 @@ export const getDataWithString = async (reportName, criteria, value, token) => {
   }
   catch (err) {
     if (err.message === 'Network request failed')
-      Alert.alert('Network Error', 'Failed to fetch data. Please check your network connection and try again.', err);
+      Alert.alert('Network Error', 'Failed to fetch data. Please check your network connection and try again.');
     else {
       Alert.alert("Error: ", err)
       console.log(err)

@@ -10,32 +10,7 @@ const Invite = ({navigation}) => {
 
   const { user } = useContext(AuthContext)
 
-  const {userEmail, L1ID, setUserEmail, setL1ID, getAccessToken} = useContext(UserContext)
-
-  useEffect(() => {
-    const setData = async () => {
-      try {
-        const res = await getDataWithString('All_App_Users', 'Email', user.email, getAccessToken());
-        console.log('Response from getDataWithString:', res);
-
-        if (res && res.data && res.data.length > 0) {
-          const userId = res.data[0].ID;
-          setL1ID(userId);
-          setUserEmail(user.email);
-          console.log('L1ID set to:', userId);
-        } else {
-          console.error('Unexpected response structure or empty data:', res);
-        }
-      } catch (error) {
-        console.error('Error in setData:', error);
-      }
-    };
-
-    if (user) {
-      setData();
-    }
-  }, [ ]); 
-
+  const {userEmail, L1ID } = useContext(UserContext)
   
   return (
     <View style={styles.container}>

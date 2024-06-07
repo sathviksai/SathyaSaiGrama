@@ -28,7 +28,8 @@ const Register = ({navigation}) => {
           await createUserWithEmailAndPassword(auth,userCred.email,userCred.password);
           sendEmailVerification(auth.currentUser)
           setLoading(false);
-          navigation.navigate('VerificationNotice')
+          console.log("Id in register: ", res.data[0])
+          navigation.navigate('VerificationNotice', {id: res.data[0].ID})
         } catch (error) {
           setLoading(false);
           if (error.message === 'Network request failed') 
@@ -51,81 +52,81 @@ const Register = ({navigation}) => {
 
   return (
     <KeyboardAvoidingView behavior='padding'
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 80} style={styles.container}>
-      {loading ? (
-        <ActivityIndicator size="large" color="#752A26" />
-      ) : (
-      <View style={styles.main}>
-      <Text style={styles.signup}>Sign Up</Text>
-      <Controller
-        name='email'
-        control={control}
-        render={({ field: { onChange, value } }) => (
-          <TextInput
-            placeholder="Email"
-            style={styles.inputBox}
-            value={value}
-            onChangeText={onChange}
-          />
-        )}
-        rules={{ required: true, pattern: /^\S+@\S+$/i }}
-      />
-      {errors.email?.type === 'required' && <Text style={styles.textError}>Email is required</Text>}
-      {errors.email?.type === 'pattern' && <Text style={styles.textError}>Enter valid email</Text>}
-
-      <Controller
-        name='password'
-        control={control}
-        render={({ field: { onChange, value } }) => (
-          <TextInput
-            placeholder="Password"
-            style={styles.inputBox}
-            value={value}
-            secureTextEntry
-            onChangeText={(text) => {
-              onChange(text);
-              setPassword(text);
-            }}
-          />
-        )}
-        rules={{ required: true, minLength: 8, pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/ }}
-      />
-      {errors.password?.type === 'required' && <Text style={styles.textError}>Password is required</Text>}
-      {errors.password?.type === 'minLength' && <Text style={styles.textError}>Password must be 8 characters long</Text>}
-      {errors.password?.type === 'pattern' && <Text style={styles.textError}>Password must contain at least a uppercase,lowercase, number and a special character</Text>}
-
-      <Controller
-        name='confirmPassword'
-        control={control}
-        render={({ field: { onChange, value } }) => (
-          <TextInput
-            placeholder="Confirm Password"
-            style={styles.inputBox}
-            value={value}
-            secureTextEntry
-            onChangeText={onChange}
-          />
-        )}
-        rules={{ required: true, minLength: 8, pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/, validate: value => value === password || 'Passwords do not match' }}
-      />
-      {errors.confirmPassword?.type === 'required' && <Text style={styles.textError}>Password is required</Text>}
-      {errors.confirmPassword?.type === 'minLength' && <Text style={styles.textError}>Password must be 8 characters long</Text>}
-      {errors.confirmPassword?.type === 'pattern' && <Text style={styles.textError}>Password must contain at least a uppercase,lowercase, number and a special character</Text>}
-      {errors.confirmPassword?.type === 'validate' && <Text style={styles.textError}>Passwords do not match</Text>}
-
-
-      <TouchableOpacity onPress={handleSubmit(handleRegForm)} style={styles.register}>
-        <Text style={styles.registerTitle}>Register</Text>
-      </TouchableOpacity>
-      <View style={styles.redirect}>
-      <Text style={{ fontWeight: "bold",marginEnd:8 }}>You already have account?</Text>
-      <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-        <Text style={{ color: "blue", fontWeight: "bold" }}>Login</Text>
-      </TouchableOpacity>
-      </View>
-      </View>
+    keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 80} style={styles.container}>
+    {loading ? (
+      <ActivityIndicator size="large" color="#752A26" />
+    ) : (
+    <View style={styles.main}>
+    <Text style={styles.signup}>Sign Up</Text>
+    <Controller
+      name='email'
+      control={control}
+      render={({ field: { onChange, value } }) => (
+        <TextInput
+          placeholder="Email"
+          style={styles.inputBox}
+          value={value}
+          onChangeText={onChange}
+        />
       )}
-    </KeyboardAvoidingView>
+      rules={{ required: true, pattern: /^\S+@\S+$/i }}
+    />
+    {errors.email?.type === 'required' && <Text style={styles.textError}>Email is required</Text>}
+    {errors.email?.type === 'pattern' && <Text style={styles.textError}>Enter valid email</Text>}
+
+    <Controller
+      name='password'
+      control={control}
+      render={({ field: { onChange, value } }) => (
+        <TextInput
+          placeholder="Password"
+          style={styles.inputBox}
+          value={value}
+          secureTextEntry
+          onChangeText={(text) => {
+            onChange(text);
+            setPassword(text);
+          }}
+        />
+      )}
+      rules={{ required: true, minLength: 8, pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/ }}
+    />
+    {errors.password?.type === 'required' && <Text style={styles.textError}>Password is required</Text>}
+    {errors.password?.type === 'minLength' && <Text style={styles.textError}>Password must be 8 characters long</Text>}
+    {errors.password?.type === 'pattern' && <Text style={styles.textError}>Password must contain at least a uppercase,lowercase, number and a special character</Text>}
+
+    <Controller
+      name='confirmPassword'
+      control={control}
+      render={({ field: { onChange, value } }) => (
+        <TextInput
+          placeholder="Confirm Password"
+          style={styles.inputBox}
+          value={value}
+          secureTextEntry
+          onChangeText={onChange}
+        />
+      )}
+      rules={{ required: true, minLength: 8, pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/, validate: value => value === password || 'Passwords do not match' }}
+    />
+    {errors.confirmPassword?.type === 'required' && <Text style={styles.textError}>Password is required</Text>}
+    {errors.confirmPassword?.type === 'minLength' && <Text style={styles.textError}>Password must be 8 characters long</Text>}
+    {errors.confirmPassword?.type === 'pattern' && <Text style={styles.textError}>Password must contain at least a uppercase,lowercase, number and a special character</Text>}
+    {errors.confirmPassword?.type === 'validate' && <Text style={styles.textError}>Passwords do not match</Text>}
+
+
+    <TouchableOpacity onPress={handleSubmit(handleRegForm)} style={styles.register}>
+      <Text style={styles.registerTitle}>Register</Text>
+    </TouchableOpacity>
+    <View style={styles.redirect}>
+    <Text style={{ fontWeight: "bold",marginEnd:8 }}>You already have account?</Text>
+    <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+      <Text style={{ color: "blue", fontWeight: "bold" }}>Login</Text>
+    </TouchableOpacity>
+    </View>
+    </View>
+    )}
+  </KeyboardAvoidingView>
   )
 
 }
