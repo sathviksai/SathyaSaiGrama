@@ -1,6 +1,42 @@
-import React, {useState} from 'react';
-import {View, Text, StyleSheet, TouchableOpacity, Share} from 'react-native';
+import React, {useContext, useState} from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Share,
+  AppRegistry,
+  ActivityIndicator,
+  Alert,
+} from 'react-native';
 import CheckBox from 'react-native-check-box';
+import UserContext from '../../context/UserContext';
+import {BASE_APP_URL, APP_OWNER_NAME, APP_LINK_NAME, YOURLS_KEY} from '@env';
+import axios from 'axios';
+
+const shortUrl = async (url) => {
+  console.log('short');
+  try {
+    const response = await axios.get(
+      'https://visit.ssslsg.org/yourls-api.php',
+      {
+        params: {
+          signature: YOURLS_KEY,
+          action: 'shorturl',
+          url: url,
+          format: 'json',
+        },
+      },
+    );
+    if (response.data.status === 'success') {
+      return response.data.shorturl;
+    } else {
+      console.log('Error:', response.data.message);
+    }
+  } catch (error) {
+    console.error('Error making request:', error);
+  }
+};
 
 const HighlightedText = ({text, highlights}) => {
   const regex = new RegExp(`(${highlights.join('|')})`, 'gi');
@@ -24,29 +60,119 @@ const HighlightedText = ({text, highlights}) => {
 };
 
 const VisitorFills = () => {
-  const [selectedOption, setSelectedOption] = useState(null);
+  const {getAccessToken, L1ID} = useContext(UserContext);
+  console.log(L1ID);
 
-  const handleCheckboxChange = option => {
-    setSelectedOption(selectedOption === option ? null : option);
+  const generatedData = async () => {
+    try {
+      const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/All_Link_Ids`;
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          Authorization: `Zoho-oauthtoken ${getAccessToken()}`,
+        },
+      });
+      return await response.json();
+    } catch (err) {
+      if (err.message === 'Network request failed')
+        Alert.alert(
+          'Network Error',
+          'Failed to fetch data. Please check your network connection and try again.',
+        );
+      else {
+        Alert.alert('Error: ', err);
+        console.log(err);
+      }
+    }
   };
+
+  const randomNumber = (min, max) => {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  };
+
+  const generateUniqueLinkID = async () => {
+    let link_id = 0;
+    const Generated_Link_ID = await generatedData();
+
+    while (true) {
+      const glink_id = randomNumber(100000000001, 999999999998);
+      const link_id_count = Generated_Link_ID.data.filter(
+        record => record.Link_ID === glink_id,
+      ).length;
+
+      if (link_id_count === 0) {
+        link_id = glink_id;
+        break;
+      }
+    }
+    console.log(link_id);
+    return link_id;
+  };
+
+  const postss = async () => {
+    const UniqueNumber = await generateUniqueLinkID();
+    console.log(UniqueNumber);
+    console.log(L1ID);
+    const formData = {
+      data: {
+        Link_ID: UniqueNumber,
+        Referrer_App_User_lookup: L1ID,
+      },
+    };
+
+    try {
+      const response = await fetch(
+        `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/form/Generated_Link_ID`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Zoho-oauthtoken ${getAccessToken()}`,
+          },
+          body: JSON.stringify(formData),
+        },
+      );
+
+      return await response.json();
+    } catch (error) {
+      Alert.alert('Error', 'Something went wrong');
+    }
+  };
+  let veryshortUrl = '';
+  const generateURL = async () => {
+    const res = await postss();
+    console.log(res);
+    const id = res.data.ID;
+
+    if (id) {
+      const shareURL = `https://creatorapp.zohopublic.com/${APP_OWNER_NAME}/${APP_LINK_NAME}/form-perma/Visitor_Information/t253nXrNhjgOHEpBs8EmZMTmpfP1UQejdGPB07QXDWt9NV2SjENZJmXwHJUuPbwFmXpT2Wsm72zAnyXwtZdy8Y4YgBdGyb6mOKee?L1_lookup=${L1ID}&LinkIDLookup=${id}&Home_Office=${selectedOption}`;
+
+      veryshortUrl = await shortUrl(shareURL);
+    }
+  };
+
+  const [loading, setLoading] = useState(false);
 
   const onShare = async () => {
     try {
-      const result = await Share.share({
-        message: `I am inviting you for ${selectedOption || 'an event'}.`,
-      });
-      if (result.action === Share.sharedAction) {
-        if (result.activityType) {
-          // shared with activity type of result.activityType
-        } else {
-          // shared
-        }
-      } else if (result.action === Share.dismissedAction) {
-        // dismissed
+      if (selectedOption !== null) {
+        setLoading(true);
+        const res = await generateURL();
+        const result = await Share.share({
+          message: `Please Fill the form using this Link : ${veryshortUrl}`,
+        });
+        setLoading(false);
+      } else {
+        Alert.alert('Select anyone option');
       }
     } catch (error) {
-      alert(error.message);
+      setLoading(false);
+      Alert.alert(error.message);
     }
+  };
+
+  const [selectedOption, setSelectedOption] = useState(null);
+  const handleCheckboxChange = option => {
+    setSelectedOption(selectedOption === option ? null : option);
   };
 
   return (
@@ -101,9 +227,21 @@ const VisitorFills = () => {
           </Text>
         </TouchableOpacity>
       </View>
-      <TouchableOpacity style={styles.shareButton} onPress={onShare}>
-        <Text style={styles.shareButtonText}>Share URL</Text>
-      </TouchableOpacity>
+      <View style={styles.share}>
+        {loading && (
+          <View style={styles.indicatorWrapper}>
+            <ActivityIndicator size="large" color="#752A26" />
+            <Text style={styles.indicatorText}>
+              Generating URL Please Wait...
+            </Text>
+          </View>
+        )}
+        {!loading && (
+          <TouchableOpacity style={styles.shareButton} onPress={onShare}>
+            <Text style={styles.shareButtonText}>Share URL</Text>
+          </TouchableOpacity>
+        )}
+      </View>
     </View>
   );
 };
@@ -168,6 +306,12 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginLeft: 10,
+  },
+  indicatorText: {
+    fontSize: 18,
+    marginTop: 12,
+    textAlign: 'center',
+    alignItems: 'center',
   },
 });
 

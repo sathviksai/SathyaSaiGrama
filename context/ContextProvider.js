@@ -1,20 +1,34 @@
 import React, { useState } from 'react'
 import UserContext from './UserContext'
 
-function ContextProvider({children}) {
+function ContextProvider({ children }) {
 
-   const [userEmail, setUserEmail] = useState()
-   const [L1ID, setL1ID] = useState()
-   let accessToken = ""
+  const [userEmail, setUserEmail] = useState()
+  const [L1ID, setL1ID] = useState()
+  const [pendingFlag, setPendingFlag] = useState(false)
+  const [approveFlag, setApproveFlag] = useState(false)
+  const [deniedFlag, setDeniedFlag] = useState(false)
+  const [pendingDataFetched, setPendingDataFetched] = useState(false)
+  const [approveDataFetched, setApproveDataFetched] = useState(false)
+  const [deniedDataFetched, setDeniedDataFetched] = useState(false)
+  const [userType, setUserType] = useState("")
+  //let accessToken = ""
+  const [accessToken, setAccessToken] = useState(""); // Use state for accessToken
 
-   const setAccessToken = (newToken) =>{
-    accessToken = newToken
-   }
+  const getAccessToken = () => accessToken;
 
-   const getAccessToken = () => accessToken
-   
+  // const setAccessToken = (newToken) => {
+  //   accessToken = newToken
+  // }
+
+  // const getAccessToken = () => accessToken
+
   return (
-    <UserContext.Provider value={{userEmail, setUserEmail, L1ID, setL1ID,setAccessToken,getAccessToken }}>
+    <UserContext.Provider value={{ userEmail, setUserEmail, L1ID, setL1ID, accessToken, setAccessToken, getAccessToken, pendingFlag, setPendingFlag, approveFlag, setApproveFlag, deniedFlag, setDeniedFlag, pendingDataFetched, setPendingDataFetched, 
+      approveDataFetched, setApproveDataFetched, 
+      deniedDataFetched, setDeniedDataFetched,
+      userType, setUserType
+     }}>
       {children}
     </UserContext.Provider>
   )
