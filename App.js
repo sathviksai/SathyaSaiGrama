@@ -12,7 +12,7 @@ const App = () => {
 
   const { user } = useContext(AuthContext);
 
-  const { setAccessToken, getAccessToken, accessToken, setLoggedUser } = useContext(UserContext)
+  const { setAccessToken, setUserType, accessToken, setLoggedUser, setL1ID, setUserEmail } = useContext(UserContext)
   const [loading, setLoading] = useState(true)
 
 
@@ -51,9 +51,12 @@ const App = () => {
     const checkUserExist = async () =>{
       let existedUser = await AsyncStorage.getItem("existedUser");
       existedUser = JSON.parse(existedUser)
-      console.log("Existed user in App.js:", existedUser)
       if(existedUser){
         setLoggedUser(existedUser);
+        setUserType(existedUser.role)
+        setL1ID(existedUser.userId)
+        setUserEmail(existedUser.email)
+        console.log("Existed user in App.js:", existedUser)
       }
     }
 

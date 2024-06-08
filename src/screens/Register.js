@@ -13,19 +13,19 @@ const Register = ({navigation}) => {
   const [loading, setLoading] = useState(false);
   const { control, handleSubmit, formState: { errors } } = useForm()
   const [password, setPassword] = useState()
-  const {getAccessToken} = useContext(UserContext)
+  const {accessToken} = useContext(UserContext)
 
 
   const handleRegForm = async (userCred) => {
     setLoading(true);
     console.log(userCred.email)
-      const res = await getDataWithString('All_App_Users', 'Email', userCred.email, getAccessToken());
+      const res = await getDataWithString('All_App_Users', 'Email', userCred.email, accessToken);
       console.log("response object returned ", res)
 
       if (res.data && res.data.length > 0) { 
         //authentication       
         try {
-          await createUserWithEmailAndPassword(auth,userCred.email,userCred.password);
+          await createUserWithEmailAndPassword(auth, userCred.email, userCred.password);
           sendEmailVerification(auth.currentUser)
           setLoading(false);
           console.log("Id in register: ", res.data[0])

@@ -16,7 +16,7 @@ function ApprovalTab() {
             <Tab.Navigator>
                 <Tab.Screen name="Pending" component={Pending} />
                 <Tab.Screen name="Approved" component={Approved} />
-                <Tab.Screen name="Denied" component={Denied} />
+                <Tab.Screen name="Denied" component={Denied} options={{title:"Rejected"}} />
             </Tab.Navigator>
         </>
 

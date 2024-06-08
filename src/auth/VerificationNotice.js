@@ -1,4 +1,4 @@
-import React, { useEffect, useContext } from 'react';
+import React, { useEffect, useContext, useState } from 'react';
 import { View, Text, Button, StyleSheet, Alert, TouchableOpacity } from 'react-native';
 import { auth } from './firebaseConfig';
 import { sendEmailVerification } from 'firebase/auth';
@@ -14,6 +14,7 @@ const VerificationNotice = ({ route, navigation }) => {
   const user = auth.currentUser;
   const { setUserEmail, setL1ID, accessToken, userType, setUserType, setLoggedUser } = useContext(UserContext)
   const { setUser } = useContext(AuthContext)
+  const [departmentIds, setDepartmentIds] = useState([])
 
 
   useEffect(() => {
@@ -22,7 +23,9 @@ const VerificationNotice = ({ route, navigation }) => {
 
       console.log("inside useEffect ofVerificationNotice: ", accessToken, id);
       const res = await getDataWithInt("All_Offices", "Approver_app_user_lookup", id, accessToken);
-      if (res.data) {
+      if (res && res.data) {
+        const deptIds = res.data.map(dept => dept.ID); 
+        setDepartmentIds(deptIds)
         setUserType("L2")
       }
       else {
@@ -42,20 +45,19 @@ const VerificationNotice = ({ route, navigation }) => {
     }, 5000);
 
     const checkEmailVerification = async () => {
-
-
       if (user) {
         await user.reload();
         if (user.emailVerified && userType) {
           setUserEmail(user.email)
           setL1ID(id)
-          clearInterval(interval);
-          if (userType) {
-            await AsyncStorage.setItem("existedUser", JSON.stringify({ userId: id, role: userType }));
+          if (userType && departmentIds) {
+            console.log("department id in verificationNotice: ", departmentIds);
+            await AsyncStorage.setItem("existedUser", JSON.stringify({ userId: id, role: userType, email: user.email, deptIds: departmentIds }));
             let existedUser = await AsyncStorage.getItem("existedUser");
             existedUser = JSON.parse(existedUser)
             console.log("Existed user in Base route useEffect:", existedUser)
             setLoggedUser(existedUser);
+            clearInterval(interval);
             navigation.navigate('FooterTab');
           }
         }

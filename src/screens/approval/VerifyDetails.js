@@ -36,7 +36,7 @@ const VerifyDetails = ({ navigation, route }) => {
   const { user } = route.params;
 
   const [photo, setPhoto] = useState();
-  const { getAccessToken, pendingFlag, setPendingFlag, approveFlag, setApproveFlag, deniedFlag, setDeniedFlag, setDeniedDataFetched, setApproveDataFetched, setPendingDataFetched } = useContext(UserContext)
+  const { getAccessToken, setDeniedDataFetched, setApproveDataFetched, setPendingDataFetched } = useContext(UserContext)
   const token = getAccessToken()
   const [loading, setLoading] = useState(true);
   const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/${user.ID}/Photo/download`
@@ -93,14 +93,10 @@ const VerifyDetails = ({ navigation, route }) => {
       if(status==="PENDING APPROVAL"){
         setPendingDataFetched(false)
         setApproveDataFetched(false)
-        setPendingFlag(!pendingFlag)
-        setApproveFlag(!approveFlag)
       }
       else if(status==="DENIED"){
         setDeniedDataFetched(false)
         setApproveDataFetched(false)
-        setDeniedFlag(!deniedFlag)
-        setApproveFlag(!approveFlag)
       }
       Alert.alert("Visitor Approved")
       navigation.navigate('Approved')
@@ -130,14 +126,10 @@ const VerifyDetails = ({ navigation, route }) => {
       if(status==="PENDING APPROVAL"){
         setPendingDataFetched(false)
         setDeniedDataFetched(false)
-        setPendingFlag(!pendingFlag)
-        setDeniedFlag(!deniedFlag)
       }
       else if(status==="APPROVED"){
         setDeniedDataFetched(false)
         setApproveDataFetched(false)
-        setDeniedFlag(!deniedFlag)
-        setApproveFlag(!approveFlag)
       }
       Alert.alert("Visitor Rejected")
       navigation.navigate('Denied')

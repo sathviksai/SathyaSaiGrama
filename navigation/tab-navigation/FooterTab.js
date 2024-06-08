@@ -22,6 +22,8 @@ import AddData from '../../src/screens/AddData';
 import FamilyMemberVerifyDetails from '../../src/screens/FamilyMemberVerifyDetails';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import RNRestart from 'react-native-restart';
+import L2ApprovalTab from '../../src/screens/L2-approval/L2ApprovalTab';
+import ViewDetails from '../../src/screens/L2-approval/ViewDetails';
 
 const Tab = createBottomTabNavigator();
 const InviteStack = createNativeStackNavigator();
@@ -89,12 +91,51 @@ const ApprovalStack = () => {
 
 }
 
-const L1ApprovalStack = () => {
+const L2ApprovalStack = () => {
+
+    const { loggedUser, accessToken, setUserType, userType, userEmail } = useContext(UserContext)
+    const { setUser }= useContext(AuthContext)
+
+    console.log("Logged user in L2Approval stack in FooterTab", loggedUser)
+
+    const fetchDataFromOffice = async ( ) => {
+
+        const res = await getDataWithInt("All_Offices", "Approver_app_user_lookup", loggedUser.userId, accessToken);
+        if (res && res.data) {
+            const deptIds = res.data.map(dept => dept.ID);
+            await AsyncStorage.removeItem("existedUser");
+            setUserType("L2")
+            await AsyncStorage.setItem("existedUser", JSON.stringify({ userId: loggedUser.userId, role: "L2", email: userEmail, deptIds: deptIds  }))
+        }
+        else {
+            await AsyncStorage.removeItem("existedUser");
+            setUserType("L1")
+            await AsyncStorage.setItem("existedUser", JSON.stringify({ userId: loggedUser.userId, role: "L1", email: userEmail, deptIds:  deptIds }))
+        }
+
+        let exist = await AsyncStorage.getItem("existedUser");
+        exist = JSON.parse(exist)
+        if (exist && userType && (userType != exist.role)) {
+            Alert.alert("Your account has been deleted!")
+            setUser(null);
+            await AsyncStorage.removeItem("existedUser");
+            setTimeout(() => {
+                RNRestart.Restart();
+            }, 1000)
+        }
+        console.log("Re-cheking is completed in L1 request")
+    }
+
+
+
+    useEffect(() => {
+            fetchDataFromOffice()
+    }, [])
+
     return (
         <ApproveStack.Navigator screenOptions={{ headerShown: false }}>
-            <ApproveStack.Screen name="ApprovalTab" component={ApprovalTab} />
-            <ApproveStack.Screen name="VerifyDetails" component={VerifyDetails} />
-            <ApproveStack.Screen name="EditVerifydetails" component={EditVerifyDetails} />
+            <ApproveStack.Screen name="L2ApprovalTab" component={L2ApprovalTab} />
+            <ApproveStack.Screen name="ViewDetails" component={ViewDetails} />
         </ApproveStack.Navigator>
     )
 
@@ -104,50 +145,11 @@ const L1ApprovalStack = () => {
 
 function FooterTab({ navigation }) {
 
-    const [loading, setLoading] = useState(true)
-
-    const { user, setUser } = useContext(AuthContext)
-    const { setUserEmail, setL1ID, accessToken, userType, setUserType, loggedUser, setLoggedUser } = useContext(UserContext)
-    console.log("Logged user data in footer: ", loggedUser)
-
-    // useEffect(()=>{
-
-    //     const fetchDataFromOffice = async (existedUser) => {
-
-    //         console.log("access token and id in footer: ", accessToken, existedUser.userId);
-    //         const res = await getDataWithInt("All_Offices", "Approver_app_user_lookup", existedUser.userId, accessToken);
-    //         if (res.data) {
-    //             await AsyncStorage.removeItem("existedUser");
-    //             setUserType("L2")
-    //             await AsyncStorage.setItem("existedUser", JSON.stringify({userId: existedUser.userId, role: "L2"}))
-    //         }
-    //         else {
-    //             await AsyncStorage.removeItem("existedUser");
-    //             setUserType("L1")
-    //             await AsyncStorage.setItem("existedUser", JSON.stringify({userId: existedUser.userId, role: "L1"}))
-    //         }
-
-    //         let exist = await AsyncStorage.getItem("existedUser");
-    //         exist = JSON.parse(exist)
-    //         setLoggedUser(exist);
-    //         if(exist && userType && (userType!=exist.role)){
-    //             Alert.alert("Your account has been deleted!")
-    //             setUser(null);
-    //             await AsyncStorage.removeItem("existedUser");
-    //             setTimeout(()=>{
-    //                 RNRestart.Restart(); 
-    //             },1000)
-    //         }
-    //     }
-    //     if(loggedUser != null){
-    //         fetchDataFromOffice(loggedUser)
-    //     }
-
-    // },[ ])
+    const { loggedUser } = useContext(UserContext)
 
     return (
         <>
-            { !loggedUser ? (
+            {!loggedUser ? (
                 <ActivityIndicator size="large" color="red" style={styles.loadingContainer} />
             ) : (
                 <Tab.Navigator
@@ -237,8 +239,8 @@ function FooterTab({ navigation }) {
                     {
                         loggedUser.role === "L2" ? (
                             <Tab.Screen
-                                name="L1ApprovalStack"
-                                component={L1ApprovalStack}
+                                name="L2ApprovalStack"
+                                component={L2ApprovalStack}
                                 options={{
                                     headerShown: false,
                                     tabBarIcon: ({ focused }) => (

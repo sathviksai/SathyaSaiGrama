@@ -5,7 +5,7 @@ import UserContext from '../../../context/UserContext';
 import { getDataWithIntAndString } from '../../components/ApiRequest';
 
 const Pending = ({ navigation }) => {
-  const { L1ID, getAccessToken, pendingFlag, pendingDataFetched, setPendingDataFetched } = useContext(UserContext);
+  const { L1ID, getAccessToken, pendingDataFetched, setPendingDataFetched } = useContext(UserContext);
   const [Pendings, setPendings] = useState([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -15,15 +15,15 @@ const Pending = ({ navigation }) => {
     setLoading(true);
     const result = await getDataWithIntAndString('Approval_to_Visitor_Report', 'Referrer_App_User_lookup', L1ID, "Referrer_Approval", "PENDING APPROVAL", getAccessToken());
     setPendings(result.data);
-    setLoading(false);
+    setLoading(false); 
     setPendingDataFetched(true);
-  };
+  }; 
 
   useEffect(() => {
     if (!pendingDataFetched) {
       fetchData();
     }
-  }, [pendingDataFetched, pendingFlag]);
+  }, [pendingDataFetched ]);
 
   const onRefresh = async () => {
     setRefreshing(true);

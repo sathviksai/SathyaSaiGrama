@@ -1,12 +1,15 @@
 import { StyleSheet, Text, View, TouchableOpacity } from 'react-native'
-import React from 'react'
+import React, { useContext } from 'react'
+import UserContext from '../../../context/UserContext'
 
 const ApprovalComponent = ({ navigation, user }) => {
+
+    const { loggedUser } = useContext(UserContext)
 
     const openPending = () => {
         navigation.navigate("VerifyDetails", { user: user })
     }
-    const containerHeight = user.Referrer_Approval === "APPROVED" ? 120 : 100;
+    const containerHeight = user.Referrer_Approval === "APPROVED" && loggedUser.role=="L1" ? 120 : 100;
     return (
         <TouchableOpacity style={[styles.container, { height: containerHeight }]} onPress={openPending}>
             <View style={styles.hold}>
@@ -22,7 +25,7 @@ const ApprovalComponent = ({ navigation, user }) => {
                 <View style={styles.inner}><Text style={styles.txt}>{user.Number_of_People}</Text></View>
             </View>
             {
-                user?.Referrer_Approval === "APPROVED" ? (
+                user?.Referrer_Approval === "APPROVED" && loggedUser.role=="L1"? (
                     <View style={styles.hold}>
                         <View style={styles.inner}><Text style={styles.txt}>L2 Approval status</Text></View>
                         <View style={styles.inner}><Text style={styles.txt}>{user.L2_Approval_Status}</Text></View>
