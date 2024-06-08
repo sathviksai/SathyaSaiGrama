@@ -19,6 +19,8 @@ function ContextProvider({ children }) {
   //let accessToken = ""
   const [accessToken, setAccessToken] = useState(""); // Use state for accessToken
 
+  const [editData, setEditData] = useState({})
+
   const getAccessToken = () => accessToken;
 
   // const setAccessToken = (newToken) => {
@@ -35,8 +37,8 @@ function ContextProvider({ children }) {
       loggedUser, setLoggedUser,
       L2PendingDataFetched, setL2PendingDataFetched,
       L2ApproveDataFetched, setL2ApproveDataFetched,
-      L2DeniedDataFetched, setL2DeniedDataFetched
-
+      L2DeniedDataFetched, setL2DeniedDataFetched,
+      editData, setEditData
      }}>
       {children}
     </UserContext.Provider>

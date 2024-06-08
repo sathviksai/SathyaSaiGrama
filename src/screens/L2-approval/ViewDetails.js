@@ -147,11 +147,11 @@ const ViewDetails = ({ navigation, route }) => {
   console.log("User in View details of L2 : ", user)
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#EEEEEE" }}>
-      <View style={styles.header}>
+      {/* <View style={styles.header}>
         <View style={styles.headerContainer}>
           <Text style={styles.headertxt}>Visitor details</Text>
         </View>
-      </View>
+      </View> */}
       <ScrollView style={styles.scrollview}>
         {
           user?.L2_Approval_Status === "PENDING APPROVAL" ? (
@@ -181,7 +181,6 @@ const ViewDetails = ({ navigation, route }) => {
             </View>
           ) : null
         }
-
         <View style={[styles.container, { marginTop: 20 }]}>
           <View style={styles.left}>
             <Text style={styles.label}>Name</Text>
@@ -329,7 +328,7 @@ const ViewDetails = ({ navigation, route }) => {
             )}
           </View>
         </View>
-        <View style={[styles.container, { marginTop: 20, marginBottom: 20 }]}>
+        <View style={[styles.container, { marginTop: 20, marginBottom: 40 }]}>
           <View style={styles.left}>
             <Text style={styles.label}>Is the guest being invited to your Home or Office</Text>
           </View>
@@ -337,7 +336,6 @@ const ViewDetails = ({ navigation, route }) => {
             <Text style={styles.value}>{user.Home_or_Office}</Text>
           </View>
         </View>
-
       </ScrollView>
     </SafeAreaView>
   )
@@ -385,10 +383,10 @@ const styles = StyleSheet.create({
     color: "black",
   },
   scrollview: {
-    height: "92%s",
     backgroundColor: "#FAFAFA",
-    marginVertical: 20,
+    marginVertical: 10,
     marginHorizontal: 10,
+    paddingTop: 20,
     ...Platform.select({
       ios: {
         shadowOffset: { width: 2, height: 2 },
@@ -402,7 +400,7 @@ const styles = StyleSheet.create({
     }),
   },
   btnAccept: {
-    width: 90,
+    width: 100,
     height: 40,
     borderWidth: 1,
     borderColor: 'grey',
@@ -413,7 +411,7 @@ const styles = StyleSheet.create({
     backgroundColor: "green"
   },
   btnReject: {
-    width: 90,
+    width: 100,
     height: 40,
     borderWidth: 1,
     borderColor: 'grey',
@@ -426,6 +424,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 20,
     //color: "#752A26"
-    color: "black"
+    color: "#FFF"
   }
 })

@@ -5,6 +5,7 @@ import { DATABASE_ID, COLLECTION_ID, APPWRITE_FUNCTION_PROJECT_ID, APPWRITE_API_
 import {StyleSheet, ActivityIndicator, Alert } from "react-native";
 import { AuthContext, AuthProvider } from "./src/auth/AuthProvider";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import SplashScreen from "./src/screens/SplashScreen";
 
 
 const App = () => {
@@ -74,7 +75,8 @@ const App = () => {
   return (
     <>
     {loading ? (
-      <ActivityIndicator size="large" color="#752A26" style={styles.loadingContainer}/>
+      // <ActivityIndicator size="large" color="#752A26" style={styles.loadingContainer}/>
+      <SplashScreen/>
     ) : (
     <BaseRoute />
     )}

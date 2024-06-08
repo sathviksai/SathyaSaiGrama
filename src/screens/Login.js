@@ -73,12 +73,12 @@ const Login = ({ navigation }) => {
     const handleLoginForm = async (userCred) => {
 
         setLoading(true);
-        const res = await getDataWithString('All_App_Users', 'Email', userCred.email, accessToken);
+        const res = await getDataWithString('All_App_Users', 'Email', userCred.email.toLowerCase(), accessToken);
         console.log("Whether user exis or not in login: ", res)
         if (res && res.data) {
             try {
                 fetchDataFromOffice(res.data[0].ID)
-                const userCredential = await signInWithEmailAndPassword(auth, userCred.email, userCred.password);
+                const userCredential = await signInWithEmailAndPassword(auth, userCred.email.toLowerCase(), userCred.password);
                 const user = userCredential.user;
                 setLoading(false);
                 if (user.emailVerified) {
