@@ -26,7 +26,7 @@ const HeaderWithSearch = ({ search, setSearch }) => {
             <Image source={require('../../assets/sort.png')} style={styles.sortIcon} />
             </TouchableOpacity>
             <TouchableOpacity >
-            <Image source={require('../../assets/filter.png')} style={[styles.sortIcon, {width:30}]} />
+            {/* <Image source={require('../../assets/filter.png')} style={[styles.sortIcon, {width:30}]} /> */}
             </TouchableOpacity>
         </View>
     );

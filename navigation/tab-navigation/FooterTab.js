@@ -24,6 +24,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import RNRestart from 'react-native-restart';
 import L2ApprovalTab from '../../src/screens/L2-approval/L2ApprovalTab';
 import ViewDetails from '../../src/screens/L2-approval/ViewDetails';
+import FlatMembers from '../../src/screens/FlatMembers';
 
 const Tab = createBottomTabNavigator();
 const InviteStack = createNativeStackNavigator();
@@ -33,8 +34,8 @@ const LApprovalStack = createNativeStackNavigator()
 
 function InviteStackScreen() {
     return (
-        <InviteStack.Navigator screenOptions={{ headerShown: false }}>
-            <InviteStack.Screen name="Invite" component={Invite} />
+        <InviteStack.Navigator screenOptions={{ headerShown: true }}>
+            <InviteStack.Screen name="Invite" component={Invite} options={{headerShown: false}}/>
             <InviteStack.Screen
                 name="VisitorFills"
                 component={VisitorFills}
@@ -42,6 +43,23 @@ function InviteStackScreen() {
             <InviteStack.Screen
                 name="FillByYourSelf"
                 component={FillByYourSelf}
+                options={{
+                  title: 'Visitor Information',
+                  headerStyle: {
+                    backgroundColor: 'white',
+                  },
+                  headerTintColor: '#1F2024',
+                  headerTitleStyle: {
+                    fontFamily: 'Inter',
+                    fontSize: 16,
+                    fontWeight: '800',
+                    alignSelf: 'center',
+                    textAlign: 'center',
+                    fontStyle: 'normal',
+                    lineHeight: 30,
+                    alignItems: 'center',
+                  },
+                }}
             />
         </InviteStack.Navigator>
     );
@@ -75,6 +93,10 @@ function ProfileStackScreen() {
                 name="FamilyMemberVerifyDetails"
                 component={FamilyMemberVerifyDetails}
             />
+                        <ProfileStack.Screen
+                name="FlatMembers"
+                component={FlatMembers}
+            />
         </ProfileStack.Navigator>
     );
 }
@@ -101,7 +123,7 @@ const ApprovalStack = ({ navigation }) => {
                 headerRight: () => (
                     <TouchableOpacity onPress={() => navigation.navigate("EditVerifydetails", { user: editData })}>
                         <Image
-                            source={require("../../src/assets/edit.png")} // Your icon URL here
+                            source={require("../../src/assets/Edit.png")} // Your icon URL here
                             style={{ width: 20, height: 20, marginRight: 15, tintColor: "#B21E2B" }} // Adjust style as needed
                         />
                     </TouchableOpacity>

@@ -2,7 +2,6 @@ import { Image, Platform, SafeAreaView, ScrollView, StyleSheet, Text, TouchableO
 import React, { useContext, useEffect, useState } from 'react'
 import { BASE_APP_URL, APP_LINK_NAME, APP_OWNER_NAME } from "@env"
 import UserContext from '../../../context/UserContext';
-import edit from "../../assets/edit.png"
 import { encode } from 'base64-arraybuffer';
 
 
