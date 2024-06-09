@@ -1,56 +1,110 @@
-import { StyleSheet, Text, View, TouchableOpacity } from 'react-native'
+import { StyleSheet, Text, View, TouchableOpacity,Image } from 'react-native'
 import React from 'react'
 
 const FamilyMember = ({ navigation, member }) => {
-    console.log(member.App_User_lookup)
 
-    const openFamilyMemberVerifyDetails = () =>{
-  navigation.navigate("FamilyMemberVerifyDetails", {memberDetails: member})
-    }
   return (
-    <TouchableOpacity style={styles.container} onPress={openFamilyMemberVerifyDetails}>
-        <View style={styles.hold}>  
-            <View style={styles.inner}><Text style={styles.txt1}>Name: </Text></View>
-            <View style={styles.inner}><Text style={styles.txt1}>{member.App_User_lookup.Name_field}</Text></View>
+    <View style={styles.container}>
+    <View style={styles.main}>
+        <View style={styles.head}>
+          <Text style={styles.title}>{member.App_User_lookup.Name_field}</Text>
+          <TouchableOpacity
+            onPress={() => navigation.navigate('Edit',{formType: "MemberBasicInfo",memberdata:member})}
+            style={styles.edit}>
+            <Image
+              source={require('../assets/Edit.png')}
+              style={{width: 17, height: 14.432,marginEnd:5,flexShrink:0}}
+            />
+            <Text
+              style={[styles.title,styles.editText]}>
+              Edit
+            </Text>
+          </TouchableOpacity>
         </View>
-        <View style={styles.hold}>
-            <View style={styles.inner}><Text style={styles.txt}>Relation: </Text></View>
-            <View style={styles.inner}><Text style={styles.txt}>{member.Relationship_with_the_primary_contact}</Text></View>
+        <View style={styles.input}>
+                <Text style={styles.label}>Relation: </Text>
+                <Text style={styles.value}>{member.Relationship_with_the_primary_contact}</Text>
         </View>
-        <View style={styles.hold}>
-            <View style={styles.inner}><Text style={styles.txt}>Accommodation Approval: </Text></View>
-            <View style={styles.inner}><Text style={styles.txt}>{member.Accommodation_Approval}</Text></View>
+        <View style={styles.input}>  
+            <Text style={styles.label}>Ph: </Text>
+            <Text style={styles.value}>{member.App_User_lookup.Phone_Number}</Text>
         </View>
-    </TouchableOpacity>
+        <View style={styles.input}>
+            <Text style={styles.label}>Email:  </Text>
+             <Text style={styles.value}>{member.App_User_lookup.Email}</Text>
+        </View>
+        <View style={styles.input}>
+           <Text style={styles.label}>Gender:  </Text>
+           <Text style={styles.value}>{member.App_User_lookup.Gender}</Text>
+        </View>
+    </View>
+    </View>
   )
 }
 
 export default FamilyMember
 
 const styles = StyleSheet.create({
-    container:{
-        width: "95%",
-        height: 120,
-        backgroundColor:"#C6C3C1",
-        paddingTop: "5%",
-        alignItems: "center",
-        borderRadius:10,
-        marginBottom: 10,
-        marginLeft: 8
-    },
-    hold:{
+    container: {
+        flex: 1,
+        backgroundColor:"#FFF"
+      },
+      main: {
+        padding: 16,
+        justifyContent: 'center',
+        backgroundColor: '#FFF',
+        margin: '3%',
+        borderRadius: 8,
+        flexShrink:0,
+        ...Platform.select({
+          ios: {
+            shadowOffset: {width: 2, height: 2},
+            shadowColor: '#FFF',
+            shadowOpacity: 0.3,
+            shadowRadius: 4,
+          },
+          android: {
+            elevation: 5,
+          },
+        }),
+      },
+      title: {
+        color: '#1F2024',
+        fontFamily: "Inter",
+        fontSize:14,
+        fontStyle:"normal",
+        fontWeight:"900",
+        letterSpacing: 0.07
+      },
+      head: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+      },
+      edit: {
+        flexDirection: 'row',
+        alignItems: 'baseline',
+      },
+      editText:{
+        color:"#B21E2B"
+      },
+      input:{
         flexDirection:"row",
-        marginBottom: 10,
-    },
-    inner:{
-        width: "50%",
-        paddingLeft: "5%"
-    },
-    txt1:{
-        fontWeight: "bold",
-        marginBottom: 5
-    },
-    txt:{
-        
-    }
+        margin: 5,
+        marginStart:"5%"
+      },
+      label: {
+        marginEnd:10,
+        color:"#1F2024",
+        fontSize: 14,
+        fontStyle:"normal",
+        fontWeight:"400",
+        letterSpacing: 0.25
+      },
+      value: {
+        color:"#1F2024",
+        fontSize: 14,
+        fontStyle:"normal",
+        fontWeight:"400",
+        letterSpacing: 0.25
+      },
 })

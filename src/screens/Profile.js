@@ -1,17 +1,45 @@
-import { StyleSheet, Text, View,TouchableOpacity,Alert,ScrollView,Image } from 'react-native'
-import React, { useContext } from 'react'
+import { StyleSheet, Text, View,TouchableOpacity,Alert,Modal,Image,TextInput } from 'react-native'
+import React, { useContext,useState } from 'react'
 import {auth} from '../auth/firebaseConfig';
-import {signOut } from "firebase/auth";
+import {signOut,
+  deleteUser,
+  reauthenticateWithCredential,
+  EmailAuthProvider, } from "firebase/auth";
 import { SafeAreaView } from 'react-native-safe-area-context';
 import UserContext from '../../context/UserContext';
-import RNRestart from 'react-native-restart';
 import { getDataWithInt, getDataWithString, getDataWithStringAndInt, getDataWithoutStringAndWithInt } from '../components/ApiRequest';
 import { AuthContext } from '../auth/AuthProvider';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import RNRestart from 'react-native-restart';
 
 const Profile = ({navigation}) => {
-  const { getAccessToken, userEmail, L1ID } = useContext(UserContext)
-  const { setUser } = useContext(AuthContext)
+  const { getAccessToken,userEmail,L1ID } = useContext(UserContext)
+  const {user, setUser} = useContext(AuthContext);
+
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [modalVisible, setModalVisible] = useState(false);
+
+  const handleDeleteAccount = async () => {
+    const credential = EmailAuthProvider.credential(email, password);
+
+    try {
+      await reauthenticateWithCredential(user, credential);
+      console.log('User reauthenticated successfully.');
+
+      await deleteUser(user);
+      console.log('User account deleted successfully.');
+      Alert.alert('Success', 'User account deleted successfully.');
+      navigation.navigate('Login');
+    } catch (error) {
+      console.error('Error reauthenticating or deleting user:', error);
+      Alert.alert(
+        'Error',
+        `Error reauthenticating or deleting user: ${error.message}`,
+      );
+    }
+  };
+
 
   const onLogout = () => {
     signOut(auth)
@@ -29,6 +57,7 @@ const Profile = ({navigation}) => {
 
   const toMyprofile = async() =>{
     console.log("Email from context: ",userEmail)
+    console.log(getAccessToken())
     const resFromUser= await getDataWithString('All_App_Users', 'Email', userEmail,getAccessToken());
     const resFromVehicleInfo= await getDataWithInt('All_Vehicle_Information', 'App_User_lookup', L1ID,getAccessToken());
     const resFromFlat = await getDataWithInt("All_Flats","Primary_Contact_app_user_lookup",L1ID,getAccessToken())
@@ -39,7 +68,7 @@ const Profile = ({navigation}) => {
       console.log("resfromfamilyrelation: ",resFromFamilyMember.data)
       console.log("resfromfamilyinfo ",resFromFamilyMember.data[0].App_User_lookup)
       if(resFromFamilyMember.data){
-        navigation.navigate("MyProfile",{userInfo: resFromUser.data,vehicleInfo: resFromVehicleInfo.data,flatExists:true,familyMembersData:resFromFamilyMember.data})
+        navigation.navigate("MyProfile",{userInfo: resFromUser.data,vehicleInfo: resFromVehicleInfo.data,flatExists:true, familyMembersData:resFromFamilyMember.data, flatid: resFromFlat.data[0].ID})
       }
       else{ 
         navigation.navigate("MyProfile",{userInfo: resFromUser.data,vehicleInfo: resFromVehicleInfo.data,flatExists:true})
@@ -50,57 +79,97 @@ const Profile = ({navigation}) => {
   }
   return (
     <SafeAreaView style={styles.container}>
-       <View style={styles.safeArea}>
+      <View style={styles.account}>
+        <Text style={styles.accountTitle}>Account</Text>
+      </View>
       <View style={styles.topSection}>
-          <View style={styles.propicArea}>
-            <Image source={require("../assets/sathya.jpg")} style={styles.propic} />
+          <Image source={require("../assets/profilePhoto.png")} style={styles.propic} />
+          <Text style={styles.name}>Vivek Kashyap</Text>
+          <View style={styles.imgdel}>
+          <Text style={styles.email}>{userEmail}</Text>
+          <TouchableOpacity activeOpacity={0.9} onPress={() => setModalVisible(true)}>
+          <Image source={require("../assets/delete.png")} style={styles.del}/>
+          </TouchableOpacity>
           </View>
-          <Text style={styles.name}>User name</Text>
-          <Text style={styles.membership}>L1 Approval</Text>
-        </View>
+      </View>
 
 
-        <View style={styles.buttonList}>
-        <TouchableOpacity style={styles.buttonSection} activeOpacity={0.9} onPress={toMyprofile}>
+      <View style={styles.options}>
+        <TouchableOpacity style={styles.buttonSection} onPress={toMyprofile}>
           <View style={styles.buttonArea}>
-          <View style={styles.iconArea}>
-            <Image source={require("../assets/myprofile.png")} style={styles.iconStyle} resizeMode="contain" />
-          </View> 
-          <Text style={styles.buttonName}>My Profile</Text>
+            <Text style={styles.buttonName}>My Profile</Text>
+            <Image source={require("../assets/RightArrow.png")} style={styles.img}/>
           </View>
-          <View style={styles.sp}></View>
+          {/* <View style={styles.sp}></View> */}
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.buttonSection} activeOpacity={0.9} onPress={()=>navigation.navigate("Notifications")}>
-          <View style={styles.buttonArea}>
-          <View style={styles.iconArea}>
-            <Image source={require("../assets/notification.png")} style={styles.iconStyle} resizeMode="contain" />
-          </View> 
-          <Text style={styles.buttonName}>Notifications</Text>
+        <TouchableOpacity style={styles.buttonSection} onPress={()=>navigation.navigate("Notifications")}>
+        <View style={styles.buttonArea}>
+            <Text style={styles.buttonName}>Notifications</Text>
+            <Image source={require("../assets/RightArrow.png")} style={styles.img}/>
           </View>
-          <View style={styles.sp}></View>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.buttonSection} activeOpacity={0.9} onPress={()=>navigation.navigate("Settings")}>
-          <View style={styles.buttonArea}>
-          <View style={styles.iconArea}>
-            <Image source={require("../assets/setting.png")} style={styles.iconStyle} resizeMode="contain" />
+        <TouchableOpacity style={styles.buttonSection} onPress={()=>navigation.navigate("Feedback")}>
+        <View style={styles.buttonArea}>
+            <Text style={styles.buttonName}>Send Feedback</Text>
+            <Image source={require("../assets/RightArrow.png")} style={styles.img}/>
           </View>
-          <Text style={styles.buttonName}>Settings</Text>
-          </View>
-          <View style={styles.sp}></View>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.buttonSection} activeOpacity={0.9} onPress={onLogout} >
-          <View style={styles.buttonArea}>
-          <View style={styles.iconArea}>
-            <Image source={require("../assets/logout.png")} style={styles.iconStyle} resizeMode="contain" />
+        <TouchableOpacity style={styles.buttonSection} onPress={onLogout}>
+        <View style={styles.buttonArea}>
+            <Text style={styles.buttonName}>Logout</Text>
+            <Image source={require("../assets/RightArrow.png")} style={styles.img}/>
           </View>
-          <Text style={styles.buttonName}>Logout</Text>
-          </View>
-          <View style={styles.sp}></View>
         </TouchableOpacity>
-        </View>
+
+
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={() => {
+            setModalVisible(!modalVisible);
+          }}>
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+              <Text style={styles.modalText}>
+                Enter your credentials to delete you account permanantly
+              </Text>
+              <TextInput
+                placeholder="Email"
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                style={styles.input}
+              />
+              <TextInput
+                placeholder="Password"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+                style={styles.input}
+              />
+              <View style={styles.buttonContainer}>
+                <TouchableOpacity
+                  style={[styles.button, styles.buttonDelete]}
+                  onPress={async () => {
+                    setModalVisible(!modalVisible);
+                    await handleDeleteAccount();
+                  }}>
+                  <Text style={styles.textStyle}>Delete</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.button, styles.buttonClose]}
+                  onPress={() => setModalVisible(!modalVisible)}>
+                  <Text style={styles.textStyle}>Cancel</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
       </View>
   </SafeAreaView>
   )
@@ -109,91 +178,140 @@ const Profile = ({navigation}) => {
 export default Profile
 
 const styles = StyleSheet.create({
-  log:{
-      alignItems:"center"
-  },
-  logoutButton: {
-    backgroundColor: '#FCAF03',
-    padding: 12,
-    borderRadius: 20,
-    width: '80%',
-    alignItems: 'center',
-    marginBottom: 30,
-  },
-  logout: {
-    fontSize: 15,
-    color: '#000000',
-    fontWeight: '500',
-  },
   container: {
     flex: 1,
-    backgroundColor: '#2F3133',
+  
   },
-  safeArea: {
-    flex: 1,
+  account:{
+    width: 375,
+    height:56,
+    paddingTop: 19.5,
+    paddingRight:0,
+    justifyContent:"center",
+    alignItems:"center",
+    flexShrink: 0
+  },
+  accountTitle:{
+    fontFamily: "Inter",
+    fontSize: 14,
+    fontStyle: "normal",
+    fontWeight:'800',
+    color: "#1F2024",
+    textAlign: "center"
+    // lineHeight:"normal"
+  },
+  propic: {
+    width: 81.5,
+    height: 82,
+    borderRadius:85,
+    textAlign:"center"
+  },
+  name: {
+    color: '#1F2024',
+    textAlign:"center",
+    fontFamily:"Inter",
+    fontSize:16,
+    fontStyle:"normal",
+    fontWeight:"900",
+    letterSpacing:0.8
+  },
+  email:{
+    color: "#71727A",
+    textAlign:"center",
+    fontFamily:"Inter",
+    fontSize:12,
+    fontStyle:"normal",
+    fontWeight:"400",
+    letterSpacing:0.12,
+    marginEnd:30,
+    marginStart:30,
+    alignSelf:"center"
+  },
+  options:{
+    width:375,
+    paddingTop:44,
+    paddingRight:16,
+    flexDirection:"column",
+    alignItems:"flex-start",
+    gap:2
+  },
+  buttonSection: {
+    padding:15,
+    marginStart:10,
+    marginEnd:10,
+    gap:10,
+    alignSelf:"stretch",
+    borderBottomWidth:0.3,
+    borderBottomColor:"#D4D6DD"
   },
   topSection: {
-    height: 300,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  propicArea: {
-    width: 140,
-    height: 140,
-     borderRadius: 70,
-    borderWidth: 4,
-    borderColor: '#FFBB3B'
-  },
-  propic: {
-    width: '100%',
-    height: '100%',
-    borderRadius:85,
-  },
-  name: {
-    marginTop: 20,
-    color: 'white',
-    fontSize: 32,
-  },
-  membership: {
-    color: '#FFBB3B',
-    fontSize: 18,
-  },
-  buttonList: {
-    marginTop: 20,
-  },
-  buttonSection: {
-    paddingTop: 10,
-    paddingBottom: 5,
-    paddingLeft: 25,
-    paddingRight: 25,
-
+  buttonName: {
+    color:"#1F2024",
+    fontFamily:"Inter",
+    fontSize:14,
+    fontStyle:"normal",
+    fontWeight:"400",
   },
   buttonArea: {
     flexDirection: 'row',
+     justifyContent:"space-between",
+  },
+  img:{
+    height: 12,
+    width:12
+  },
+  centeredView: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    marginTop: 22,
   },
-  iconArea: {
-    width: 40,
-    height: 40,
-
-    justifyContent: 'center',
+  imgdel:{
+    flexDirection:"row"
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 35,
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
   },
-  iconStyle: {
-    width: 25,
-    height: 25,
+  modalText: {
+    marginBottom: 15,
+    textAlign: 'center',
   },
-  buttonName: {
-    width: 300,
-    fontSize: 20,
-    color: 'white',
-    marginLeft: 20,
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
-  sp: {
-    width: 400,
-    marginTop: 10,
-    height: 1,
-    backgroundColor: '#FFFFFF45'
-  }
+  button: {
+    borderRadius: 20,
+    margin: 20,
+    padding: 10,
+    elevation: 2,
+    marginHorizontal: 10,
+  },
+  buttonClose: {
+    backgroundColor: '#2196F3',
+  },
+  buttonDelete: {
+    backgroundColor: '#ff0000',
+  },
+  // sp:{
+  //   height: 0,
+  //   justifyContent: "center",
+  //   alignItems:"center",
+  //   alignSelf:"stretch"
+  // }
 })

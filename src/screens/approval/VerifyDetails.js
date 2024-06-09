@@ -2,7 +2,6 @@ import { Image, Platform, SafeAreaView, ScrollView, StyleSheet, Text, TouchableO
 import React, { useContext, useEffect, useState } from 'react'
 import { BASE_APP_URL, APP_LINK_NAME, APP_OWNER_NAME } from "@env"
 import UserContext from '../../../context/UserContext';
-import edit from "../../assets/edit.png"
 import { encode } from 'base64-arraybuffer';
 
 
@@ -382,7 +381,7 @@ const styles = StyleSheet.create({
     color: "black",
   },
   scrollview: {
-    backgroundColor: "#FAFAFA",
+    backgroundColor: "#FFF",
     marginVertical: 10,
     marginHorizontal: 10,
     padding: 15,
@@ -394,7 +393,7 @@ const styles = StyleSheet.create({
         shadowRadius: 4,
       },
       android: {
-        elevation: 8,
+        elevation: 4,
       },
     }),
   },

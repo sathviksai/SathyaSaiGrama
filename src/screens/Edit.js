@@ -305,7 +305,7 @@ const Edit = ({route, navigation}) => {
                 onPress={() => navigation.navigate('AddData')}
                 style={styles.add}>
                 <Image
-                  source={require('../assets/add.jpg')}
+                  source={require('../assets/add.png')}
                   style={{width: 30, height: 30}}
                 />
                 <Text

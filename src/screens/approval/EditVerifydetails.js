@@ -34,7 +34,7 @@ const EditVerifyDetails = ({ navigation, route }) => {
 
   console.log("No of boys initially : ", user)
 
-  const {getAccessToken} = useContext(UserContext)
+  const { getAccessToken } = useContext(UserContext)
 
   const handleDateChange = (selectedDate) => {
     const formattedDate = moment(selectedDate, 'YYYY-MM-DD').format('DD-MMM-YYYY');
@@ -82,7 +82,7 @@ const EditVerifyDetails = ({ navigation, route }) => {
 
   const onSave = async () => {
 
-    if(!remarks){
+    if (!remarks) {
       setRemarks("")
     }
 
@@ -91,34 +91,34 @@ const EditVerifyDetails = ({ navigation, route }) => {
     let boysCount = boys;
     let girlsCount = girls;
 
-    if(selectedGender=="Male" && isSingle=="Single"){
+    if (selectedGender == "Male" && isSingle == "Single") {
       menCount = 1
       womenCount = 0
       boysCount = 0
       girlsCount = 0;
-    }else if(selectedGender=="Female" && isSingle=="Single"){
+    } else if (selectedGender == "Female" && isSingle == "Single") {
       menCount = 0
       womenCount = 1
       boysCount = 0
       girlsCount = 0;
     }
 
-    let people = menCount+womenCount+boysCount+girlsCount;
+    let people = menCount + womenCount + boysCount + girlsCount;
     console.log("Total people : ", people)
 
     const updateField = {
       Date_of_Visit: date,
       Gender: selectedGender,
       Home_or_Office: isHome,
-      Number_of_Boys	:	boysCount,
-      Number_of_Girls	:	girlsCount,
-      Number_of_Men	:	menCount,
-      Number_of_People	:	people,
-      Number_of_Women	:	womenCount,
+      Number_of_Boys: boysCount,
+      Number_of_Girls: girlsCount,
+      Number_of_Men: menCount,
+      Number_of_People: people,
+      Number_of_Women: womenCount,
       Priority: priority,
       Remarks: remarks,
-      Single_or_Group_Visit	:	isSingle,
-      Guest_Category: category,	
+      Single_or_Group_Visit: isSingle,
+      Guest_Category: category,
     }
 
     const updateData = {
@@ -129,19 +129,19 @@ const EditVerifyDetails = ({ navigation, route }) => {
     console.log("saved details : ", updateField)
     const response = await updateRecord('Approval_to_Visitor_Report', updateData, getAccessToken());
 
-    if(response.result[0].code === 3000){
+    if (response.result[0].code === 3000) {
       Alert.alert("Edit Successful")
-      const newUser = {...user, ...updateData}
+      const newUser = { ...user, ...updateData }
       console.log("New user data is:", newUser)
-      navigation.navigate('VerifyDetails', {user: {...user, ...updateField}})
+      navigation.navigate('VerifyDetails', { user: { ...user, ...updateField } })
     }
-    else{
+    else {
       Alert.alert("Error: ", response.code)
     }
   }
 
   const onCancel = () => {
-    navigation.navigate("VerifyDetails", {user: user})
+    navigation.navigate("VerifyDetails", { user: user })
   }
 
   console.log("User in verify details : ", user)
@@ -150,7 +150,7 @@ const EditVerifyDetails = ({ navigation, route }) => {
       {/* <View style={styles.header}>
         <Text style={styles.headertxt}>Edit visitor details</Text>
       </View> */}
-      <ScrollView style={{ height: "92%s" }}>
+      <ScrollView style={{ height: "92%s", backgroundColor: "#FFF", fontFamily: "Inter" }}>
 
         <View style={styles.v}>
           <Text style={[styles.txt, { marginTop: 20 }]}>Visitor Name</Text>
@@ -202,29 +202,29 @@ const EditVerifyDetails = ({ navigation, route }) => {
           </Modal>
         </View>
         <View style={styles.v}>
-        <Text style={styles.txt}>Gender</Text>
-        <View style={styles.radioButtonContainer}>
-          {gender.map(option => (
-            <TouchableOpacity
-              key={option}
-              style={styles.singleOptionContainer}
-              onPress={() => {
-                setSelectedGender(option);
-              }}
-            >
-              <View style={styles.outerCircle}>
-                {selectedGender === option && <View style={styles.innerCircle} />}
-              </View>
-              <Text style={{ marginLeft: 10 }}>{option}</Text>
-            </TouchableOpacity>
-          ))}
+          <Text style={styles.txt}>Gender</Text>
+          <View style={styles.radioButtonContainer}>
+            {gender.map(option => (
+              <TouchableOpacity
+                key={option}
+                style={styles.singleOptionContainer}
+                onPress={() => {
+                  setSelectedGender(option);
+                }}
+              >
+                <View style={styles.outerCircle}>
+                  {selectedGender === option && <View style={styles.innerCircle} />}
+                </View>
+                <Text style={{ marginLeft: 10, fontSize: 14 }}>{option}</Text>
+              </TouchableOpacity>
+            ))}
           </View>
-          </View>
+        </View>
 
         <View style={styles.v}>
           <Text style={styles.txt}>Single or Group Visit</Text>
           <Dropdown
-            style={{ borderColor: "black", borderWidth: 1, borderRadius: 10, paddingLeft: 10, backgroundColor: "#F8F4F0", borderColor: "#b21e2b" }}
+            style={styles.dropdownstyle}
             data={singleOrGroup}
             maxHeight={300}
             labelField="label"
@@ -239,7 +239,7 @@ const EditVerifyDetails = ({ navigation, route }) => {
         </View>
         {
           isSingle === 'Group' &&
-          <View style={{ width: "100%", height: "20%", marginTop: 10 }}>
+          <View style={{ width: "90%", height: "20%", marginTop: 10, marginLeft: 20 }}>
             <View style={styles.single}>
               <View style={styles.left}>
                 <Text style={styles.singleTxt}>No. of Men</Text>
@@ -280,7 +280,7 @@ const EditVerifyDetails = ({ navigation, route }) => {
         <View style={styles.v}>
           <Text style={styles.txt}>Is the guest being invited to your Home or Office</Text>
           <Dropdown
-            style={{ borderColor: "black", borderWidth: 1, borderRadius: 10, paddingLeft: 10, backgroundColor: "#F8F4F0", borderColor: "#b21e2b" }}
+            style={styles.dropdownstyle}
             data={homeOrOffice}
             maxHeight={300}
             labelField="label"
@@ -297,7 +297,7 @@ const EditVerifyDetails = ({ navigation, route }) => {
         <View style={styles.v}>
           <Text style={styles.txt}>Guest Category</Text>
           <Dropdown
-            style={{ borderColor: "black", borderWidth: 1, borderRadius: 10, paddingLeft: 10, backgroundColor: "#F8F4F0", borderColor: "#b21e2b" }}
+            style={styles.dropdownstyle}
             data={guestCategory}
             maxHeight={300}
             labelField="label"
@@ -314,7 +314,7 @@ const EditVerifyDetails = ({ navigation, route }) => {
         <View style={styles.v}>
           <Text style={styles.txt}>Priority</Text>
           <Dropdown
-            style={{ borderColor: "black", borderWidth: 1, borderRadius: 10, paddingLeft: 10, backgroundColor: "#F8F4F0", borderColor: "#b21e2b" }}
+           style={styles.dropdownstyle}
             data={guestPriority}
             maxHeight={300}
             labelField="label"
@@ -330,13 +330,13 @@ const EditVerifyDetails = ({ navigation, route }) => {
         </View>
         <View style={styles.v}>
           <Text style={styles.txt}>Remark</Text>
-          <TextInput style={{ height: 100, borderWidth: 1, borderColor:"#b21e2b", borderRadius: 6, padding: 10 }} multiline={true} value={remarks} onChangeText={txt => setRemarks(txt)} />
+          <TextInput style={{ height: 100, borderWidth: 1, borderColor: "gray", borderRadius: 6, padding: 10 }} multiline={true} value={remarks} onChangeText={txt => setRemarks(txt)} />
         </View>
 
         <View style={styles.btnRoot}>
           <TouchableOpacity style={styles.save} onPress={onSave}>
             <View style={styles.btn}>
-              <Text style={styles.btnsave}>Save</Text>
+              <Text style={styles.btnsave}>Update</Text>
             </View>
           </TouchableOpacity>
         </View>
@@ -348,11 +348,6 @@ const EditVerifyDetails = ({ navigation, route }) => {
 export default EditVerifyDetails
 
 const styles = StyleSheet.create({
-  header: {
-    width: "100%",
-    height: "30",
-    backgroundColor: "#752a26",
-  },
   errorText: {
     color: 'red',
     marginTop: 5,
@@ -364,14 +359,24 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "white"
   },
+  dropdownstyle: {
+    borderWidth: 1, 
+    borderRadius: 10, 
+    paddingLeft: 10, 
+    backgroundColor: "#FFF", 
+    borderColor: "gray", 
+    height: 48, 
+    fontSize: 14
+  },
   inputtxt: {
-    height: 38,
+    height: 48,
     marginTop: 5,
-    backgroundColor: "#F8F4F0",
+    backgroundColor: "#FFF",
     borderWidth: 1,
-    borderColor: '#B21E2B',
+    borderColor: 'gray',
     borderRadius: 6,
-    paddingLeft: 10
+    paddingLeft: 10,
+    fontSize: 16
   },
   v: {
     marginLeft: 20,
@@ -381,9 +386,10 @@ const styles = StyleSheet.create({
   txt: {
     fontSize: 16,
     fontFamily: "Inter",
-    fontStyle:"normal",
+    fontStyle: "normal",
     fontWeight: "700",
-    marginBottom: 6
+    marginBottom: 6,
+    color: "#2F3036"
   },
   modalContainer: {
     flex: 1,
@@ -436,16 +442,21 @@ const styles = StyleSheet.create({
   },
   num: {
     borderWidth: 1,
-    backgroundColor: "#F8F4F0",
-    borderColor: '#b21e2b',
+    backgroundColor: "#FFF",
+    borderColor: 'gray',
     borderRadius: 6,
     paddingLeft: 10,
     marginVertical: 5,
     height: 35
   },
   singleTxt: {
-    fontSize: 20,
-    marginVertical: 5
+    marginVertical: 5,
+    fontSize: 16,
+    fontFamily: "Inter",
+    fontStyle: "normal",
+    fontWeight: "700",
+    marginBottom: 6,
+    color: "#2F3036"
   },
 
   btnRoot: {
@@ -473,13 +484,14 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#e2e2e2',
+    backgroundColor: '#FFFF',
+    borderColor: "gray"
   },
   innerCircle: {
     width: 12,
     height: 12,
     borderRadius: 11,
-    backgroundColor: '#752A26',
+    backgroundColor: '#b21e2b',
   },
 
 

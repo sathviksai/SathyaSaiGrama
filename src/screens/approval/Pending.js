@@ -33,7 +33,7 @@ const Pending = ({ navigation }) => {
   };
 
   return (
-    <View style={{ flex: 1, paddingTop: 10, backgroundColor: "#FFF" }}>
+    <View style={{ flex: 1, paddingTop: 10, backgroundColor: "#FFFF" }}>
       {loading ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#0000ff" />

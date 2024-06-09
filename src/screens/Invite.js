@@ -9,7 +9,6 @@ import {
   Image,
   Share,
   Alert,
-  TouchableWithoutFeedback
 } from 'react-native';
 import UserContext from '../../context/UserContext';
 import {useContext, useEffect, useState} from 'react';
@@ -44,7 +43,7 @@ const Invite = ({navigation}) => {
             format: 'json',
           },
         },
-      );  
+      );
       if (response.data.status === 'success') {
         return response.data.shorturl;
       } else {
@@ -209,7 +208,6 @@ const Invite = ({navigation}) => {
                 transparent={true}
                 visible={modal}
                 onRequestClose={() => setModal(false)}>
-                  <TouchableWithoutFeedback onPress={() => setModal(false)}>
                 <View style={styles.centeredView}>
                   <View style={styles.modalView}>
                     <View>
@@ -249,7 +247,6 @@ const Invite = ({navigation}) => {
                     </View>
                   </View>
                 </View>
-                </TouchableWithoutFeedback>
               </Modal>
             </View>
             <TouchableOpacity

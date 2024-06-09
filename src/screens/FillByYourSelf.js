@@ -46,9 +46,9 @@ const FillByYourSelf = () => {
   const [isFocus, setIsFocus] = useState(false);
   const [focus, setFocus] = useState(false);
   const [priority, setPriority] = useState('');
-  const [vehicleType, setVehicleType] = useState('');
-  const [isVehicle, setIsVehicle] = useState(false);
-  const [vehicleNumber, setVehicleNumber] = useState('');
+  // const [vehicleType, setVehicleType] = useState('');
+  // const [isVehicle, setIsVehicle] = useState(false);
+  // const [vehicleNumber, setVehicleNumber] = useState('');
 
   const phoneInput = useRef(null);
 
@@ -151,34 +151,34 @@ const FillByYourSelf = () => {
       }
     }
   };
-  const postVehicle = async () => {
-    const formData = {
-      data: {
-        Vehicle_Number: vehicleNumber,
-        Vehicle_Type: vehicleType,
-      },
-    };
-    try {
-      const response = await fetch(
-        `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/form/Vehicle_Information`,
-        {
-          method: 'POST',
-          headers: {
-            Authorization: `Zoho-oauthtoken ${getAccessToken()}`,
-          },
-          body: JSON.stringify(formData),
-        },
-      );
-      const res = await response.json();
-      console.log('Vehicle Response', res);
-      return res;
-    } catch (error) {
-      Alert.alert('Error', 'Something went wrong');
-    }
-  };
+  // const postVehicle = async () => {
+  //   const formData = {
+  //     data: {
+  //       Vehicle_Number: vehicleNumber,
+  //       Vehicle_Type: vehicleType,
+  //     },
+  //   };
+  //   try {
+  //     const response = await fetch(
+  //       `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/form/Vehicle_Information`,
+  //       {
+  //         method: 'POST',
+  //         headers: {
+  //           Authorization: `Zoho-oauthtoken ${getAccessToken()}`,
+  //         },
+  //         body: JSON.stringify(formData),
+  //       },
+  //     );
+  //     const res = await response.json();
+  //     console.log('Vehicle Response', res);
+  //     return res;
+  //   } catch (error) {
+  //     Alert.alert('Error', 'Something went wrong');
+  //   }
+  // };
 
   const posttoL1aprroved = async DepartmentID => {
-    const Vehicle_Info = await postVehicle();
+    // const Vehicle_Info = await postVehicle();
     const formData = {
       data: {
         Single_or_Group_Visit: selectedSG,
@@ -202,7 +202,7 @@ const FillByYourSelf = () => {
         Number_of_Women: women,
         Number_of_Girls: girls,
         Home_or_Office: selectedHO,
-        Vehicle_Information: [Vehicle_Info.data.ID],
+        // Vehicle_Information: [Vehicle_Info.data.ID],
       },
     };
 
@@ -329,7 +329,7 @@ const FillByYourSelf = () => {
       try {
         const rese = await posttoL1aprroved(empId.data[0].Office_lookup.ID);
         console.log('Response', rese);
-        navigation.navigate('Approved');
+
         setIsSubmitted(false);
       } catch (err) {
         Alert.alert(err);
@@ -367,11 +367,10 @@ const FillByYourSelf = () => {
     <SentForApproval />
   ) : (
     <SafeAreaView style={styles.container}>
-      <ScrollView style={{margin: 24}}>
+      <ScrollView style={{paddingStart: 8}}>
         <View>
-          <Text style={styles.header}>Visitor Information</Text>
           <View style={styles.namecontainer}>
-            <Text style={styles.label}>
+            <Text style={[styles.label, {marginTop: 20}]}>
               Name <Text style={{color: 'red'}}>*</Text>
             </Text>
             <View
@@ -381,7 +380,7 @@ const FillByYourSelf = () => {
                 justifyContent: 'space-between',
               }}>
               <Dropdown
-                style={[styles.dropdown, {width: 85}]}
+                style={[styles.dropdown, {width: '25%'}]}
                 placeholderStyle={styles.placeholderStyle}
                 selectedTextStyle={styles.selectedTextStyle}
                 inputSearchStyle={styles.inputSearchStyle}
@@ -402,14 +401,14 @@ const FillByYourSelf = () => {
               />
 
               <TextInput
-                style={[styles.dropdown, {width: 110, color: '#71727A'}]}
+                style={[styles.dropdown, {width: '32%', color: '#71727A'}]}
                 value={firstName}
                 onChangeText={setFirstName}
                 selectionColor={'#B21E2B'}
               />
 
               <TextInput
-                style={[styles.dropdown, {width: 110, color: '#71727A'}]}
+                style={[styles.dropdown, {width: '30%', color: '#71727A'}]}
                 value={lastName}
                 onChangeText={setLastName}
                 selectionColor={'#B21E2B'}
@@ -420,8 +419,8 @@ const FillByYourSelf = () => {
                 flex: 1,
                 flexDirection: 'row',
               }}>
-              <Text style={[styles.bottomtext, {marginRight: 62}]}>Prefix</Text>
-              <Text style={[styles.bottomtext, {marginRight: 73}]}>
+              <Text style={[styles.bottomtext, {marginRight: 75}]}>Prefix</Text>
+              <Text style={[styles.bottomtext, {marginRight: 72}]}>
                 First Name
               </Text>
               <Text style={styles.bottomtext}>Last Name</Text>
@@ -615,7 +614,7 @@ const FillByYourSelf = () => {
                 }}
               />
             </View>
-            <View style={[styles.namecontainer, {marginBottom: 0}]}>
+            {/* <View style={[styles.namecontainer, {marginBottom: 0}]}>
               <Text style={styles.label}>Vehicle Information</Text>
             </View>
             <View
@@ -667,7 +666,7 @@ const FillByYourSelf = () => {
                   selectionColor={'#B21E2B'}
                 />
               </View>
-            </View>
+            </View> */}
           </View>
           {selectedSG === 'Group' ? (
             <View>
@@ -743,6 +742,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'white',
     flexShrink: 0,
+    justifyContent: "center",
+    paddingLeft: 12
   },
   header: {
     fontFamily: 'Inter',
@@ -792,7 +793,7 @@ const styles = StyleSheet.create({
   },
   phoneInputContainer: {
     height: 50,
-    width: '96%',
+    width: '95%',
     borderStyle: 'solid',
     borderColor: '#B21E2B',
     borderWidth: 1.5,
