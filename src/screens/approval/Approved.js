@@ -5,7 +5,7 @@ import UserContext from '../../../context/UserContext';
 import { getDataWithIntAndString } from '../../components/ApiRequest';
 
 const Approved = ({ navigation }) => {
-  const { L1ID, getAccessToken, approveFlag, approveDataFetched, setApproveDataFetched } = useContext(UserContext);
+  const { L1ID, getAccessToken, approveDataFetched, setApproveDataFetched } = useContext(UserContext);
   const [approveds, setApproveds] = useState([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -23,7 +23,7 @@ const Approved = ({ navigation }) => {
     if (!approveDataFetched) {
       fetchData();
     }
-  }, [approveDataFetched, approveFlag]);
+  }, [approveDataFetched]);
 
   const onRefresh = async () => {
     setRefreshing(true);

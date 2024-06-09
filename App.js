@@ -5,6 +5,7 @@ import { DATABASE_ID, COLLECTION_ID, APPWRITE_FUNCTION_PROJECT_ID, APPWRITE_API_
 import {StyleSheet, ActivityIndicator, Alert } from "react-native";
 import { AuthContext, AuthProvider } from "./src/auth/AuthProvider";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import SplashScreen from "./src/screens/SplashScreen";
 
 
 const App = () => {
@@ -12,7 +13,7 @@ const App = () => {
 
   const { user } = useContext(AuthContext);
 
-  const { setAccessToken, getAccessToken, accessToken, setLoggedUser } = useContext(UserContext)
+  const { setAccessToken, setUserType, accessToken, setLoggedUser, setL1ID, setUserEmail } = useContext(UserContext)
   const [loading, setLoading] = useState(true)
 
 
@@ -51,9 +52,12 @@ const App = () => {
     const checkUserExist = async () =>{
       let existedUser = await AsyncStorage.getItem("existedUser");
       existedUser = JSON.parse(existedUser)
-      console.log("Existed user in App.js:", existedUser)
       if(existedUser){
         setLoggedUser(existedUser);
+        setUserType(existedUser.role)
+        setL1ID(existedUser.userId)
+        setUserEmail(existedUser.email)
+        console.log("Existed user in App.js:", existedUser)
       }
     }
 
@@ -71,7 +75,8 @@ const App = () => {
   return (
     <>
     {loading ? (
-      <ActivityIndicator size="large" color="#752A26" style={styles.loadingContainer}/>
+      // <ActivityIndicator size="large" color="#752A26" style={styles.loadingContainer}/>
+      <SplashScreen/>
     ) : (
     <BaseRoute />
     )}

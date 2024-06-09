@@ -22,11 +22,14 @@ import AddData from '../../src/screens/AddData';
 import FamilyMemberVerifyDetails from '../../src/screens/FamilyMemberVerifyDetails';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import RNRestart from 'react-native-restart';
+import L2ApprovalTab from '../../src/screens/L2-approval/L2ApprovalTab';
+import ViewDetails from '../../src/screens/L2-approval/ViewDetails';
 
 const Tab = createBottomTabNavigator();
 const InviteStack = createNativeStackNavigator();
 const ProfileStack = createNativeStackNavigator();
 const ApproveStack = createNativeStackNavigator();
+const LApprovalStack = createNativeStackNavigator()
 
 function InviteStackScreen() {
     return (
@@ -78,23 +81,105 @@ function ProfileStackScreen() {
 
 
 
-const ApprovalStack = () => {
+const ApprovalStack = ({ navigation }) => {
+
+    const { editData } = useContext(UserContext)
     return (
-        <ApproveStack.Navigator screenOptions={{ headerShown: false }}>
-            <ApproveStack.Screen name="ApprovalTab" component={ApprovalTab} />
-            <ApproveStack.Screen name="VerifyDetails" component={VerifyDetails} />
-            <ApproveStack.Screen name="EditVerifydetails" component={EditVerifyDetails} />
+        <ApproveStack.Navigator >
+            <ApproveStack.Screen name="ApprovalTab" component={ApprovalTab}
+                options={{
+                    header: () => (
+                        <View style={{ height: 56, padding: 19.5, justifyContent: 'center', alignItems: 'center', backgroundColor: '#FFF' }}>
+                            <Text style={{ fontStyle: "normal", fontWeight: 800, fontSize: 14, color: "#1F2024", fontFamily: "Inter", textAlign: "center" }}>My Approvals</Text>
+                        </View>
+                    ),
+                }}
+            />
+            <ApproveStack.Screen name="VerifyDetails" component={VerifyDetails} options={{
+                title: "Visitor details",
+                headerTintColor: "#B21E2B",
+                headerRight: () => (
+                    <TouchableOpacity onPress={() => navigation.navigate("EditVerifydetails", { user: editData })}>
+                        <Image
+                            source={require("../../src/assets/edit.png")} // Your icon URL here
+                            style={{ width: 20, height: 20, marginRight: 15, tintColor: "#B21E2B" }} // Adjust style as needed
+                        />
+                    </TouchableOpacity>
+                ),
+            }} />
         </ApproveStack.Navigator>
     )
 
 }
 
-const L1ApprovalStack = () => {
+
+const AppApproveStack = () => {
+
     return (
-        <ApproveStack.Navigator screenOptions={{ headerShown: false }}>
-            <ApproveStack.Screen name="ApprovalTab" component={ApprovalTab} />
-            <ApproveStack.Screen name="VerifyDetails" component={VerifyDetails} />
-            <ApproveStack.Screen name="EditVerifydetails" component={EditVerifyDetails} />
+        <LApprovalStack.Navigator screenOptions={{ headerShown: false }}>
+            <ApproveStack.Screen name="ApprovalStack" component={ApprovalStack} />
+            <ApproveStack.Screen name="EditVerifydetails" component={EditVerifyDetails} options={{
+                title: "Edit visitor details", headerShown: true,
+                headerTintColor: "#B21E2B",
+            }} />
+        </LApprovalStack.Navigator>
+    )
+
+}
+
+const L2ApprovalStack = () => {
+
+    const { loggedUser, accessToken, setUserType, userType, userEmail } = useContext(UserContext)
+    const { setUser } = useContext(AuthContext)
+
+    console.log("Logged user in L2Approval stack in FooterTab", loggedUser)
+
+    const fetchDataFromOffice = async () => {
+
+        const res = await getDataWithInt("All_Offices", "Approver_app_user_lookup", loggedUser.userId, accessToken);
+        if (res && res.data) {
+            const deptIds = res.data.map(dept => dept.ID);
+            await AsyncStorage.removeItem("existedUser");
+            setUserType("L2")
+            await AsyncStorage.setItem("existedUser", JSON.stringify({ userId: loggedUser.userId, role: "L2", email: userEmail, deptIds: deptIds }))
+        }
+        else {
+            await AsyncStorage.removeItem("existedUser");
+            setUserType("L1")
+            await AsyncStorage.setItem("existedUser", JSON.stringify({ userId: loggedUser.userId, role: "L1", email: userEmail, deptIds: deptIds }))
+        }
+
+        let exist = await AsyncStorage.getItem("existedUser");
+        exist = JSON.parse(exist)
+        if (exist && userType && (userType != exist.role)) {
+            Alert.alert("Your account has been deleted!")
+            setUser(null);
+            await AsyncStorage.removeItem("existedUser");
+            setTimeout(() => {
+                RNRestart.Restart();
+            }, 1000)
+        }
+        console.log("Re-cheking is completed in L1 request")
+    }
+
+
+
+    useEffect(() => {
+        fetchDataFromOffice()
+    }, [])
+
+    return (
+        <ApproveStack.Navigator >
+            <ApproveStack.Screen name="L2ApprovalTab" component={L2ApprovalTab}
+                options={{
+                    header: () => (
+                        <View style={{ height: 56, padding: 19.5, justifyContent: 'center', alignItems: 'center', backgroundColor: '#FFF' }}>
+                            <Text style={{ fontStyle: "normal", fontWeight: 800, fontSize: 14, color: "#1F2024", fontFamily: "Inter", textAlign: "center" }}>L1 Requests</Text>
+                        </View>
+                    ),
+                }}
+            />
+            <ApproveStack.Screen name="ViewDetails" component={ViewDetails} options={{title: "Visitor details", headerTintColor: "#B21E2B",}}/>
         </ApproveStack.Navigator>
     )
 
@@ -104,228 +189,183 @@ const L1ApprovalStack = () => {
 
 function FooterTab({ navigation }) {
 
-    const [loading, setLoading] = useState(true)
-
-    const { user, setUser } = useContext(AuthContext)
-    const { setUserEmail, setL1ID, accessToken, userType, setUserType, loggedUser, setLoggedUser } = useContext(UserContext)
-    console.log("Logged user data in footer: ", loggedUser)
-
-    // useEffect(()=>{
-
-    //     const fetchDataFromOffice = async (existedUser) => {
-
-    //         console.log("access token and id in footer: ", accessToken, existedUser.userId);
-    //         const res = await getDataWithInt("All_Offices", "Approver_app_user_lookup", existedUser.userId, accessToken);
-    //         if (res.data) {
-    //             await AsyncStorage.removeItem("existedUser");
-    //             setUserType("L2")
-    //             await AsyncStorage.setItem("existedUser", JSON.stringify({userId: existedUser.userId, role: "L2"}))
-    //         }
-    //         else {
-    //             await AsyncStorage.removeItem("existedUser");
-    //             setUserType("L1")
-    //             await AsyncStorage.setItem("existedUser", JSON.stringify({userId: existedUser.userId, role: "L1"}))
-    //         }
-
-    //         let exist = await AsyncStorage.getItem("existedUser");
-    //         exist = JSON.parse(exist)
-    //         setLoggedUser(exist);
-    //         if(exist && userType && (userType!=exist.role)){
-    //             Alert.alert("Your account has been deleted!")
-    //             setUser(null);
-    //             await AsyncStorage.removeItem("existedUser");
-    //             setTimeout(()=>{
-    //                 RNRestart.Restart(); 
-    //             },1000)
-    //         }
-    //     }
-    //     if(loggedUser != null){
-    //         fetchDataFromOffice(loggedUser)
-    //     }
-
-    // },[ ])
+    const { loggedUser } = useContext(UserContext)
 
     return (
         <>
-            { !loggedUser ? (
-                <ActivityIndicator size="large" color="red" style={styles.loadingContainer} />
-            ) : (
-                <Tab.Navigator
-                    screenOptions={{
-                        tabBarShowLabel: false,
-                        tabBarHideOnKeyboard: true,
-                        tabBarStyle: {
-                            backgroundColor: '#ece2e2',
-                            height: 70,
-                            borderTopWidth: 0,
-                            elevation: 0,
-                            paddingTop: 8,
-                        },
-                        headerTitleStyle: {
-                            fontWeight: 'bold',
-                            fontSize: 25,
-                            fontFamily: 'Inter',
-                        },
-                    }}>
-                    <Tab.Screen
-                        name="InviteStackScreen"
-                        component={InviteStackScreen}
-                        options={{
-                            headerShown: false,
-                            tabBarIcon: ({ focused }) => (
-                                <View style={styles.iconContainer}>
-                                    <Image
-                                        source={
-                                            !focused
-                                                ? require('../../src/assets/invitation.png')
-
-                                                : require('../../src/assets/invitationDark.png')
-                                        }
-                                        resizeMode="contain"
-                                        style={{
-                                            width: 30,
-                                            height: 30,
-                                            tintColor: focused ? '#752a26' : 'black',
-                                            marginBottom: 5,
-                                        }}
-                                    />
-                                    <Text
-                                        style={{
-                                            color: focused ? '#752a26' : 'black',
-                                            fontSize: 12,
-                                            fontFamily: 'Inter',
-                                        }}>
-                                        INVITE
-                                    </Text>
-                                </View>
-                            ),
-                        }}
+        {!loggedUser ? (
+          <ActivityIndicator
+            size="large"
+            color="red"
+            style={styles.loadingContainer}
+          />
+        ) : (
+          <Tab.Navigator
+            screenOptions={{
+              tabBarShowLabel: false,
+              tabBarHideOnKeyboard: true,
+              tabBarStyle: {
+                height: 88,
+                borderTopWidth: 0,
+                elevation: 0,
+                paddingTop: 16,
+                paddingLeft: 16,
+                paddingRight: 16,
+                paddingBottom: 32,
+                gap: 4,
+              },
+            }}>
+            <Tab.Screen
+              name="InviteStackScreen"
+              component={InviteStackScreen}
+              options={{
+                headerShown: false,
+                tabBarIcon: ({focused}) => (
+                  <View style={styles.iconContainer}>
+                    <Image
+                      source={
+                        !focused
+                          ? require('../../src/assets/invitation.png')
+                          : require('../../src/assets/invitationDark.png')
+                      }
+                      resizeMode="contain"
+                      style={{
+                        width: 30,
+                        height: 30,
+                        tintColor: focused ? '#B21E2B' : '#D4D6DD',
+                      }}
                     />
-                    <Tab.Screen
-                        name="ApprovalStack"
-                        component={ApprovalStack}
-                        options={{
-                            headerShown: false,
-                            tabBarIcon: ({ focused }) => (
-                                <View style={styles.iconContainer}>
-                                    <Image
-                                        source={
-                                            focused
-                                                ? require('../../src/assets/approvedDark.png')
-                                                : require('../../src/assets/approved.png')
-                                        }
-                                        resizeMode="contain"
-                                        style={{
-                                            width: 30,
-                                            height: 30,
-                                            tintColor: focused ? '#752a26' : 'black',
-                                            marginBottom: 5,
-                                        }}
-                                    />
-                                    <Text
-                                        style={{
-                                            color: focused ? '#752a26' : 'black',
-                                            fontSize: 12,
-                                            fontFamily: 'Inter',
-                                        }}>
-                                        My Approvals
-                                    </Text>
-                                </View>
-                            ),
-                        }}
+                    <Text style={focused ? styles.pressed : styles.notpressed}>
+                      Invite
+                    </Text>
+                  </View>
+                ),
+              }}
+            />
+            <Tab.Screen
+              name="AppApproveStack"
+              component={AppApproveStack}
+              options={{
+                headerShown: false,
+                tabBarIcon: ({focused}) => (
+                  <View style={styles.iconContainer}>
+                    <Image
+                      source={
+                        focused
+                          ? require('../../src/assets/approvedDark.png')
+                          : require('../../src/assets/approved.png')
+                      }
+                      resizeMode="contain"
+                      style={{
+                        width: 30,
+                        height: 30,
+                        tintColor: focused ? '#B21E2B' : '#D4D6DD',
+                      }}
                     />
-                    {
-                        loggedUser.role === "L2" ? (
-                            <Tab.Screen
-                                name="L1ApprovalStack"
-                                component={L1ApprovalStack}
-                                options={{
-                                    headerShown: false,
-                                    tabBarIcon: ({ focused }) => (
-                                        <View style={styles.iconContainer}>
-                                            <Image
-                                                source={
-                                                    focused
-                                                        ? require('../../src/assets/approvedDark.png')
-                                                        : require('../../src/assets/approved.png')
-                                                }
-                                                resizeMode="contain"
-                                                style={{
-                                                    width: 30,
-                                                    height: 30,
-                                                    tintColor: focused ? '#752a26' : 'black',
-                                                    marginBottom: 5,
-                                                }}
-                                            />
-                                            <Text
-                                                style={{
-                                                    color: focused ? '#752a26' : 'black',
-                                                    fontSize: 12,
-                                                    fontFamily: 'Inter',
-                                                }}>
-                                                L1 Requests
-                                            </Text>
-                                        </View>
-                                    ),
-                                }}
-                            />
-                        ) : null
-                    }
-                    <Tab.Screen
-                        name="ProfileStackScreen"
-                        component={ProfileStackScreen}
-                        options={{
-                            headerShown: false,
-                            headerTitleAlign: 'center',
-                            headerStyle: {
-                                backgroundColor: '#ece2e2',
-                            },
-                            headerTintColor: '#752a26',
-                            tabBarIcon: ({ focused }) => (
-                                <View style={styles.iconContainer}>
-                                    <Image
-                                        source={
-                                            focused
-                                                ? require('../../src/assets/userDark.png')
-                                                : require('../../src/assets/user.png')
-                                        }
-                                        resizeMode="contain"
-                                        style={{
-                                            width: 30,
-                                            height: 30,
-                                            tintColor: focused ? '#752a26' : 'black',
-                                            bottom: 5,
-                                        }}
-                                    />
-                                    <Text
-                                        style={{
-                                            color: focused ? '#752a26' : 'black',
-                                            fontSize: focused ? 14 : 12,
-                                            fontFamily: 'Inter',
-                                        }}>
-                                        PROFILE
-                                    </Text>
-                                </View>
-                            ),
+                    <Text style={focused ? styles.pressed : styles.notpressed}>
+                      My Approvals
+                    </Text>
+                  </View>
+                ),
+              }}
+            />
+            {loggedUser.role === 'L2' ? (
+              <Tab.Screen
+                name="L2ApprovalStack"
+                component={L2ApprovalStack}
+                options={{
+                  headerShown: false,
+                  tabBarIcon: ({focused}) => (
+                    <View style={styles.iconContainer}>
+                      <Image
+                        source={
+                          focused
+                            ? require('../../src/assets/request.png')
+                            : require('../../src/assets/request.png')
+                        }
+                        resizeMode="contain"
+                        style={{
+                          width: 30,
+                          height: 30,
+                          tintColor: focused ? '#B21E2B' : '#D4D6DD',
                         }}
+                      />
+                      <Text style={focused ? styles.pressed : styles.notpressed}>
+                        L1 Requests
+                      </Text>
+                    </View>
+                  ),
+                }}
+              />
+            ) : null}
+            <Tab.Screen
+              name="ProfileStackScreen"
+              component={ProfileStackScreen}
+              options={{
+                headerShown: false,
+  
+                tabBarIcon: ({focused}) => (
+                  <View style={styles.iconContainer}>
+                    <Image
+                      source={
+                        focused
+                          ? require('../../src/assets/userDark.png')
+                          : require('../../src/assets/user.png')
+                      }
+                      resizeMode="contain"
+                      style={{
+                        width: 30,
+                        height: 30,
+                        tintColor: focused ? '#B21E2B' : '#D4D6DD',
+                      }}
                     />
-                </Tab.Navigator>
-            )
-            }
-        </>
+                    <Text style={focused ? styles.pressed : styles.notpressed}>
+                      Account
+                    </Text>
+                  </View>
+                ),
+              }}
+            />
+          </Tab.Navigator>
+        )}
+      </>
     );
 }
 
 export default FooterTab;
+
 const styles = StyleSheet.create({
     iconContainer: {
-        alignItems: 'center',
-        justifyContent: 'center',
+      flex: 1,
+      flexDirection: 'column',
+      gap: 8,
+      alignItems: 'center',
+      justifyContent: 'center',
     },
     loadingContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
     },
-
-});
+  
+    pressed: {
+      color: '#1F2024',
+      textAlign: 'center',
+      fontSize: 11,
+      fontFamily: 'Inter',
+      fontStyle: 'normal',
+      fontWeight: '600',
+      lineHeight: 14,
+      letterSpacing: 0.165,
+    },
+    notpressed: {
+      color: '#71727A',
+      fontWeight: '400',
+      textAlign: 'center',
+      fontSize: 11,
+      fontFamily: 'Inter',
+      fontStyle: 'normal',
+      letterSpacing: 0.165,
+    },
+  });
+  

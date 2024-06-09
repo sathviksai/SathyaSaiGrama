@@ -68,7 +68,9 @@ export const getDataWithString = async (reportName, criteria, value, token) => {
         criteria: `${criteria}=="${value}"`
       }
     });
-    return await response.json();
+    const res = await response.json();
+    console.log("Response in getDataWithString: ", res)
+    return res
   }
   catch (err) {
     if (err.message === 'Network request failed')
@@ -82,7 +84,8 @@ export const getDataWithString = async (reportName, criteria, value, token) => {
 
 export const getDataWithIntAndString = async (reportName, criteria1, value1, criteria2, value2, token) => {
   try {
-    const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/${reportName}?criteria=${criteria1}==${value1}%26%26${criteria2}=="${value2}"`;
+    const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/${reportName}?criteria=${criteria1}==[${value1}]%26%26${criteria2}=="${value2}"`;
+    console.log("url : ", url)
     const response = await fetch(url, {
       method: 'GET',
       headers: {
@@ -92,7 +95,37 @@ export const getDataWithIntAndString = async (reportName, criteria1, value1, cri
         criteria: `${criteria1}==${value1}&&${criteria2}=="${value2}"`
       }
     });
-    return await response.json();
+    const res = await response.json();
+    console.log("Response in getDataWithIntAndString: ", res)
+    return res
+  }
+  catch (err) {
+    if (err.message === 'Network request failed')
+      Alert.alert('Network Error', 'Failed to fetch data. Please check your network connection and try again.');
+    else {
+      Alert.alert("Error: ", err)
+      console.log(err)
+    }
+  }
+}
+
+
+export const getL2Data = async (reportName, criteria1, value1, criteria2, value2, criteria3, value3, criteria4, value4, token) => {
+  try {
+    const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/${reportName}?criteria=${criteria1}==[${value1}]%26%26${criteria2}=="${value2}"%26%26${criteria3}=="${value3}"%26%26${criteria4}!=${value4}`;
+    console.log("url : ", url)
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        Authorization: `Zoho-oauthtoken ${token}`
+      },
+      params: {
+        criteria: `${criteria1}==${value1}&&${criteria2}=="${value2}"&&${criteria3}=="${value3}"&&${criteria4}!=${value4}`
+      }
+    });
+    const res = await response.json();
+    console.log("Response in getL2Data: ", res)
+    return res
   }
   catch (err) {
     if (err.message === 'Network request failed')
@@ -128,3 +161,5 @@ export const getDataWithTwoString = async (reportName, criteria1, value1, criter
     }
   }
 }
+
+

@@ -5,7 +5,7 @@ import UserContext from '../../../context/UserContext';
 import { getDataWithIntAndString } from '../../components/ApiRequest';
 
 const Denied = ({ navigation }) => {
-  const { L1ID, getAccessToken, deniedFlag, deniedDataFetched, setDeniedDataFetched } = useContext(UserContext);
+  const { L1ID, getAccessToken, deniedDataFetched, setDeniedDataFetched } = useContext(UserContext);
   const [denieds, setDenieds] = useState([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -23,7 +23,7 @@ const Denied = ({ navigation }) => {
     if (!deniedDataFetched) {
       fetchData();
     }
-  }, [deniedDataFetched, deniedFlag]);
+  }, [deniedDataFetched]);
 
   const onRefresh = async () => {
     setRefreshing(true);

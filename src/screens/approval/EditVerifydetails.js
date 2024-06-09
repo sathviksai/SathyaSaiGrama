@@ -147,9 +147,9 @@ const EditVerifyDetails = ({ navigation, route }) => {
   console.log("User in verify details : ", user)
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <View style={styles.header}>
+      {/* <View style={styles.header}>
         <Text style={styles.headertxt}>Edit visitor details</Text>
-      </View>
+      </View> */}
       <ScrollView style={{ height: "92%s" }}>
 
         <View style={styles.v}>
@@ -224,7 +224,7 @@ const EditVerifyDetails = ({ navigation, route }) => {
         <View style={styles.v}>
           <Text style={styles.txt}>Single or Group Visit</Text>
           <Dropdown
-            style={{ borderColor: "black", borderWidth: 1, borderRadius: 10, paddingLeft: 10, backgroundColor: "#F8F4F0" }}
+            style={{ borderColor: "black", borderWidth: 1, borderRadius: 10, paddingLeft: 10, backgroundColor: "#F8F4F0", borderColor: "#b21e2b" }}
             data={singleOrGroup}
             maxHeight={300}
             labelField="label"
@@ -280,7 +280,7 @@ const EditVerifyDetails = ({ navigation, route }) => {
         <View style={styles.v}>
           <Text style={styles.txt}>Is the guest being invited to your Home or Office</Text>
           <Dropdown
-            style={{ borderColor: "black", borderWidth: 1, borderRadius: 10, paddingLeft: 10, backgroundColor: "#F8F4F0" }}
+            style={{ borderColor: "black", borderWidth: 1, borderRadius: 10, paddingLeft: 10, backgroundColor: "#F8F4F0", borderColor: "#b21e2b" }}
             data={homeOrOffice}
             maxHeight={300}
             labelField="label"
@@ -297,7 +297,7 @@ const EditVerifyDetails = ({ navigation, route }) => {
         <View style={styles.v}>
           <Text style={styles.txt}>Guest Category</Text>
           <Dropdown
-            style={{ borderColor: "black", borderWidth: 1, borderRadius: 10, paddingLeft: 10, backgroundColor: "#F8F4F0" }}
+            style={{ borderColor: "black", borderWidth: 1, borderRadius: 10, paddingLeft: 10, backgroundColor: "#F8F4F0", borderColor: "#b21e2b" }}
             data={guestCategory}
             maxHeight={300}
             labelField="label"
@@ -314,7 +314,7 @@ const EditVerifyDetails = ({ navigation, route }) => {
         <View style={styles.v}>
           <Text style={styles.txt}>Priority</Text>
           <Dropdown
-            style={{ borderColor: "black", borderWidth: 1, borderRadius: 10, paddingLeft: 10, backgroundColor: "#F8F4F0" }}
+            style={{ borderColor: "black", borderWidth: 1, borderRadius: 10, paddingLeft: 10, backgroundColor: "#F8F4F0", borderColor: "#b21e2b" }}
             data={guestPriority}
             maxHeight={300}
             labelField="label"
@@ -330,18 +330,13 @@ const EditVerifyDetails = ({ navigation, route }) => {
         </View>
         <View style={styles.v}>
           <Text style={styles.txt}>Remark</Text>
-          <TextInput style={{ height: 100, borderWidth: 1, borderColor: 'black', borderRadius: 6, padding: 10 }} multiline={true} value={remarks} onChangeText={txt => setRemarks(txt)} />
+          <TextInput style={{ height: 100, borderWidth: 1, borderColor:"#b21e2b", borderRadius: 6, padding: 10 }} multiline={true} value={remarks} onChangeText={txt => setRemarks(txt)} />
         </View>
 
         <View style={styles.btnRoot}>
           <TouchableOpacity style={styles.save} onPress={onSave}>
             <View style={styles.btn}>
               <Text style={styles.btnsave}>Save</Text>
-            </View>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.cancel} onPress={onCancel}>
-            <View style={styles.btn}>
-              <Text style={styles.btncancel}>Cancel</Text>
             </View>
           </TouchableOpacity>
         </View>
@@ -374,7 +369,7 @@ const styles = StyleSheet.create({
     marginTop: 5,
     backgroundColor: "#F8F4F0",
     borderWidth: 1,
-    borderColor: 'black',
+    borderColor: '#B21E2B',
     borderRadius: 6,
     paddingLeft: 10
   },
@@ -384,7 +379,11 @@ const styles = StyleSheet.create({
     marginRight: 20
   },
   txt: {
-    fontSize: 20
+    fontSize: 16,
+    fontFamily: "Inter",
+    fontStyle:"normal",
+    fontWeight: "700",
+    marginBottom: 6
   },
   modalContainer: {
     flex: 1,
@@ -413,29 +412,17 @@ const styles = StyleSheet.create({
   },
   btnsave: {
     borderWidth: 1,
-    width: 90,
+    width: 135,
     height: 40,
     textAlign: "center",
     paddingTop: 5,
     borderRadius: 8,
     fontSize: 20,
     marginBottom: 20,
-    backgroundColor: "#006A4E",
-    color: "white"
-
-  },
-  btncancel: {
-    borderWidth: 1,
-    width: 90,
-    height: 40,
-    textAlign: "center",
-    paddingTop: 5,
-    borderRadius: 8,
-    fontSize: 20,
-    marginBottom: 20,
-    backgroundColor: "#752a26",
-    color: "white"
-
+    backgroundColor: "#b21e2b",
+    color: "white",
+    borderColor: '#b21e2b',
+    elevation: 5
   },
   single: {
     flexDirection: "row",
@@ -450,7 +437,7 @@ const styles = StyleSheet.create({
   num: {
     borderWidth: 1,
     backgroundColor: "#F8F4F0",
-    borderColor: 'black',
+    borderColor: '#b21e2b',
     borderRadius: 6,
     paddingLeft: 10,
     marginVertical: 5,

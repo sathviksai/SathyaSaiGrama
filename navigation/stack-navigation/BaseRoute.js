@@ -36,6 +36,7 @@ const BaseRoute = () => {
       );
       res = await res.json()
       setAccessToken(res.documents[0].Token)
+      console.log("Zoho token in base route using app write:", res.documents[0].Token)
     } catch (error) {
       console.log("Error in Base route: ", error)
       Alert.alert(error)
@@ -44,20 +45,10 @@ const BaseRoute = () => {
   }
 
   useEffect(() => {
-    const intervalId = setInterval(getAppWriteToken, 3000000);
+    const intervalId = setInterval(getAppWriteToken, 600000);
     return () => clearInterval(intervalId);
   }, []);
 
-
-  // useEffect(()=>{
-  //   const getLocalData = async() =>{
-  //     let existedUser = await AsyncStorage.getItem("existedUser");
-  //     existedUser = JSON.parse(existedUser)
-
-  //     console.log("Existed user data: ", existedUser)
-  //   }
-  //   getLocalData()
-  // },[])
 
   useEffect(()=>{
 
@@ -83,7 +74,7 @@ const BaseRoute = () => {
     //   ) : (
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
-        {loggedUser ? (
+        { loggedUser ? (
           <Stack.Screen name="FooterTab" component={FooterTab} />
         ) : (
           <>

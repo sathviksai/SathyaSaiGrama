@@ -22,14 +22,17 @@ const Login = ({ navigation }) => {
     const [loading, setLoading] = useState(false);
     const { control, handleSubmit, formState: { errors } } = useForm()
     const { getAccessToken, userType, setUserType, accessToken, setUserEmail, setL1ID, loggedUser, setLoggedUser } = useContext(UserContext)
-    const [currentUserId, setCurrentUserId] = useState(null)
-
+    const [currentUser, setCurrentUser] = useState(null)
+    const [departmentIds, setDepartmentIds] = useState([])
 
 
     const fetchDataFromOffice = async (id) => {
         console.log("access token and id in fetchDataFromOffice in login: ", accessToken, id);
         const res = await getDataWithInt("All_Offices", "Approver_app_user_lookup", id, accessToken);
         if (res && res.data) {
+            console.log("department data found in Login:", res.data)
+            const deptIds = res.data.map(dept => dept.ID);
+            setDepartmentIds(deptIds)
             setUserType("L2")
         }
         else {
@@ -44,9 +47,9 @@ const Login = ({ navigation }) => {
     useEffect(() => {
 
         const storeData = async () => {
-            if (currentUserId) {
+            if (currentUser) {
                 console.log("Inside the useEffect of login")
-                await AsyncStorage.setItem("existedUser", JSON.stringify({ userId: currentUserId, role: userType }));
+                await AsyncStorage.setItem("existedUser", JSON.stringify({ userId: currentUser.id, role: userType, email: currentUser.email, deptIds: departmentIds }));
                 console.log("login data saved into local storage")
                 let existedUser = await AsyncStorage.getItem("existedUser");
                 existedUser = JSON.parse(existedUser)
@@ -56,13 +59,13 @@ const Login = ({ navigation }) => {
             }
         };
 
-        if(userType){
+        if (userType && departmentIds) {
             console.log("Before store data called in useEffect in Login")
             storeData()
             console.log("After store data called in useEffect in Login")
         }
 
-    }, [userType, currentUserId]);
+    }, [currentUser]);
 
 
 
@@ -70,18 +73,18 @@ const Login = ({ navigation }) => {
     const handleLoginForm = async (userCred) => {
 
         setLoading(true);
-        const res = await getDataWithString('All_App_Users', 'Email', userCred.email, accessToken);
+        const res = await getDataWithString('All_App_Users', 'Email', userCred.email.toLowerCase(), accessToken);
         console.log("Whether user exis or not in login: ", res)
         if (res && res.data) {
             try {
                 fetchDataFromOffice(res.data[0].ID)
-                const userCredential = await signInWithEmailAndPassword(auth, userCred.email, userCred.password);
+                const userCredential = await signInWithEmailAndPassword(auth, userCred.email.toLowerCase(), userCred.password);
                 const user = userCredential.user;
                 setLoading(false);
                 if (user.emailVerified) {
                     setL1ID(res.data[0].ID)
                     setUserEmail(userCred.email)
-                    setCurrentUserId(res.data[0].ID)
+                    setCurrentUser({ id: res.data[0].ID, email: userCred.email })
                 } else {
                     // Email is not verified, display message and send verification email (if needed)
                     await sendEmailVerification(auth.currentUser);

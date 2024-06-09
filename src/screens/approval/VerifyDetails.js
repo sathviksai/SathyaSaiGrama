@@ -8,7 +8,7 @@ import { encode } from 'base64-arraybuffer';
 
 export const updateRecord = async (reportName, modified_data, token) => {
   try {
-     const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/${reportName}`
+    const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/${reportName}`
     console.log(url)
     const response = await fetch(url, {
       method: 'PATCH',
@@ -32,11 +32,12 @@ export const updateRecord = async (reportName, modified_data, token) => {
 
 
 const VerifyDetails = ({ navigation, route }) => {
-  
+
   const { user } = route.params;
 
   const [photo, setPhoto] = useState();
-  const { getAccessToken, pendingFlag, setPendingFlag, approveFlag, setApproveFlag, deniedFlag, setDeniedFlag, setDeniedDataFetched, setApproveDataFetched, setPendingDataFetched } = useContext(UserContext)
+  const { getAccessToken, setDeniedDataFetched, setApproveDataFetched, setPendingDataFetched, setEditData } = useContext(UserContext)
+  setEditData(user);
   const token = getAccessToken()
   const [loading, setLoading] = useState(true);
   const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/${user.ID}/Photo/download`
@@ -79,7 +80,7 @@ const VerifyDetails = ({ navigation, route }) => {
     let status = user.Referrer_Approval;
 
     const updateField = {
-      Referrer_Approval : "APPROVED"
+      Referrer_Approval: "APPROVED"
     }
 
     const updateData = {
@@ -89,26 +90,22 @@ const VerifyDetails = ({ navigation, route }) => {
 
     const response = await updateRecord('Approval_to_Visitor_Report', updateData, getAccessToken());
 
-    if(response.result[0].code === 3000){
-      if(status==="PENDING APPROVAL"){
+    if (response.result[0].code === 3000) {
+      if (status === "PENDING APPROVAL") {
         setPendingDataFetched(false)
         setApproveDataFetched(false)
-        setPendingFlag(!pendingFlag)
-        setApproveFlag(!approveFlag)
       }
-      else if(status==="DENIED"){
+      else if (status === "DENIED") {
         setDeniedDataFetched(false)
         setApproveDataFetched(false)
-        setDeniedFlag(!deniedFlag)
-        setApproveFlag(!approveFlag)
       }
       Alert.alert("Visitor Approved")
       navigation.navigate('Approved')
     }
-    else{
+    else {
       Alert.alert("Error: ", response.code)
     }
-  
+
   }
 
   const onReject = async () => {
@@ -116,7 +113,7 @@ const VerifyDetails = ({ navigation, route }) => {
     let status = user.Referrer_Approval;
 
     const updateField = {
-      Referrer_Approval : "DENIED"
+      Referrer_Approval: "DENIED"
     }
 
     const updateData = {
@@ -126,23 +123,19 @@ const VerifyDetails = ({ navigation, route }) => {
 
     const response = await updateRecord('Approval_to_Visitor_Report', updateData, getAccessToken());
 
-    if(response.result[0].code === 3000){
-      if(status==="PENDING APPROVAL"){
+    if (response.result[0].code === 3000) {
+      if (status === "PENDING APPROVAL") {
         setPendingDataFetched(false)
         setDeniedDataFetched(false)
-        setPendingFlag(!pendingFlag)
-        setDeniedFlag(!deniedFlag)
       }
-      else if(status==="APPROVED"){
+      else if (status === "APPROVED") {
         setDeniedDataFetched(false)
         setApproveDataFetched(false)
-        setDeniedFlag(!deniedFlag)
-        setApproveFlag(!approveFlag)
       }
       Alert.alert("Visitor Rejected")
       navigation.navigate('Denied')
     }
-    else{
+    else {
       Alert.alert("Error: ", response.code)
     }
 
@@ -152,8 +145,8 @@ const VerifyDetails = ({ navigation, route }) => {
 
   console.log("User in verify details : ", user)
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#EEEEEE" }}>
-      <View style={styles.header}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#FFF" }}>
+      {/* <View style={styles.header}>
         <View style={styles.headerContainer}>
           <Text style={styles.headertxt}>Visitor details</Text>
           <TouchableOpacity onPress={() => navigation.navigate("EditVerifydetails", { user: user })} style={{ width: 40, height: 40, padding: 10, marginEnd: 20 }}>
@@ -163,38 +156,36 @@ const VerifyDetails = ({ navigation, route }) => {
             />
           </TouchableOpacity>
         </View>
-      </View>
+      </View> */} 
       <ScrollView style={styles.scrollview}>
-
-        
         {
-  user?.Referrer_Approval === "PENDING APPROVAL" ? (
-    <View style={[styles.container, { marginTop: 20 }]}>
-      <View style={[styles.left, { width: "50%" }]}>
-        <TouchableOpacity style={styles.btnAccept} onPress={onApprove}>
-          <Text style={styles.btntxt}>Approve</Text>
-        </TouchableOpacity>
-      </View>
-      <View style={styles.right}>
-        <TouchableOpacity style={styles.btnReject} onPress={onReject}>
-          <Text style={styles.btntxt}>Reject</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  ) : user?.Referrer_Approval === "APPROVED" ? (
-    <View style={{width: "100%", padding: 10, marginLeft: "30%"}}>
-      <TouchableOpacity style={[styles.btnReject]} onPress={onReject}>
-        <Text style={[styles.btntxt]}>Reject</Text>
-      </TouchableOpacity>
-    </View>
-  ) : user?.Referrer_Approval === "DENIED" ? (
-    <View style={{width: "100%", padding: 10, marginLeft: "15%"}}>
-      <TouchableOpacity style={styles.btnAccept} onPress={onApprove}>
-        <Text style={styles.btntxt}>Approve</Text>
-      </TouchableOpacity>
-    </View>
-  ) : null
-}
+          user?.Referrer_Approval === "PENDING APPROVAL" ? (
+            <View style={[styles.container, { marginTop: 20 }]}>
+              <View style={[styles.left, { width: "50%" }]}>
+                <TouchableOpacity style={styles.btnAccept} onPress={onApprove}>
+                  <Text style={styles.btntxt}>Approve</Text>
+                </TouchableOpacity>
+              </View>
+              <View style={styles.right}>
+                <TouchableOpacity style={styles.btnReject} onPress={onReject}>
+                  <Text style={styles.btntxt}>Reject</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          ) : user?.Referrer_Approval === "APPROVED" ? (
+            <View style={{ width: "100%", padding: 10, marginLeft: "30%" }}>
+              <TouchableOpacity style={[styles.btnReject]} onPress={onReject}>
+                <Text style={[styles.btntxt]}>Reject</Text>
+              </TouchableOpacity>
+            </View>
+          ) : user?.Referrer_Approval === "DENIED" ? (
+            <View style={{ width: "100%", padding: 10, marginLeft: "15%" }}>
+              <TouchableOpacity style={styles.btnAccept} onPress={onApprove}>
+                <Text style={styles.btntxt}>Approve</Text>
+              </TouchableOpacity>
+            </View>
+          ) : null
+        }
 
         <View style={[styles.container, { marginTop: 20 }]}>
           <View style={styles.left}>
@@ -391,10 +382,10 @@ const styles = StyleSheet.create({
     color: "black",
   },
   scrollview: {
-    height: "92%s",
     backgroundColor: "#FAFAFA",
-    marginVertical: 20,
+    marginVertical: 10,
     marginHorizontal: 10,
+    padding: 15,
     ...Platform.select({
       ios: {
         shadowOffset: { width: 2, height: 2 },
@@ -403,12 +394,12 @@ const styles = StyleSheet.create({
         shadowRadius: 4,
       },
       android: {
-        elevation: 10,
+        elevation: 8,
       },
     }),
   },
   btnAccept: {
-    width: 90,
+    width: 100,
     height: 40,
     borderWidth: 1,
     borderColor: 'grey',
@@ -419,7 +410,7 @@ const styles = StyleSheet.create({
     backgroundColor: "green"
   },
   btnReject: {
-    width: 90,
+    width: 100,
     height: 40,
     borderWidth: 1,
     borderColor: 'grey',
@@ -432,6 +423,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 20,
     //color: "#752A26"
-    color: "black"
+    color: "#FFF"
   }
 })
