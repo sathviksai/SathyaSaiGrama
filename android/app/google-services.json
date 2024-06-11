@@ -1,0 +1,30 @@
+
+{
+  "project_info": {
+    "project_number": "142974661728",
+    "project_id": "sathya-sai-grama-1",
+    "storage_bucket": "sathya-sai-grama-1.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:142974661728:android:7be4b0156c88dcf38f7f05",
+        "android_client_info": {
+          "package_name": "com.sathya_sai_grama"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA64rii4fN_qt5ocWhnzmDv_M4vfFCGnIs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,34 +1,34 @@
-import { BASE_APP_URL, APP_OWNER_NAME, APP_LINK_NAME } from "@env";
-import { Alert } from "react-native";
-
+import {BASE_APP_URL, APP_OWNER_NAME, APP_LINK_NAME} from '@env';
+import {Alert} from 'react-native';
 
 export const getDataWithInt = async (reportName, criteria, value, token) => {
   try {
     const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/${reportName}?criteria=${criteria}==${value}`;
-    console.log("url in getDataWithInt: ",url)
+    console.log('url in getDataWithInt: ', url);
     const response = await fetch(url, {
       method: 'GET',
       headers: {
-        Authorization: `Zoho-oauthtoken ${token}`
+        Authorization: `Zoho-oauthtoken ${token}`,
       },
       params: {
-        criteria: `${criteria}==${value}`
-      }
+        criteria: `${criteria}==${value}`,
+      },
     });
     const res = await response.json();
-    console.log("Response in getDataWithInt: ", res)
-    return res
-  }
-  catch (err) {
+    console.log('Response in getDataWithInt: ', res);
+    return res;
+  } catch (err) {
     if (err.message === 'Network request failed')
-      Alert.alert('Network Error', 'Failed to fetch data. Please check your network connection and try again.');
+      Alert.alert(
+        'Network Error',
+        'Failed to fetch data. Please check your network connection and try again.',
+      );
     else {
-      Alert.alert("Error: ", err)
-      console.log(err)
+      Alert.alert('Error: ', err);
+      console.log(err);
     }
   }
-}
-
+};
 
 // export const getDataWithString = async (reportName, criteria, value, token) => {
 
@@ -57,109 +57,139 @@ export const getDataWithInt = async (reportName, criteria, value, token) => {
 
 export const getDataWithString = async (reportName, criteria, value, token) => {
   try {
-    console.log("token in getDataWithString: ", token, value)
+    console.log('token in getDataWithString: ', token, value);
     const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/${reportName}?criteria=${criteria}=="${value}"`;
+    console.log('url', url);
     const response = await fetch(url, {
       method: 'GET',
       headers: {
-        Authorization: `Zoho-oauthtoken ${token}`
+        Authorization: `Zoho-oauthtoken ${token}`,
       },
       params: {
-        criteria: `${criteria}=="${value}"`
-      }
+        criteria: `${criteria}=="${value}"`,
+      },
     });
     const res = await response.json();
-    console.log("Response in getDataWithString: ", res)
-    return res
-  }
-  catch (err) {
+    console.log('Response in getDataWithString: ', res);
+    return res;
+  } catch (err) {
     if (err.message === 'Network request failed')
-      Alert.alert('Network Error', 'Failed to fetch data. Please check your network connection and try again.');
+      Alert.alert(
+        'Network Error',
+        'Failed to fetch data. Please check your network connection and try again.',
+      );
     else {
-      Alert.alert("Error: ", err)
-      console.log(err)
+      Alert.alert('Error: ', err);
+      console.log(err);
     }
   }
-}
+};
 
-export const getDataWithIntAndString = async (reportName, criteria1, value1, criteria2, value2, token) => {
+export const getDataWithIntAndString = async (
+  reportName,
+  criteria1,
+  value1,
+  criteria2,
+  value2,
+  token,
+) => {
   try {
     const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/${reportName}?criteria=${criteria1}==[${value1}]%26%26${criteria2}=="${value2}"`;
-    console.log("url : ", url)
+    console.log('url : ', url);
     const response = await fetch(url, {
       method: 'GET',
       headers: {
-        Authorization: `Zoho-oauthtoken ${token}`
+        Authorization: `Zoho-oauthtoken ${token}`,
       },
       params: {
-        criteria: `${criteria1}==${value1}&&${criteria2}=="${value2}"`
-      }
+        criteria: `${criteria1}==${value1}&&${criteria2}=="${value2}"`,
+      },
     });
     const res = await response.json();
-    console.log("Response in getDataWithIntAndString: ", res)
-    return res
-  }
-  catch (err) {
+    console.log('Response in getDataWithIntAndString: ', res);
+    return res;
+  } catch (err) {
     if (err.message === 'Network request failed')
-      Alert.alert('Network Error', 'Failed to fetch data. Please check your network connection and try again.');
+      Alert.alert(
+        'Network Error',
+        'Failed to fetch data. Please check your network connection and try again.',
+      );
     else {
-      Alert.alert("Error: ", err)
-      console.log(err)
+      Alert.alert('Error: ', err);
+      console.log(err);
     }
   }
-}
+};
 
-
-export const getL2Data = async (reportName, criteria1, value1, criteria2, value2, criteria3, value3, criteria4, value4, token) => {
+export const getL2Data = async (
+  reportName,
+  criteria1,
+  value1,
+  criteria2,
+  value2,
+  criteria3,
+  value3,
+  criteria4,
+  value4,
+  token,
+) => {
   try {
     const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/${reportName}?criteria=${criteria1}==[${value1}]%26%26${criteria2}=="${value2}"%26%26${criteria3}=="${value3}"%26%26${criteria4}!=${value4}`;
-    console.log("url : ", url)
+    console.log('url : ', url);
     const response = await fetch(url, {
       method: 'GET',
       headers: {
-        Authorization: `Zoho-oauthtoken ${token}`
+        Authorization: `Zoho-oauthtoken ${token}`,
       },
       params: {
-        criteria: `${criteria1}==${value1}&&${criteria2}=="${value2}"&&${criteria3}=="${value3}"&&${criteria4}!=${value4}`
-      }
+        criteria: `${criteria1}==${value1}&&${criteria2}=="${value2}"&&${criteria3}=="${value3}"&&${criteria4}!=${value4}`,
+      },
     });
     const res = await response.json();
-    console.log("Response in getL2Data: ", res)
-    return res
-  }
-  catch (err) {
+    console.log('Response in getL2Data: ', res);
+    return res;
+  } catch (err) {
     if (err.message === 'Network request failed')
-      Alert.alert('Network Error', 'Failed to fetch data. Please check your network connection and try again.');
+      Alert.alert(
+        'Network Error',
+        'Failed to fetch data. Please check your network connection and try again.',
+      );
     else {
-      Alert.alert("Error: ", err)
-      console.log(err)
+      Alert.alert('Error: ', err);
+      console.log(err);
     }
   }
-}
+};
 
-
-export const getDataWithTwoString = async (reportName, criteria1, value1, criteria2, value2, token) => {
+export const getDataWithTwoString = async (
+  reportName,
+  criteria1,
+  value1,
+  criteria2,
+  value2,
+  token,
+) => {
   try {
     const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/${reportName}?criteria=${criteria1}=="${value1}"%26%26${criteria2}==${value2}`;
     const response = await fetch(url, {
       method: 'GET',
       headers: {
-        Authorization: `Zoho-oauthtoken ${token}`
+        Authorization: `Zoho-oauthtoken ${token}`,
       },
       params: {
-        criteria: `${criteria1}=="${value1}"&&${criteria2}==${value2}`
-      }
+        criteria: `${criteria1}=="${value1}"&&${criteria2}==${value2}`,
+      },
     });
     return await response.json();
-  }
-  catch (err) {
+  } catch (err) {
     if (err.message === 'Network request failed')
-      Alert.alert('Network Error', 'Failed to fetch data. Please check your network connection and try again.');
+      Alert.alert(
+        'Network Error',
+        'Failed to fetch data. Please check your network connection and try again.',
+      );
     else {
-      Alert.alert("Error: ", err)
-      console.log(err)
+      Alert.alert('Error: ', err);
+      console.log(err);
     }
   }
-}
-
-
+};
