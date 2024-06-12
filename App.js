@@ -11,7 +11,7 @@ import {StyleSheet, ActivityIndicator, Alert} from 'react-native';
 import {AuthContext, AuthProvider} from './src/auth/AuthProvider';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import SplashScreen from './src/screens/SplashScreen';
-import {requestUserPermission} from './src/utils/notificationService';
+import {getDeviceToken} from './src/utils/notificationService';
 
 const App = () => {
   const {user} = useContext(AuthContext);
@@ -23,6 +23,7 @@ const App = () => {
     setLoggedUser,
     setL1ID,
     setUserEmail,
+    setDeviceToken
   } = useContext(UserContext);
   const [loading, setLoading] = useState(true);
 
@@ -52,10 +53,12 @@ const App = () => {
   useEffect(() => {
     const fetchToken = async () => {
       await getAppWriteToken();
+      const dToken = await getDeviceToken();
+      console.log("device token is app.js: ", dToken)
     };
 
     fetchToken();
-    requestUserPermission();
+    
   }, []);
 
   useEffect(() => {

@@ -6,22 +6,38 @@ import {
   TouchableOpacity,
   Alert,
   Image,
+  ScrollView,
 } from 'react-native';
 import {useForm, Controller} from 'react-hook-form';
 import React, {useContext, useState} from 'react';
 import {Dropdown} from 'react-native-element-dropdown';
-import {patchDataWithInt, patchDataWithRecordId} from '../components/ApiRequest';
+import {
+  patchDataWithInt,
+  patchDataWithRecordId,
+} from '../components/ApiRequest';
 import UserContext from '../../context/UserContext';
 
 const Edit = ({route, navigation}) => {
   const formType = route.params?.formType;
   const userdata = route.params?.userdata;
   const vehicledata = route.params?.vehicledata;
-  const memberdata = route.params?.memberdata
+  const memberdata = route.params?.memberdata;
 
   const gender = ['Male', 'Female'];
   const [selectedGender, setSelectedGender] = useState(userdata?.Gender);
-  const [memSelectedGender, setMemSelectedGender] = useState(memberdata?.App_User_lookup.Gender);
+  const [memSelectedGender, setMemSelectedGender] = useState(
+    memberdata?.App_User_lookup.Gender,
+  );
+  console.log(
+    'object: ',
+    formType,
+    route.params?.departmentName, // Ensure the parameter names match
+    route.params?.departmentNameExists,
+  );
+  const dept = route.params?.departmentName;
+  const deptExists = route.params?.departmentNameExists;
+
+  const [loading, setLoading] = useState(false);
 
   const relationTypeDropDown = [
     {label: 'Spouse', value: 'Spouse'},
@@ -63,7 +79,7 @@ const Edit = ({route, navigation}) => {
       familymembername: memberdata?.App_User_lookup.Name_field,
       familymemberemail: memberdata?.App_User_lookup.Email,
       familymemberphone: memberdata?.App_User_lookup.Phone_Number,
-      familymemberrelation: memberdata?.Relationship_with_the_primary_contact
+      familymemberrelation: memberdata?.Relationship_with_the_primary_contact,
     },
   });
   const vehicleTypeDropDown = [
@@ -77,7 +93,24 @@ const Edit = ({route, navigation}) => {
 
   const [isFocus, setIsFocus] = useState(true);
 
-  const saveDataFromBasicInfo = async (basicInfo) => {
+  const handleCancelByMemberBasicInfo = () => {
+    navigation.navigate('Profile');
+  };
+
+  const handleCancelByBasicInfo = () => {
+    navigation.navigate('MyProfile', {
+      userInfo: [{...userdata}],
+      vehicleInfo: vehicledata,
+      familyMembersData: route.params.family,
+      flatExists: route.params.flat,
+      flat: route.params.flatdata,
+      dapartment: dept,
+      dapartmentExists: deptExists,
+      flatMember: route.params.flatMember,
+    });
+  };
+
+  const saveDataFromBasicInfo = async basicInfo => {
     const updateddata = {
       Name_field: basicInfo.name,
       Phone_Number: basicInfo.phone,
@@ -99,6 +132,12 @@ const Edit = ({route, navigation}) => {
       navigation.navigate('MyProfile', {
         userInfo: [{...userdata, ...updateddata}],
         vehicleInfo: vehicledata,
+        familyMembersData: route.params.family,
+        flatExists: route.params.flat,
+        flat: route.params.flatdata,
+        dapartment: dept,
+        dapartmentExists: deptExists,
+        flatMember: route.params.flatMember,
       });
     } else {
       Alert.alert('Error code', resFromUserUpdate.code);
@@ -134,54 +173,104 @@ const Edit = ({route, navigation}) => {
       navigation.navigate('MyProfile', {
         userInfo: [{...userdata}],
         vehicleInfo: vehicledata,
+        familyMembersData: route.params.family,
+        flatExists: route.params.flat,
+        flat: route.params.flatdata,
+        dapartment: dept,
+        dapartmentExists: deptExists,
+        flatMember: route.params.flatMember,
       });
     } else {
       Alert.alert('Error code', resFromUserUpdate.code);
     }
   };
 
-  const saveDataFromFamilyMemberBasicInfo = async(memberInfo) => {
-
+  const saveDataFromFamilyMemberBasicInfo = async memberInfo => {
     const sendUpdateddata = {
-      App_User_lookup:{
+      App_User_lookup: {
         Name_field: memberInfo.familymembername,
         Phone_Number: memberInfo.familymemberphone,
-        Email:memberInfo.familymemberemail,
+        Email: memberInfo.familymemberemail,
         Gender: memSelectedGender,
-      }
+        ID: memberdata?.App_User_lookup.ID,
+      },
+      Relationship_with_the_primary_contact: memberInfo?.familymemberrelation,
+      ID: memberdata?.ID,
     };
 
-    console.log(memberdata.App_User_lookup.ID)
+    console.log(memberdata?.App_User_lookup.ID);
     const user = {
-      criteria: `ID==${memberdata.App_User_lookup.ID}`,
+      criteria: `ID==${memberdata?.App_User_lookup.ID}`,
       data: {
-        Name_field: memberInfo.familymembername,
-        Phone_Number: memberInfo.familymemberphone,
+        Name_field: memberInfo?.familymembername,
+        Phone_Number: memberInfo?.familymemberphone,
         Gender: memSelectedGender,
-      }
+      },
+    };
+    console.log(user);
+
+    console.log(memberdata?.ID);
+
+    const relationUpdate = {
+      criteria: `ID==${memberdata?.ID}`,
+      data: {
+        Relationship_with_the_primary_contact: memberInfo?.familymemberrelation,
+      },
     };
 
+    console.log(relationUpdate);
+    console.log(getAccessToken());
 
-    console.log(user)
+    const resFromRelation = await patchDataWithInt(
+      'All_Residents',
+      relationUpdate,
+      getAccessToken(),
+    );
+    console.log('resFromRelation: ', resFromRelation);
 
-    const resFromMemberUpdate = await patchDataWithInt('All_App_Users',user,getAccessToken());
-    console.log(getAccessToken())
+    const resFromMemberUpdate = await patchDataWithInt(
+      'All_App_Users',
+      user,
+      getAccessToken(),
+    );
+    console.log(getAccessToken());
 
-    console.log("resFromMemUpdate: ",resFromMemberUpdate)
+    console.log('resFromMemUpdate: ', resFromMemberUpdate);
+    console.log('route.params?.membersData: ', route.params?.membersData);
 
-     if (resFromMemberUpdate.result[0].message ===  "Data Updated Successfully") {
-      navigation.navigate('FamilyMemberVerifyDetails', {memberDetails:{...sendUpdateddata}});
+    if (
+      resFromMemberUpdate &&
+      resFromMemberUpdate.result[0].message === 'Data Updated Successfully' &&
+      resFromRelation &&
+      resFromRelation.result[0].message === 'Data Updated Successfully'
+    ) {
+      const membersData = route.params?.membersData;
+
+      // const index = membersData.findIndex(obj => obj.ID === memberdata?.ID);
+
+      // if (index === -1) {
+      //   membersData[index] = {}
+      // }
+      navigation.navigate('Profile', {
+        userInfo: route.params.user,
+        vehicleInfo: route.params.vehicle,
+        familyMembersData: route.params.family,
+        flatExists: route.params.flat,
+        flat: route.params.flatdata,
+        dapartment: dept,
+        dapartmentExists: deptExists,
+      });
     } else {
       Alert.alert('Error code', resFromMemberUpdate.code);
     }
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.main}>
+    <ScrollView style={styles.container}>
+      <View style={styles.infoContainer}>
         {formType === 'BasicInfo' ? (
-          <>
-            <Text style={styles.title}>Basic Information</Text>
+          <View>
+            <Text style={styles.title}>Personal Info</Text>
             <View style={styles.field}>
               <Text style={styles.label}>
                 Name <Text style={{color: 'red'}}>*</Text>
@@ -291,112 +380,140 @@ const Edit = ({route, navigation}) => {
               )}
             </View>
 
-            <TouchableOpacity
+            {/* <TouchableOpacity
               style={styles.register}
               onPress={handleSubmit(saveDataFromBasicInfo)}>
               <Text style={styles.registerTitle}>Save</Text>
-            </TouchableOpacity>
-          </>
-        ) : formType === 'VehicleInfo' ? (
-          <>
-            <View style={styles.head}>
-              <Text style={styles.title}>Vehicle Information</Text>
+            </TouchableOpacity> */}
+
+            <View style={styles.footer}>
               <TouchableOpacity
-                onPress={() => navigation.navigate('AddData')}
-                style={styles.add}>
+                onPress={handleSubmit(saveDataFromBasicInfo)}
+                style={styles.submit}>
+                <Text style={styles.buttonText}>Submit</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={handleCancelByBasicInfo}
+                style={styles.Cancel}>
+                <Text style={styles.buttonText1}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        ) : formType === 'VehicleInfo' ? (
+          <View>
+            <View style={styles.head}>
+              <Text style={styles.title}>Vehicle Info</Text>
+              <TouchableOpacity
+                onPress={() =>
+                  navigation.navigate('AddData', {
+                    formType: 'VehicleInfo',
+                    userdata: userdata,
+                    vehicledata: vehicledata,
+                    family: route.params?.familyMembersData,
+                    flat: route.params.flatExists,
+                  })
+                }
+                style={styles.edit}>
                 <Image
                   source={require('../assets/add.png')}
-                  style={{width: 30, height: 30}}
-                />
-                <Text
                   style={{
-                    color: 'blue',
-                    fontWeight: 'bold',
-                    alignSelf: 'center',
-                  }}>
-                  Add
-                </Text>
+                    width: 17,
+                    height: 14.432,
+                    marginEnd: 5,
+                    flexShrink: 0,
+                  }}
+                />
+                <Text style={[styles.title, styles.editText]}>Add</Text>
               </TouchableOpacity>
             </View>
             {vehicledata ? (
               vehicledata.map((vehicle, index) => (
-                <View
-                  key={index}
-                  style={{flexDirection: 'row', alignItems: 'center'}}>
-                  <View style={{marginEnd: 15}}>
-                    <Text style={styles.label}>Vehicle Type</Text>
-                    <Controller
-                      name={`vehicleType${index}`} // Use unique key for Controller name
-                      control={control}
-                      defaultValue={vehicle.Vehicle_Type}
-                      render={({field: {onChange, value}}) => (
-                        <Dropdown
-                          style={{
-                            borderColor: 'black',
-                            borderWidth: 1,
-                            borderRadius: 10,
-                            paddingLeft: 10,
-                            backgroundColor: '#F8F4F0',
-                            width: 120,
-                          }}
-                          data={vehicleTypeDropDown}
-                          maxHeight={300}
-                          labelField="label"
-                          valueField="value"
-                          value={value}
-                          onFocus={() => setIsFocus(true)}
-                          onBlur={() => setIsFocus(false)}
-                          onChange={item => {
-                            onChange(item.value); // Update the form value
-                            setIsFocus(false);
-                          }}
-                        />
+                <View style={styles.main} key={index}>
+                  <View
+                    key={index}
+                    style={{
+                      flexDirection: 'row',
+                      marginBottom: 0,
+                    }}>
+                    <View style={{marginEnd: 15}}>
+                      <Text style={styles.label}>Vehicle Type</Text>
+                      <Controller
+                        name={`vehicleType${index}`} // Use unique key for Controller name
+                        control={control}
+                        defaultValue={vehicle.Vehicle_Type}
+                        render={({field: {onChange, value}}) => (
+                          <Dropdown
+                            style={[styles.dropdownVehicle, styles.inputBox]}
+                            data={vehicleTypeDropDown}
+                            maxHeight={300}
+                            labelField="label"
+                            valueField="value"
+                            value={value}
+                            onFocus={() => setIsFocus(true)}
+                            onBlur={() => setIsFocus(false)}
+                            onChange={item => {
+                              onChange(item.value); // Update the form value
+                              setIsFocus(false);
+                            }}
+                          />
+                        )}
+                        rules={{required: true}}
+                      />
+                      {errors[`vehicleType-${index}`] && (
+                        <Text style={styles.textError}>
+                          Vehicle type is required
+                        </Text>
                       )}
-                      rules={{required: true}}
-                    />
-                    {errors[`vehicleType-${index}`] && (
-                      <Text style={styles.textError}>
-                        Vehicle type is required
-                      </Text>
-                    )}
-                  </View>
-                  <View style={styles.field}>
-                    <Text style={styles.label}>Vehicle Number</Text>
-                    <Controller
-                      name={`vehicleNumber${index}`} // Use unique key for Controller name
-                      control={control}
-                      defaultValue={vehicle.Vehicle_Number}
-                      render={({field: {onChange, value}}) => (
-                        <TextInput
-                          style={styles.inputBox}
-                          value={value}
-                          onChangeText={onChange}
-                        />
+                    </View>
+                    <View style={styles.field}>
+                      <Text style={styles.label}>Vehicle Number</Text>
+                      <Controller
+                        name={`vehicleNumber${index}`} // Use unique key for Controller name
+                        control={control}
+                        defaultValue={vehicle.Vehicle_Number}
+                        render={({field: {onChange, value}}) => (
+                          <TextInput
+                            style={[styles.inputBox, styles.dropdownVehicle]}
+                            value={value}
+                            onChangeText={onChange}
+                          />
+                        )}
+                        rules={{required: true}}
+                      />
+                      {errors[`vehicleNumber${index}`] && ( // Corrected error handling for dynamic field names
+                        <Text style={styles.textError}>
+                          Vehicle number is required
+                        </Text>
                       )}
-                      rules={{required: true}}
-                    />
-                    {errors[`vehicleNumber${index}`] && ( // Corrected error handling for dynamic field names
-                      <Text style={styles.textError}>
-                        Vehicle number is required
-                      </Text>
-                    )}
-                  </View>
-                  <TouchableOpacity
+                    </View>
+                    {/* <TouchableOpacity
                     style={styles.registerVehicle}
                     onPress={handleSubmit(
                       data => saveDataFromVehicleInfo(data, vehicle.ID, index), // Passed index correctly to handleSubmit
                     )}>
                     <Text style={styles.registerVehicleTitle}>Save</Text>
-                  </TouchableOpacity>
+                  </TouchableOpacity> */}
+                  </View>
+
+                  <View style={[styles.footer, styles.submitButton]}>
+                    <TouchableOpacity
+                      style={styles.submit}
+                      onPress={handleSubmit(
+                        data =>
+                          saveDataFromVehicleInfo(data, vehicle.ID, index), // Passed index correctly to handleSubmit
+                      )}>
+                      <Text style={styles.buttonText}>Submit</Text>
+                    </TouchableOpacity>
+                  </View>
                 </View>
               ))
             ) : (
               <></>
             )}
-          </>
-        ) : formType === 'MemberBasicInfo' ?(
+          </View>
+        ) : formType === 'MemberBasicInfo' ? (
           <>
-            <Text style={styles.title}>Basic Information</Text>
+            <Text style={styles.title}>Personal Info</Text>
             <View style={styles.field}>
               <Text style={styles.label}>
                 Name <Text style={{color: 'red'}}>*</Text>
@@ -419,45 +536,34 @@ const Edit = ({route, navigation}) => {
             </View>
 
             <View style={styles.field}>
-          <Text style={styles.label}>
-            Relation Type<Text style={{color: 'red'}}>*</Text>
-          </Text>
-          <Controller
-            name="familymemberrelation" // Use unique key for Controller name
-            control={control}
-            render={({field: {onChange, value}}) => (
-              <Dropdown
-                style={{
-                  borderColor: 'black',
-                  borderWidth: 1,
-                  borderRadius: 10,
-                  paddingLeft: 10,
-                  backgroundColor: '#F8F4F0',
-                  borderWidth: 1,
-                  borderColor: 'grey',
-                  paddingHorizontal: 12,
-                  width: '90%',
-                  marginTop: 5,
-                }}
-                data={relationTypeDropDown}
-                maxHeight={300}
-                labelField="label"
-                valueField="value"
-                value={value}
-                onFocus={() => setIsFocus(true)}
-                onBlur={() => setIsFocus(false)}
-                onChange={item => {
-                  onChange(item.value); // Update the form value
-                  setIsFocus(false);
-                }}
+              <Text style={styles.label}>
+                Relation Type <Text style={{color: 'red'}}>*</Text>
+              </Text>
+              <Controller
+                name="familymemberrelation" // Use unique key for Controller name
+                control={control}
+                render={({field: {onChange, value}}) => (
+                  <Dropdown
+                    style={styles.inputBox}
+                    data={relationTypeDropDown}
+                    maxHeight={300}
+                    labelField="label"
+                    valueField="value"
+                    value={value}
+                    onFocus={() => setIsFocus(true)}
+                    onBlur={() => setIsFocus(false)}
+                    onChange={item => {
+                      onChange(item.value); // Update the form value
+                      setIsFocus(false);
+                    }}
+                  />
+                )}
+                rules={{required: true}}
               />
-            )}
-            rules={{required: true}}
-          />
-          {errors['familymemberrelation'] && (
-            <Text style={styles.textError}>Relation type is required</Text>
-          )}
-        </View>
+              {errors['familymemberrelation'] && (
+                <Text style={styles.textError}>Relation type is required</Text>
+              )}
+            </View>
 
             <View style={styles.field}>
               <Text style={styles.label}>
@@ -469,6 +575,7 @@ const Edit = ({route, navigation}) => {
                 render={({field: {onChange, value}}) => (
                   <TextInput
                     style={styles.inputBox}
+                    editable={false}
                     value={value}
                     onChangeText={onChange}
                   />
@@ -501,34 +608,51 @@ const Edit = ({route, navigation}) => {
               <Text style={styles.label}>
                 Gender <Text style={{color: 'red'}}>*</Text>
               </Text>
-                  <View style={styles.radioButtonContainer}>
-                    {gender.map(option => (
-                      <TouchableOpacity
-                        key={option}
-                        style={styles.singleOptionContainer}
-                        onPress={() => {
-                          setMemSelectedGender(option);
-                          onChange(option);
-                        }}
-                      >
-                        <View style={styles.outerCircle}>
-                          {memSelectedGender === option && <View style={styles.innerCircle} />}
-                        </View>
-                        <Text style={{marginLeft: 10}}>{option}</Text>
-                      </TouchableOpacity>
-                    ))}
-                  </View>
+              <View style={styles.radioButtonContainer}>
+                {gender.map(option => (
+                  <TouchableOpacity
+                    key={option}
+                    style={styles.singleOptionContainer}
+                    onPress={() => {
+                      setMemSelectedGender(option);
+                    }}>
+                    <View style={styles.outerCircle}>
+                      {memSelectedGender === option && (
+                        <View style={styles.innerCircle} />
+                      )}
+                    </View>
+                    <Text
+                      style={{
+                        fontFamily: 'Inter',
+                        fontSize: 14,
+                        fontStyle: 'normal',
+                        fontWeight: '400',
+                      }}>
+                      {option}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
             </View>
 
-            <TouchableOpacity style={styles.register} onPress={handleSubmit(saveDataFromFamilyMemberBasicInfo)}>
-              <Text style={styles.registerTitle}>Save</Text>
-            </TouchableOpacity>
+            <View style={styles.footer}>
+              <TouchableOpacity
+                onPress={handleSubmit(saveDataFromFamilyMemberBasicInfo)}
+                style={styles.submit}>
+                <Text style={styles.buttonText}>Submit</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={handleCancelByMemberBasicInfo}
+                style={styles.Cancel}>
+                <Text style={styles.buttonText1}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
           </>
-        ):(
+        ) : (
           <></>
         )}
       </View>
-    </View>
+    </ScrollView>
   );
 };
 
@@ -536,57 +660,57 @@ export default Edit;
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#C19F83',
+    backgroundColor: '#FFF',
     flex: 1,
   },
-  main: {
-    padding: 16,
-    justifyContent: 'center',
-    backgroundColor: 'white',
-    marginStart: 10,
-    marginEnd: 10,
-    marginBottom: 10,
-    borderRadius: 20,
-    ...Platform.select({
-      ios: {
-        shadowOffset: {width: 2, height: 2},
-        shadowColor: '#333',
-        shadowOpacity: 0.3,
-        shadowRadius: 4,
-      },
-      android: {
-        elevation: 8,
-      },
-    }),
+  submitButton: {
+    alignSelf: 'center',
+    marginTop: 4,
+  },
+  infoContainer: {
+    paddingHorizontal: 24,
+    paddingVertical: 40,
+    flexDirection: 'column',
+  },
+  edit: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+  },
+  editText: {
+    color: '#B21E2B',
   },
   label: {
-    fontSize: 15,
+    alignSelf: 'stretch',
+    color: '#2F3036',
+    fontFamily: 'Inter',
+    fontSize: 13,
+    fontStyle: 'normal',
+    fontWeight: '700',
   },
   inputBox: {
+    fontFamily: 'Inter',
+    fontSize: 14,
+    fontStyle: 'normal',
+    fontWeight: '400',
+    marginBottom: 8,
+    borderRadius: 12,
     borderWidth: 1,
-    borderColor: 'grey',
+    borderColor: '#C5C6CC',
     paddingHorizontal: 12,
-    borderRadius: 10,
-    width: '90%',
-    marginTop: 5,
-  },
-  register: {
-    width: '90%',
-    backgroundColor: '#752A26',
-    padding: 12,
-    borderRadius: 30,
-    alignItems: 'center',
-    marginTop: 40,
-  },
-  registerTitle: {
-    fontSize: 16,
-    color: 'white',
-    fontWeight: '600',
   },
   title: {
-    color: 'black',
-    fontWeight: 'bold',
-    fontSize: 25,
+    width: 327,
+    color: '#1F2024',
+    fontFamily: 'Inter',
+    fontSize: 16,
+    fontStyle: 'normal',
+    fontWeight: '900',
+    letterSpacing: 0.08,
+    marginBottom: 24,
+  },
+  dropdownVehicle: {
+    width: '100%',
+    marginEnd: 85,
   },
   registerVehicleTitle: {
     fontSize: 16,
@@ -604,8 +728,7 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
   },
   head: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    // flexDirection:"row"
   },
   add: {
     flexDirection: 'row',
@@ -636,11 +759,85 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#e2e2e2',
+    marginEnd: 8,
   },
   innerCircle: {
     width: 12,
     height: 12,
     borderRadius: 11,
-    backgroundColor: '#752A26',
+    backgroundColor: '#B21E2B',
+  },
+  footer: {
+    flex: 1,
+    width: 340,
+    height: 45,
+    paddingVertical: 20,
+    paddingHorizontal: 0,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 20,
+    marginBottom: 10,
+    gap: 8,
+  },
+  buttonText: {
+    color: 'white',
+    fontSize: 14,
+    fontStyle: 'normal',
+    fontFamily: 'Inter',
+    fontWeight: '700',
+  },
+  buttonText1: {
+    color: '#B21E2B',
+    fontSize: 14,
+    fontStyle: 'normal',
+    fontFamily: 'Inter',
+    fontWeight: '700',
+  },
+  submit: {
+    height: 50,
+    width: 110,
+    backgroundColor: '#B21E2B',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  Cancel: {
+    height: 50,
+    width: 110,
+    borderWidth: 1,
+    borderStyle: 'solid',
+    borderColor: '#B21E2B',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  vehicleSubmit: {
+    width: 80,
+  },
+  main: {
+    padding: 16,
+    justifyContent: 'center',
+    backgroundColor: '#FFF',
+    margin: '3%',
+    width: 310,
+    alignSelf: 'center',
+    borderRadius: 8,
+    flexShrink: 0,
+    ...Platform.select({
+      ios: {
+        shadowOffset: {width: 2, height: 2},
+        shadowColor: '#FFF',
+        shadowOpacity: 0.3,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 5,
+      },
+    }),
   },
 });

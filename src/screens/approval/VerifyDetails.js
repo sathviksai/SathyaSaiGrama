@@ -35,7 +35,7 @@ const VerifyDetails = ({ navigation, route }) => {
   const { user } = route.params;
 
   const [photo, setPhoto] = useState();
-  const { getAccessToken, setDeniedDataFetched, setApproveDataFetched, setPendingDataFetched, setEditData } = useContext(UserContext)
+  const { getAccessToken, setDeniedDataFetched, setApproveDataFetched, setPendingDataFetched, setEditData, loggedUser } = useContext(UserContext)
   setEditData(user);
   const token = getAccessToken()
   const [loading, setLoading] = useState(true);
@@ -333,6 +333,21 @@ const VerifyDetails = ({ navigation, route }) => {
             <Text style={styles.value}>{user.Home_or_Office}</Text>
           </View>
         </View>
+        {
+          user.Referrer_Approval==="APPROVED" && user.L2_Approval_Status=="APPROVED" && loggedUser.role=="L1" ?(
+            <View style={[styles.container, { marginTop: 20, marginBottom: 20 }]}>
+            <View style={styles.left}>
+              <Text style={styles.label}>Generated QR Code</Text>
+            </View>
+            <View style={styles.right}>
+              <TouchableOpacity>
+              <Image source={{uri: user.Generated_QR_Code}} style={{height: 100, width: 100}}/>
+              </TouchableOpacity>
+            </View>
+          </View>
+            
+          ): null
+        }
 
       </ScrollView>
     </SafeAreaView>

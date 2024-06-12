@@ -9,16 +9,26 @@ import {
 import React, {useState} from 'react';
 import {Image} from 'react-native-elements';
 import FamilyMember from './FamilyMember';
+import {getDataWithInt} from '../components/ApiRequest';
 
 const MyProfile = ({route, navigation}) => {
   const userdata = route.params?.userInfo[0];
   const vehicledata = route.params?.vehicleInfo;
   const familyMembersData = route.params?.familyMembersData;
   const [refreshing, setRefreshing] = useState(false);
-  console.log('user data in my: ', userdata);
-  console.log('vehicle data in my: ', vehicledata);
+  console.log(
+    'object: ',
 
-  
+    route.params.flatExists,
+    route.params.flatMember,
+    route.params.flat,
+  );
+  const dept = route.params?.dapartment;
+  const deptExists = route.params?.dapartmentExists;
+  // console.log('user data in my: ', userdata);
+  // console.log('vehicle data in my: ', vehicledata);
+
+  console.log('from ', dept, deptExists);
 
   return (
     <ScrollView style={styles.container}>
@@ -36,17 +46,18 @@ const MyProfile = ({route, navigation}) => {
                 vehicledata: vehicledata,
                 family: route.params?.familyMembersData,
                 flat: route.params.flatExists,
+                flatdata: route.params.flat,
+                departmentName: dept, // Fix typo here
+                departmentNameExists: deptExists, // Fix typo here
+                flatMember: route.params.flatMember,
               })
             }
             style={styles.edit}>
             <Image
               source={require('../assets/Edit.png')}
-              style={{width: 17, height: 14.432,marginEnd:5,flexShrink:0}}
+              style={{width: 17, height: 14.432, marginEnd: 5, flexShrink: 0}}
             />
-            <Text
-              style={[styles.title,styles.editText]}>
-              Edit
-            </Text>
+            <Text style={[styles.title, styles.editText]}>Edit</Text>
           </TouchableOpacity>
         </View>
 
@@ -79,28 +90,27 @@ const MyProfile = ({route, navigation}) => {
                 vehicledata: vehicledata,
                 family: route.params?.familyMembersData,
                 flat: route.params.flatExists,
+                flatdata: route.params.flat,
+                departmentName: dept, // Fix typo here
+                departmentNameExists: deptExists, // Fix typo here
+                flatMember: route.params?.flatMember,
               })
             }
             style={styles.edit}>
             <Image
               source={require('../assets/Edit.png')}
-              style={{width: 17, height: 14.432,marginEnd:5,flexShrink:0}}
+              style={{width: 17, height: 14.432, marginEnd: 5, flexShrink: 0}}
             />
-            <Text
-              style={[styles.title,styles.editText]}>
-              Edit
-            </Text>
+            <Text style={[styles.title, styles.editText]}>Edit</Text>
           </TouchableOpacity>
         </View>
         <View style={styles.sp}></View>
 
         {vehicledata ? (
           vehicledata.map((vehicle, index) => (
-            <View
-              key={index}
-              style={styles.input}>
-                <Text style={styles.label}>{vehicle.Vehicle_Type}:</Text>
-                <Text style={styles.value}>{vehicle.Vehicle_Number}</Text>
+            <View key={index} style={styles.input}>
+              <Text style={styles.label}>{vehicle.Vehicle_Type}:</Text>
+              <Text style={styles.value}>{vehicle.Vehicle_Number}</Text>
             </View>
           ))
         ) : (
@@ -109,25 +119,34 @@ const MyProfile = ({route, navigation}) => {
       </View>
 
       {route.params.flatExists ? (
-        <TouchableOpacity activeOpacity={0.8} onPress={()=>navigation.navigate("FlatMembers",{membersInfo:familyMembersData})}> 
-          <View style={styles.main}>
+        <TouchableOpacity
+          style={styles.main}
+          activeOpacity={0.6}
+          onPress={() =>
+            navigation.navigate('FlatMembers', {membersInfo: familyMembersData})
+          }>
+          <View>
             <View style={styles.head}>
               <Text style={styles.title}>Flat Members</Text>
               <TouchableOpacity
                 onPress={() =>
                   navigation.navigate('AddData', {
-                    user: route.params?.userInfo,
+                    formType: 'FlatMember',
+                    user: userdata,
                     vehicle: route.params.vehicleInfo,
                     family: route.params?.familyMembersData,
                     flat: route.params.flatExists,
+                    flatdata: route.params.flat,
+                    department: dept,
+                    departmentExists: deptExists,
                   })
                 }
                 style={styles.edit}>
                 <Image
                   source={require('../assets/add.png')}
-                  style={{width: 14, height: 14, marginEnd:5,flexShrink:0}}
+                  style={{width: 14, height: 14, marginEnd: 5, flexShrink: 0}}
                 />
-                <Text style={[styles.title,styles.editText]}>Add</Text>
+                <Text style={[styles.title, styles.editText]}>Add</Text>
               </TouchableOpacity>
             </View>
 
@@ -137,12 +156,14 @@ const MyProfile = ({route, navigation}) => {
               //   member={memberInfo}
               //   navigation={navigation}
               // />
-              <View
-              key={index}
-              style={[styles.input]}>
-                <Text style={[styles.label]}>{memberInfo.Relationship_with_the_primary_contact}:</Text>
-                <Text style={[styles.value]}>{memberInfo.App_User_lookup.Name_field}</Text>
-            </View>
+              <View key={index} style={[styles.input]}>
+                <Text style={[styles.label]}>
+                  {memberInfo.Relationship_with_the_primary_contact}:
+                </Text>
+                <Text style={[styles.value]}>
+                  {memberInfo.App_User_lookup.Name_field}
+                </Text>
+              </View>
             ))}
             {/* {familyMembersData?(
                <FlatList
@@ -162,9 +183,47 @@ const MyProfile = ({route, navigation}) => {
             ):(
               <></>
             )} */}
-           
           </View>
         </TouchableOpacity>
+      ) : (
+        <></>
+      )}
+
+      {(route.params?.flatExists || route.params?.flatMember) && deptExists ? (
+        <View style={styles.main}>
+          <Text style={styles.title}>Office & Flat Info</Text>
+
+          <View style={styles.input}>
+            <Text style={styles.label}>Flat:</Text>
+            <Text style={styles.value}>
+              {route.params.flat.building}-{route.params.flat.flat}
+            </Text>
+          </View>
+          <View style={styles.input}>
+            <Text style={styles.label}>Department:</Text>
+            <Text style={styles.value}>{route.params.dapartment}</Text>
+          </View>
+        </View>
+      ) : route.params?.flatExists || route.params?.flatMember ? (
+        <View style={styles.main}>
+          <Text style={styles.title}>Flat Info</Text>
+
+          <View style={styles.input}>
+            <Text style={styles.label}>Flat:</Text>
+            <Text style={styles.value}>
+              {route.params.flat.building}-{route.params.flat.flat}
+            </Text>
+          </View>
+        </View>
+      ) : deptExists ? (
+        <View style={styles.main}>
+          <Text style={styles.title}>Department Info</Text>
+
+          <View style={styles.input}>
+            <Text style={styles.label}>Department:</Text>
+            <Text style={styles.value}>{route.params.dapartment}</Text>
+          </View>
+        </View>
       ) : (
         <></>
       )}
@@ -177,24 +236,24 @@ export default MyProfile;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor:"#FFF"
+    backgroundColor: '#FFF',
   },
-  myprofile:{
+  myprofile: {
     width: 375,
-    height:56,
+    height: 56,
     paddingTop: 19.5,
-    paddingRight:0,
-    justifyContent:"center",
-    alignItems:"center",
-    flexShrink: 0
+    paddingRight: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexShrink: 0,
   },
-  myprofileTitle:{
-    fontFamily: "Inter",
+  myprofileTitle: {
+    fontFamily: 'Inter',
     fontSize: 14,
-    fontStyle: "normal",
-    fontWeight:'800',
-    color: "#1F2024",
-    textAlign: "center"
+    fontStyle: 'normal',
+    fontWeight: '800',
+    color: '#1F2024',
+    textAlign: 'center',
     // lineHeight:"normal"
   },
   main: {
@@ -203,7 +262,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFF',
     margin: '3%',
     borderRadius: 8,
-    flexShrink:0,
+    flexShrink: 0,
     ...Platform.select({
       ios: {
         shadowOffset: {width: 2, height: 2},
@@ -218,11 +277,11 @@ const styles = StyleSheet.create({
   },
   title: {
     color: '#1F2024',
-    fontFamily: "Inter",
-    fontSize:14,
-    fontStyle:"normal",
-    fontWeight:"900",
-    letterSpacing: 0.07
+    fontFamily: 'Inter',
+    fontSize: 14,
+    fontStyle: 'normal',
+    fontWeight: '900',
+    letterSpacing: 0.07,
   },
   head: {
     flexDirection: 'row',
@@ -232,27 +291,27 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'baseline',
   },
-  editText:{
-    color:"#B21E2B"
+  editText: {
+    color: '#B21E2B',
   },
-  input:{
-    flexDirection:"row",
+  input: {
+    flexDirection: 'row',
     margin: 5,
-    marginStart:"5%"
+    marginStart: '5%',
   },
   label: {
-    marginEnd:10,
-    color:"#1F2024",
+    marginEnd: 10,
+    color: '#1F2024',
     fontSize: 14,
-    fontStyle:"normal",
-    fontWeight:"400",
-    letterSpacing: 0.25
+    fontStyle: 'normal',
+    fontWeight: '400',
+    letterSpacing: 0.25,
   },
   value: {
-    color:"#1F2024",
+    color: '#1F2024',
     fontSize: 14,
-    fontStyle:"normal",
-    fontWeight:"400",
-    letterSpacing: 0.25
+    fontStyle: 'normal',
+    fontWeight: '400',
+    letterSpacing: 0.25,
   },
 });

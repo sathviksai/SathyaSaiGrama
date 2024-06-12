@@ -13,7 +13,7 @@ const SplashScreen = () => {
       <Image
         style={{width: '75%'}}
         resizeMode="contain"
-        source={require('../../src/assets/image.png')}
+        source={require('../../src/assets/SSG_OWOF.png')}
       />
     </View>
   );

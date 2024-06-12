@@ -25,6 +25,7 @@ import RNRestart from 'react-native-restart';
 import L2ApprovalTab from '../../src/screens/L2-approval/L2ApprovalTab';
 import ViewDetails from '../../src/screens/L2-approval/ViewDetails';
 import FlatMembers from '../../src/screens/FlatMembers';
+import Feedback from '../../src/screens/Feedback';
 
 const Tab = createBottomTabNavigator();
 const InviteStack = createNativeStackNavigator();
@@ -66,39 +67,43 @@ function InviteStackScreen() {
 }
 
 function ProfileStackScreen() {
-    return (
-        <ProfileStack.Navigator screenOptions={{ headerShown: false }}>
-            <ProfileStack.Screen name="Profile" component={Profile} />
-            <ProfileStack.Screen
-                name="MyProfile"
-                component={MyProfile}
-            />
-            <ProfileStack.Screen
-                name="Notifications"
-                component={Notifications}
-            />
-            <ProfileStack.Screen
-                name="Settings"
-                component={Settings}
-            />
-            <ProfileStack.Screen
-                name="Edit"
-                component={Edit}
-            />
-            <ProfileStack.Screen
-                name="AddData"
-                component={AddData}
-            />
-            <ProfileStack.Screen
-                name="FamilyMemberVerifyDetails"
-                component={FamilyMemberVerifyDetails}
-            />
-                        <ProfileStack.Screen
-                name="FlatMembers"
-                component={FlatMembers}
-            />
-        </ProfileStack.Navigator>
-    );
+  return (
+    <ProfileStack.Navigator screenOptions={{ headerShown: false }}>
+    <ProfileStack.Screen name="Profile" component={Profile} />
+      <ProfileStack.Screen
+        name="MyProfile"
+        component={MyProfile} 
+      />
+      <ProfileStack.Screen
+        name="Notifications"
+        component={Notifications}
+      />
+      <ProfileStack.Screen
+        name="Settings"
+        component={Settings}
+      />
+      <ProfileStack.Screen
+        name="Edit"
+        component={Edit}
+      />
+      <ProfileStack.Screen
+        name="AddData"
+        component={AddData}
+      />
+      <ProfileStack.Screen
+        name="FamilyMemberVerifyDetails"
+        component={FamilyMemberVerifyDetails}
+      />
+      <ProfileStack.Screen
+        name="Feedback"
+        component={Feedback}
+      />
+      <ProfileStack.Screen
+        name="FlatMembers"
+        component={FlatMembers}
+      />
+    </ProfileStack.Navigator>
+  );
 }
 
 
