@@ -1,5 +1,5 @@
 import React, { useEffect, useContext, useState } from 'react';
-import { View, Text, Button, StyleSheet, Alert, TouchableOpacity } from 'react-native';
+import { View, Text, Button, StyleSheet, Alert, TouchableOpacity, Image } from 'react-native';
 import { auth } from './firebaseConfig';
 import { sendEmailVerification } from 'firebase/auth';
 import UserContext from '../../context/UserContext';
@@ -90,41 +90,133 @@ const VerificationNotice = ({ route, navigation }) => {
 
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.text}>
-        A verification email has been sent to your email address. Please verify your email to proceed.
+<View
+      style={{
+        flex: 1,
+        alignItems: 'center',
+
+        backgroundColor: 'white',
+      }}>
+      <Image
+        style={{width: '20%', marginTop: 150}}
+        resizeMode="contain"
+        source={require('../../src/assets/imagekey.png')}
+      />
+      <Text
+        style={{
+          width: 256,
+          height: 44,
+          color: '#1F2024',
+          textAlign: 'center',
+          fontFamily: 'Inter',
+          fontSize: 18,
+          fontWeight: '900',
+          letterSpacing: 0.09,
+        }}>
+        We have sent you an email
       </Text>
-      <TouchableOpacity onPress={handleResendVerification} style={styles.register}>
-        <Text style={styles.registerTitle}>RESEND VERIFICATION EMAIL</Text>
+      <Text
+        style={{
+          width: 220,
+          color: '#71727A',
+          textAlign: 'center',
+          fontFamily: 'Inter',
+          fontSize: 14,
+          fontWeight: '400',
+          lineHeight: 20,
+        }}>
+        Click on the email verification link sent to you on userinfor@gmail.com
+      </Text>
+      <TouchableOpacity
+        style={[styles.register, styles.register1]}
+        onPress={() => navigation.navigate('FillByYourSelf')}>
+        <Text style={[styles.registerTitle, {color: 'white'}]}>
+          Open Email App
+        </Text>
       </TouchableOpacity>
+
+      <View style={styles.redirect}>
+        <Text
+          style={{
+            width: 154,
+            color: '#71727A',
+            textAlign: 'center',
+            marginEnd: 1,
+            fontFamily: 'Inter',
+            fontSize: 12,
+            flexShrink: 0,
+            fontStyle: 'normal',
+            fontWeight: '600',
+            letterSpacing: 0.12,
+          }}>
+          Didn't receive the Email?
+        </Text>
+        <TouchableOpacity onPress={handleResendVerification}>
+          <Text
+            style={{
+              color: '#B21E2B',
+              width: 124,
+              fontFamily: 'Inter',
+              fontSize: 12,
+              flexShrink: 0,
+              fontStyle: 'normal',
+              fontWeight: '600',
+              letterSpacing: 0.12,
+            }}>
+            Click to Resend
+          </Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 16,
-  },
-  text: {
-    fontSize: 16,
-    textAlign: 'center',
-    marginBottom: 20,
-  },
   register: {
-    width: '90%',
-    backgroundColor: '#752A26',
-    padding: 12,
-    borderRadius: 30,
-    alignItems: 'center',
-    marginTop: 40,
+    width: 211,
+    height: 55,
+    backgroundColor: '#B21E2B',
+    paddingTop: 12,
+    paddingBottom: 12,
+    paddingLeft: 16,
+    paddingRight: 16,
+    borderRadius: 12,
+    gap: 8,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: {width: 0, height: 4},
+        shadowOpacity: 0.25,
+        shadowRadius: 5,
+      },
+      android: {
+        elevation: 5,
+      },
+    }),
+  },
+  redirect: {
+    flexDirection: 'row',
+    marginTop: 20,
+    marginBottom: 10,
+    justifyContent: 'center',
+    paddingLeft: 40,
+  },
+  register1: {
+    backgroundColor: '#B21E2B',
+    margin: 35,
+  },
+  register2: {
+    backgroundColor: '#ffbe65',
+    marginLeft: 35,
+    marginBottom: 30,
   },
   registerTitle: {
-    fontSize: 16,
-    color: 'white',
+    fontSize: 15,
+    fontFamily: 'Inter',
+    fontStyle: 'normal',
     fontWeight: '600',
+    textAlign: 'center',
+    lineHeight: 26,
   },
 });
 

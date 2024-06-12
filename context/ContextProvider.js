@@ -16,6 +16,7 @@ function ContextProvider({ children }) {
   const [L2DeniedDataFetched, setL2DeniedDataFetched] = useState(false)
   const [userType, setUserType] = useState(null)
   const [loggedUser, setLoggedUser] = useState(null)
+  const [deviceToken, setDeviceToken] = useState(null)
   //let accessToken = ""
   const [accessToken, setAccessToken] = useState(""); // Use state for accessToken
 
@@ -38,7 +39,8 @@ function ContextProvider({ children }) {
       L2PendingDataFetched, setL2PendingDataFetched,
       L2ApproveDataFetched, setL2ApproveDataFetched,
       L2DeniedDataFetched, setL2DeniedDataFetched,
-      editData, setEditData
+      editData, setEditData,
+      deviceToken, setDeviceToken
      }}>
       {children}
     </UserContext.Provider>

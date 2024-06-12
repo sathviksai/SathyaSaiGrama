@@ -1,26 +1,65 @@
-import { StyleSheet, Text, View,TouchableOpacity,Alert,Modal,Image,TextInput } from 'react-native'
-import React, { useContext,useState } from 'react'
-import {auth} from '../auth/firebaseConfig';
-import {signOut,
+import {
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  Alert,
+  Modal,
+  Image,
+  TextInput,
+  ActivityIndicator,
+  TouchableWithoutFeedback,
+} from 'react-native';
+import React, { useContext, useState } from 'react';
+import { auth } from '../auth/firebaseConfig';
+// import ImagePicker from 'react-native-image-crop-picker';
+import {
+  signOut,
   deleteUser,
   reauthenticateWithCredential,
-  EmailAuthProvider, } from "firebase/auth";
+  EmailAuthProvider,
+} from 'firebase/auth';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import UserContext from '../../context/UserContext';
-import { getDataWithInt, getDataWithString, getDataWithStringAndInt, getDataWithoutStringAndWithInt } from '../components/ApiRequest';
+import {
+  getDataWithInt,
+  getDataWithString,
+  getDataWithStringAndInt,
+  getDataWithoutStringAndWithInt,
+} from '../components/ApiRequest';
+import { useForm, Controller } from 'react-hook-form';
 import { AuthContext } from '../auth/AuthProvider';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import RNRestart from 'react-native-restart';
 
-const Profile = ({navigation}) => {
-  const { getAccessToken,userEmail,L1ID } = useContext(UserContext)
-  const {user, setUser} = useContext(AuthContext);
+const Profile = ({ navigation }) => {
+  const { getAccessToken, userEmail, L1ID } = useContext(UserContext);
+  const { user, setUser } = useContext(AuthContext);
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
+  const [profileImageModalVisible, setProfileImageModalVisible] =
+    useState(false);
+  const [loading, setLoading] = useState(false);
+  const [focusedInput, setFocusedInput] = useState(null);
+  const [showPassword, setShowPassword] = useState(false);
 
-  const handleDeleteAccount = async () => {
+  const handleModal = () => {
+    setModalVisible(!modalVisible);
+  };
+
+  const handleProfileModal = () => {
+    setProfileImageModalVisible(!profileImageModalVisible);
+  };
+
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
+
+  const handleDeleteAccount = async (email, password) => {
     const credential = EmailAuthProvider.credential(email, password);
 
     try {
@@ -40,6 +79,11 @@ const Profile = ({navigation}) => {
     }
   };
 
+  const onDelete = async userCred => {
+    setModalVisible(!modalVisible);
+    console.log(userCred);
+    await handleDeleteAccount(userCred.email, userCred.password);
+  };
 
   const onLogout = () => {
     signOut(auth)
@@ -55,213 +99,583 @@ const Profile = ({navigation}) => {
       });
   };
 
-  const toMyprofile = async() =>{
-    console.log("Email from context: ",userEmail)
-    console.log(getAccessToken())
-    const resFromUser= await getDataWithString('All_App_Users', 'Email', userEmail,getAccessToken());
-    const resFromVehicleInfo= await getDataWithInt('All_Vehicle_Information', 'App_User_lookup', L1ID,getAccessToken());
-    const resFromFlat = await getDataWithInt("All_Flats","Primary_Contact_app_user_lookup",L1ID,getAccessToken())
-    console.log("from the profile: ",resFromFlat)
+  const changeProfile = () => {
+    setProfileImageModalVisible(!profileImageModalVisible);
+  };
+
+  // const onCamera = () => {
+  //   ImagePicker.openCamera({
+  //     width: 300,
+  //     height: 400,
+  //     cropping: true,
+  //   }).then(image => {
+  //     console.log(image);
+  //   });
+  // };
+
+  // const onGallery = () => {
+  //   ImagePicker.openPicker({
+  //     width: 300,
+  //     height: 400,
+  //     cropping: true,
+  //   }).then(image => {
+  //     console.log(image);
+  //   });
+  // };
+
+  const toMyprofile = async () => {
+    setLoading(true);
+    console.log('Email from context: ', userEmail);
+    console.log(getAccessToken());
+    const resFromUser = await getDataWithString(
+      'All_App_Users',
+      'Email',
+      userEmail,
+      getAccessToken(),
+    );
+    const resFromVehicleInfo = await getDataWithInt(
+      'All_Vehicle_Information',
+      'App_User_lookup',
+      L1ID,
+      getAccessToken(),
+    );
+
+    const resFromFlat = await getDataWithInt(
+      'All_Flats',
+      'Primary_Contact_app_user_lookup',
+      L1ID,
+      getAccessToken(),
+    );
+
+    const resFromEmployee = await getDataWithInt(
+      'All_Employees',
+      'App_User_lookup',
+      L1ID,
+      getAccessToken(),
+    );
+    // console.log('resFromFlat: ', resFromFlat);
+
+    if (resFromFlat.data) {
+      const resFromFamilyMember = await getDataWithoutStringAndWithInt(
+        'All_Residents',
+        'Relationship_with_the_primary_contact',
+        'Self',
+        'Flats_lookup',
+        resFromFlat.data[0].ID,
+        getAccessToken(),
+      );
+      console.log('resfromfamilyrelation: ', resFromFamilyMember.data);
+      if (resFromFamilyMember.data) {
+        setLoading(false);
+        if (resFromEmployee.data)
+          navigation.navigate('MyProfile', {
+            userInfo: resFromUser.data,
+            vehicleInfo: resFromVehicleInfo.data,
+            flatExists: true,
+            flat: {
+              building: resFromFlat.data[0].Building,
+              flat: resFromFlat.data[0].Flat,
+            },
+            familyMembersData: resFromFamilyMember.data,
+            flatid: resFromFlat.data[0].ID,
+            dapartmentExists: true,
+            dapartment: resFromEmployee.data[0].Office_lookup.Department,
+          });
+        else
+          navigation.navigate('MyProfile', {
+            userInfo: resFromUser.data,
+            vehicleInfo: resFromVehicleInfo.data,
+            flatExists: true,
+            flat: {
+              building: resFromFlat.data[0].Building,
+              flat: resFromFlat.data[0].Flat,
+            },
+            familyMembersData: resFromFamilyMember.data,
+            flatid: resFromFlat.data[0].ID,
+            dapartmentExists: false,
+          });
+      } else {
+        setLoading(false);
+        if (resFromEmployee.data)
+          navigation.navigate('MyProfile', {
+            userInfo: resFromUser.data,
+            vehicleInfo: resFromVehicleInfo.data,
+            flat: {
+              building: resFromFlat.data[0].Building,
+              flat: resFromFlat.data[0].Flat,
+            },
+            flatExists: true,
+            dapartmentExists: true,
+            dapartment: resFromEmployee.data[0].Office_lookup.Department,
+          });
+        else
+          navigation.navigate('MyProfile', {
+            userInfo: resFromUser.data,
+            vehicleInfo: resFromVehicleInfo.data,
+            flat: {
+              building: resFromFlat.data[0].Building,
+              flat: resFromFlat.data[0].Flat,
+            },
+            flatExists: true,
+            dapartmentExists: false,
+          });
+      }
+    } else {
+      const resFromFamilyMemberRoom = await getDataWithInt(
+        'All_Residents',
+        'App_User_lookup',
+        L1ID,
+        getAccessToken(),
+      );
+      console.log('resfromfamilyrelation: ', resFromFamilyMemberRoom.data);
+      setLoading(false);
     
-    if(resFromFlat.data){
-      const resFromFamilyMember = await getDataWithoutStringAndWithInt("All_Residents","Relationship_with_the_primary_contact","Self","Flats_lookup",resFromFlat.data[0].ID,getAccessToken())
-      console.log("resfromfamilyrelation: ",resFromFamilyMember.data)
-      console.log("resfromfamilyinfo ",resFromFamilyMember.data[0].App_User_lookup)
-      if(resFromFamilyMember.data){
-        navigation.navigate("MyProfile",{userInfo: resFromUser.data,vehicleInfo: resFromVehicleInfo.data,flatExists:true, familyMembersData:resFromFamilyMember.data, flatid: resFromFlat.data[0].ID})
+      if (resFromEmployee.data) {
+        if (resFromFamilyMemberRoom.data) {
+          navigation.navigate('MyProfile', {
+            userInfo: resFromUser.data,
+            vehicleInfo: resFromVehicleInfo.data,
+            flatExists: false,
+            flatMember: true,
+            flat: {
+              building: resFromFamilyMemberRoom.data[0].Flats_lookup.Building,
+              flat: resFromFamilyMemberRoom.data[0].Flats_lookup.Flat,
+            },
+            dapartmentExists: true,
+            dapartment: resFromEmployee.data[0].Office_lookup.Department,
+          });
+        } else {
+          navigation.navigate('MyProfile', {
+            userInfo: resFromUser.data,
+            vehicleInfo: resFromVehicleInfo.data,
+            flatExists: false,
+            dapartmentExists: true,
+            flatMember: false,
+            dapartment: resFromEmployee.data[0].Office_lookup.Department,
+          });
+        }
+      } else {
+        if (resFromFamilyMemberRoom.data) {
+          navigation.navigate('MyProfile', {
+            userInfo: resFromUser.data,
+            vehicleInfo: resFromVehicleInfo.data,
+            flatExists: false,
+            flatMember: true,
+            flat: {
+              building: resFromFamilyMemberRoom.data[0].Flats_lookup.Building,
+              flat: resFromFamilyMemberRoom.data[0].Flats_lookup.Flat,
+            },
+            dapartmentExists: false,
+          });
+        } else {
+          navigation.navigate('MyProfile', {
+            userInfo: resFromUser.data,
+            vehicleInfo: resFromVehicleInfo.data,
+            flatExists: false,
+            dapartmentExists: false,
+          });
+        }
       }
-      else{ 
-        navigation.navigate("MyProfile",{userInfo: resFromUser.data,vehicleInfo: resFromVehicleInfo.data,flatExists:true})
-      }
-    }else{
-      navigation.navigate("MyProfile",{userInfo: resFromUser.data,vehicleInfo: resFromVehicleInfo.data,flatExists:false})
     }
-  }
+  };
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.account}>
-        <Text style={styles.accountTitle}>Account</Text>
-      </View>
-      <View style={styles.topSection}>
-          <Image source={require("../assets/profilePhoto.png")} style={styles.propic} />
-          <Text style={styles.name}>Vivek Kashyap</Text>
-          <View style={styles.imgdel}>
-          <Text style={styles.email}>{userEmail}</Text>
-          <TouchableOpacity activeOpacity={0.9} onPress={() => setModalVisible(true)}>
-          <Image source={require("../assets/delete.png")} style={styles.del}/>
-          </TouchableOpacity>
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#B21E2B" />
+        </View>
+      ) : (
+        <View>
+          <View style={styles.account}>
+            <Text style={styles.accountTitle}>Account</Text>
           </View>
-      </View>
-
-
-      <View style={styles.options}>
-        <TouchableOpacity style={styles.buttonSection} onPress={toMyprofile}>
-          <View style={styles.buttonArea}>
-            <Text style={styles.buttonName}>My Profile</Text>
-            <Image source={require("../assets/RightArrow.png")} style={styles.img}/>
-          </View>
-          {/* <View style={styles.sp}></View> */}
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.buttonSection} onPress={()=>navigation.navigate("Notifications")}>
-        <View style={styles.buttonArea}>
-            <Text style={styles.buttonName}>Notifications</Text>
-            <Image source={require("../assets/RightArrow.png")} style={styles.img}/>
-          </View>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.buttonSection} onPress={()=>navigation.navigate("Feedback")}>
-        <View style={styles.buttonArea}>
-            <Text style={styles.buttonName}>Send Feedback</Text>
-            <Image source={require("../assets/RightArrow.png")} style={styles.img}/>
-          </View>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.buttonSection} onPress={onLogout}>
-        <View style={styles.buttonArea}>
-            <Text style={styles.buttonName}>Logout</Text>
-            <Image source={require("../assets/RightArrow.png")} style={styles.img}/>
-          </View>
-        </TouchableOpacity>
-
-
-        <Modal
-          animationType="slide"
-          transparent={true}
-          visible={modalVisible}
-          onRequestClose={() => {
-            setModalVisible(!modalVisible);
-          }}>
-          <View style={styles.centeredView}>
-            <View style={styles.modalView}>
-              <Text style={styles.modalText}>
-                Enter your credentials to delete you account permanantly
-              </Text>
-              <TextInput
-                placeholder="Email"
-                value={email}
-                onChangeText={setEmail}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                style={styles.input}
+          <View style={styles.topSection}>
+            <View>
+              <Image
+                source={require('../assets/sathya.jpg')}
+                style={styles.propic}
               />
-              <TextInput
-                placeholder="Password"
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry
-                style={styles.input}
-              />
-              <View style={styles.buttonContainer}>
-                <TouchableOpacity
-                  style={[styles.button, styles.buttonDelete]}
-                  onPress={async () => {
-                    setModalVisible(!modalVisible);
-                    await handleDeleteAccount();
-                  }}>
-                  <Text style={styles.textStyle}>Delete</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[styles.button, styles.buttonClose]}
-                  onPress={() => setModalVisible(!modalVisible)}>
-                  <Text style={styles.textStyle}>Cancel</Text>
-                </TouchableOpacity>
-              </View>
+              <TouchableOpacity style={styles.edit} onPress={changeProfile}>
+                <Image
+                  source={require('../assets/Edit.png')}
+                  style={{
+                    width: 17,
+                    height: 14.432,
+                    marginEnd: 5,
+                    flexShrink: 0,
+                    textAlign: 'right',
+                  }}
+                />
+              </TouchableOpacity>
+            </View>
+            <Text style={styles.name}>User name</Text>
+            <View style={styles.imgdel}>
+              <Text style={styles.emailVisible}>{userEmail}</Text>
+              <TouchableOpacity
+                activeOpacity={0.9}
+                onPress={() => setModalVisible(true)}>
+                <Image
+                  source={require('../assets/delete.png')}
+                  style={styles.del}
+                />
+              </TouchableOpacity>
             </View>
           </View>
-        </Modal>
-      </View>
-  </SafeAreaView>
-  )
-}
 
-export default Profile
+          <View style={styles.options}>
+            <TouchableOpacity
+              style={styles.buttonSection}
+              onPress={toMyprofile}>
+              <View style={styles.buttonArea}>
+                <Text style={styles.buttonName}>My Profile</Text>
+                <Image
+                  source={require('../assets/RightArrow.png')}
+                  style={styles.img}
+                />
+              </View>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.buttonSection}
+              onPress={() => navigation.navigate('Notifications')}>
+              <View style={styles.buttonArea}>
+                <Text style={styles.buttonName}>Notifications</Text>
+                <Image
+                  source={require('../assets/RightArrow.png')}
+                  style={styles.img}
+                />
+              </View>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.buttonSection}
+              onPress={() => navigation.navigate('Feedback')}>
+              <View style={styles.buttonArea}>
+                <Text style={styles.buttonName}>Send Feedback</Text>
+                <Image
+                  source={require('../assets/RightArrow.png')}
+                  style={styles.img}
+                />
+              </View>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.buttonSection} onPress={onLogout}>
+              <View style={styles.buttonArea}>
+                <Text style={styles.buttonName}>Logout</Text>
+                <Image
+                  source={require('../assets/RightArrow.png')}
+                  style={styles.img}
+                />
+              </View>
+            </TouchableOpacity>
+          </View>
+
+          {/* <Modal
+            animationType="slide"
+            transparent={true}
+            visible={modalVisible}
+            onRequestClose={() => {
+              setModalVisible(!modalVisible);
+            }}>
+            <View style={styles.centeredView}>
+              <View style={styles.modalView}>
+                <Text style={styles.modalText}>
+                  Enter your credentials to delete your account permanently
+                </Text>
+                <TextInput
+                  placeholder="Email"
+                  value={email}
+                  onChangeText={setEmail}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  style={styles.input}
+                />
+                <TextInput
+                  placeholder="Password"
+                  value={password}
+                  onChangeText={setPassword}
+                  secureTextEntry
+                  style={styles.input}
+                />
+                <View style={styles.buttonContainer}>
+                  <TouchableOpacity
+                    style={[styles.button, styles.buttonDelete]}
+                    onPress={async () => {
+                      setModalVisible(!modalVisible);
+                      await handleDeleteAccount();
+                    }}>
+                    <Text style={styles.textStyle}>Delete</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.button, styles.buttonClose]}
+                    onPress={() => setModalVisible(!modalVisible)}>
+                    <Text style={styles.textStyle}>Cancel</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          </Modal> */}
+
+          <Modal
+            animationType="fade"
+            transparent={true}
+            visible={modalVisible}
+            onRequestClose={() => setModalVisible(!modalVisible)}>
+            <TouchableWithoutFeedback onPress={handleModal}>
+              <View style={styles.centeredView}>
+                <View style={styles.modalView}>
+                  <Text style={styles.shareLink}>
+                    Enter your credentials to delete your account permanently
+                  </Text>
+
+                  <Controller
+                    name="email"
+                    control={control}
+                    render={({ field: { onChange, value } }) => (
+                      <TextInput
+                        placeholder="Email Address"
+                        value={value}
+                        style={[
+                          styles.email,
+                          focusedInput === 'email' && styles.inputFocused,
+                        ]}
+                        selectionColor="#B21E2B"
+                        onFocus={() => setFocusedInput('email')}
+                        onChangeText={onChange}
+                        autoCapitalize="none"
+                      />
+                    )}
+                    rules={{ required: true, pattern: /^\S+@\S+$/i }}
+                  />
+                  {errors.email?.type === 'required' && (
+                    <Text style={styles.textError}>Email is required</Text>
+                  )}
+                  {errors.email?.type === 'pattern' && (
+                    <Text style={styles.textError}>Enter valid email</Text>
+                  )}
+
+                  <View
+                    style={[
+                      styles.passBorder,
+                      focusedInput === 'password' && styles.inputFocused,
+                    ]}>
+                    <Controller
+                      name="password"
+                      control={control}
+                      render={({ field: { onChange, value } }) => (
+                        <TextInput
+                          placeholder="Password"
+                          style={styles.inputBox}
+                          value={value}
+                          selectionColor="#B21E2B"
+                          onFocus={() => setFocusedInput('password')}
+                          secureTextEntry={!showPassword}
+                          onChangeText={onChange}
+                        />
+                      )}
+                      rules={{
+                        required: true,
+                        minLength: 8,
+                        pattern:
+                          /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+                      }}
+                    />
+                    {showPassword === false ? (
+                      <TouchableOpacity
+                        onPress={() => {
+                          setShowPassword(!showPassword);
+                        }}>
+                        <Image
+                          source={require('../assets/eyestrike.png')}
+                          style={{ width: 16, height: 16 }}
+                        />
+                      </TouchableOpacity>
+                    ) : (
+                      <TouchableOpacity
+                        onPress={() => setShowPassword(!showPassword)}>
+                        <Image
+                          source={require('../assets/eye.png')}
+                          style={{ width: 16, height: 16 }}
+                        />
+                      </TouchableOpacity>
+                    )}
+                  </View>
+
+                  {errors.password?.type === 'required' && (
+                    <Text style={styles.textError}>Password is required</Text>
+                  )}
+                  {errors.password?.type === 'minLength' && (
+                    <Text style={styles.textError}>
+                      Password must be 8 characters long
+                    </Text>
+                  )}
+                  {errors.password?.type === 'pattern' && (
+                    <Text style={styles.textError}>
+                      Password must contain at least a uppercase,lowercase,
+                      number and a special character
+                    </Text>
+                  )}
+
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                    }}>
+                    <TouchableOpacity
+                      style={[styles.HomeButton, { backgroundColor: '#B21E2B' }]}
+                      onPress={handleSubmit(onDelete)}>
+                      <Text style={[styles.wewe, styles.wewe1]}>Delete</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[styles.HomeButton, { backgroundColor: '#FFBE65' }]}
+                      onPress={() => setModalVisible(!modalVisible)}>
+                      <Text style={[styles.wewe, styles.wewe2]}>Cancel</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </View>
+            </TouchableWithoutFeedback>
+          </Modal>
+
+          <Modal
+            animationType="fade"
+            transparent={true}
+            visible={profileImageModalVisible}
+            onRequestClose={() =>
+              setProfileImageModalVisible(!profileImageModalVisible)
+            }>
+            <TouchableWithoutFeedback onPress={handleProfileModal}>
+              <View style={styles.centeredView}>
+                <View style={styles.modalView}>
+                  <View style={styles.profileHead}>
+                    <Text style={styles.shareLink}>Profile Photo</Text>
+                    <Image source={require('../assets/delete.png')} />
+                  </View>
+
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                    }}>
+                    <TouchableOpacity
+                      style={[styles.HomeButton, { backgroundColor: '#B21E2B' }]}
+                      >
+                      <Text style={[styles.wewe, styles.wewe1]}>Camera</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[styles.HomeButton, { backgroundColor: '#FFBE65' }]}
+                      >
+                      <Text style={[styles.wewe, styles.wewe2]}>Gallery</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </View>
+            </TouchableWithoutFeedback>
+          </Modal>
+        </View>
+      )}
+    </SafeAreaView>
+  );
+};
+
+export default Profile;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  
   },
-  account:{
+  edit: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+  },
+  profileHead: {
+    flexDirection: 'row',
+    width: '100%',
+    justifyContent: 'space-between',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  account: {
     width: 375,
-    height:56,
+    height: 56,
     paddingTop: 19.5,
-    paddingRight:0,
-    justifyContent:"center",
-    alignItems:"center",
-    flexShrink: 0
+    paddingRight: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexShrink: 0,
   },
-  accountTitle:{
-    fontFamily: "Inter",
+  accountTitle: {
+    fontFamily: 'Inter',
     fontSize: 14,
-    fontStyle: "normal",
-    fontWeight:'800',
-    color: "#1F2024",
-    textAlign: "center"
+    fontStyle: 'normal',
+    fontWeight: '800',
+    color: '#1F2024',
+    textAlign: 'center',
     // lineHeight:"normal"
   },
   propic: {
     width: 81.5,
     height: 82,
-    borderRadius:85,
-    textAlign:"center"
+    borderRadius: 85,
+    textAlign: 'center',
   },
   name: {
     color: '#1F2024',
-    textAlign:"center",
-    fontFamily:"Inter",
-    fontSize:16,
-    fontStyle:"normal",
-    fontWeight:"900",
-    letterSpacing:0.8
+    textAlign: 'center',
+    fontFamily: 'Inter',
+    fontSize: 16,
+    fontStyle: 'normal',
+    fontWeight: '900',
+    letterSpacing: 0.8,
   },
-  email:{
-    color: "#71727A",
-    textAlign:"center",
-    fontFamily:"Inter",
-    fontSize:12,
-    fontStyle:"normal",
-    fontWeight:"400",
-    letterSpacing:0.12,
-    marginEnd:30,
-    marginStart:30,
-    alignSelf:"center"
+  emailVisible: {
+    color: '#71727A',
+    textAlign: 'center',
+    fontFamily: 'Inter',
+    fontSize: 12,
+    fontStyle: 'normal',
+    fontWeight: '400',
+    letterSpacing: 0.12,
+    marginEnd: 30,
+    marginStart: 30,
+    alignSelf: 'center',
   },
-  options:{
-    width:375,
-    paddingTop:44,
-    paddingRight:16,
-    flexDirection:"column",
-    alignItems:"flex-start",
-    gap:2
+  options: {
+    width: 375,
+    paddingTop: 44,
+    paddingRight: 16,
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    gap: 2,
   },
   buttonSection: {
-    padding:15,
-    marginStart:10,
-    marginEnd:10,
-    gap:10,
-    alignSelf:"stretch",
-    borderBottomWidth:0.3,
-    borderBottomColor:"#D4D6DD"
+    padding: 15,
+    marginStart: 10,
+    marginEnd: 10,
+    gap: 10,
+    alignSelf: 'stretch',
+    borderBottomWidth: 0.3,
+    borderBottomColor: '#D4D6DD',
   },
   topSection: {
     justifyContent: 'center',
     alignItems: 'center',
   },
   buttonName: {
-    color:"#1F2024",
-    fontFamily:"Inter",
-    fontSize:14,
-    fontStyle:"normal",
-    fontWeight:"400",
+    color: '#1F2024',
+    fontFamily: 'Inter',
+    fontSize: 14,
+    fontStyle: 'normal',
+    fontWeight: '400',
   },
   buttonArea: {
     flexDirection: 'row',
-     justifyContent:"space-between",
+    justifyContent: 'space-between',
   },
-  img:{
+  img: {
     height: 12,
-    width:12
+    width: 12,
   },
   centeredView: {
     flex: 1,
@@ -269,12 +683,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 22,
   },
-  imgdel:{
-    flexDirection:"row"
+  imgdel: {
+    flexDirection: 'row',
   },
   modalView: {
     margin: 20,
     backgroundColor: 'white',
+    width: '100%',
     borderRadius: 20,
     padding: 35,
     alignItems: 'center',
@@ -308,10 +723,107 @@ const styles = StyleSheet.create({
   buttonDelete: {
     backgroundColor: '#ff0000',
   },
-  // sp:{
-  //   height: 0,
-  //   justifyContent: "center",
-  //   alignItems:"center",
-  //   alignSelf:"stretch"
-  // }
-})
+  inputBox: {
+    color: '#1F2024',
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    paddingEnd: 4,
+    alignItems: 'center',
+    height: 48,
+    width: '90%',
+    fontFamily: 'Inter',
+    fontSize: 14,
+    fontStyle: 'normal',
+    fontWeight: '400',
+  },
+  inputFocused: {
+    borderColor: '#B21E2B',
+  },
+  passBorder: {
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#C5C6CC',
+    gap: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingEnd: 18,
+    height: 48,
+    alignSelf: 'center',
+    marginBottom: 8,
+  },
+  email: {
+    width: 250,
+    marginTop: 10,
+    fontFamily: 'Inter',
+    fontSize: 14,
+    fontStyle: 'normal',
+    fontWeight: '400',
+    marginBottom: 8,
+    color: '#1F2024',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#C5C6CC',
+    paddingHorizontal: 12,
+  },
+  textError: {
+    color: 'red',
+    fontSize: 12,
+    marginBottom: 16,
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 35,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 30,
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.75)',
+  },
+  shareLink: {
+    color: '#1F2024',
+    textAlign: 'center',
+    fontFamily: 'Inter',
+    fontSize: 16,
+    fontStyle: 'normal',
+    fontWeight: '900',
+    letterSpacing: 0.08,
+    height: 41,
+    alignSelf: 'stretch',
+  },
+  wewe: {
+    fontFamily: 'Inter',
+    fontSize: 14,
+    fontStyle: 'normal',
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  wewe1: {
+    color: '#fff',
+  },
+  wewe2: {
+    color: '#B21E2B',
+  },
+  HomeButton: {
+    height: 50,
+    width: 120,
+    backgroundColor: '#752A26',
+    paddingTop: 12,
+    paddingBottom: 12,
+    borderRadius: 12,
+    marginTop: 20,
+    marginLeft: 4,
+    marginRight: 4,
+  },
+});

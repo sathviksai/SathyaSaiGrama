@@ -22,7 +22,7 @@ import SentForApproval from './SentForApproval';
 
 LogBox.ignoreLogs(['Warnings...']);
 LogBox.ignoreAllLogs();
-const FillByYourSelf = () => {
+const FillByYourSelf = ({navigation}) => {
   const [prefix, setPrefix] = useState(' ');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -329,12 +329,11 @@ const FillByYourSelf = () => {
       try {
         const rese = await posttoL1aprroved(empId.data[0].Office_lookup.ID);
         console.log('Response', rese);
-
+        navigation.navigate('Invite');
         setIsSubmitted(false);
       } catch (err) {
         Alert.alert(err);
       }
-      navigation.navigate('Approved');
       // Add form submission logic here
     }
   };

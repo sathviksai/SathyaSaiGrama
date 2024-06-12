@@ -9,6 +9,7 @@ import {
   Image,
   Share,
   Alert,
+  TouchableWithoutFeedback,
 } from 'react-native';
 import UserContext from '../../context/UserContext';
 import {useContext, useEffect, useState} from 'react';
@@ -137,6 +138,7 @@ const Invite = ({navigation}) => {
 
     if (id) {
       const shareURL = `https://creatorapp.zohopublic.com/${APP_OWNER_NAME}/${APP_LINK_NAME}/form-perma/Visitor_Information/t253nXrNhjgOHEpBs8EmZMTmpfP1UQejdGPB07QXDWt9NV2SjENZJmXwHJUuPbwFmXpT2Wsm72zAnyXwtZdy8Y4YgBdGyb6mOKee?L1_lookup=${L1ID}&LinkIDLookup=${id}&Home_Office=${selectedOpttion}`;
+      console.log("L1ID:", L1ID, " id:", id, "selected:", selected)
 
       veryshortUrl = await shortUrl(shareURL);
     }
@@ -208,45 +210,49 @@ const Invite = ({navigation}) => {
                 transparent={true}
                 visible={modal}
                 onRequestClose={() => setModal(false)}>
-                <View style={styles.centeredView}>
-                  <View style={styles.modalView}>
-                    <View>
-                      <Text style={styles.shareLink}>
-                        Share link with the visitor
-                      </Text>
-                    </View>
-                    <View>
-                      <Text style={styles.HomeorOffice}>
-                        Are you inviting your visitor to your Home or Office?
-                      </Text>
-                    </View>
-                    <View
-                      style={{
-                        flexDirection: 'row',
-                      }}>
-                      <TouchableOpacity
-                        style={[
-                          styles.HomeButton,
-                          {backgroundColor: '#B21E2B'},
-                        ]}
-                        onPress={() => {
-                          onShare('Home');
+                <TouchableWithoutFeedback onPress={handleModal}>
+                  <View style={styles.centeredView}>
+                    <View style={styles.modalView}>
+                      <View>
+                        <Text style={styles.shareLink}>
+                          Share link with the visitor
+                        </Text>
+                      </View>
+                      <View>
+                        <Text style={styles.HomeorOffice}>
+                          Are you inviting your visitor to your Home or Office?
+                        </Text>
+                      </View>
+                      <View
+                        style={{
+                          flexDirection: 'row',
                         }}>
-                        <Text style={[styles.wewe, styles.wewe1]}>Home</Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        style={[
-                          styles.HomeButton,
-                          {backgroundColor: '#FFBE65'},
-                        ]}
-                        onPress={() => {
-                          onShare('Office');
-                        }}>
-                        <Text style={[styles.wewe, styles.wewe2]}>Office</Text>
-                      </TouchableOpacity>
+                        <TouchableOpacity
+                          style={[
+                            styles.HomeButton,
+                            {backgroundColor: '#B21E2B'},
+                          ]}
+                          onPress={() => {
+                            onShare('Home');
+                          }}>
+                          <Text style={[styles.wewe, styles.wewe1]}>Home</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          style={[
+                            styles.HomeButton,
+                            {backgroundColor: '#FFBE65'},
+                          ]}
+                          onPress={() => {
+                            onShare('Office');
+                          }}>
+                          <Text style={[styles.wewe, styles.wewe2]}>
+                            Office
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
                     </View>
                   </View>
-                </View>
+                </TouchableWithoutFeedback>
               </Modal>
             </View>
             <TouchableOpacity

@@ -5,18 +5,41 @@ import {
   TouchableOpacity,
   TextInput,
 } from 'react-native';
-import React, {useContext, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {Dropdown} from 'react-native-element-dropdown';
 import {useForm, Controller} from 'react-hook-form';
-import { getDataWithInt, postDataWithInt } from '../components/ApiRequest';
+import {getDataWithInt, postDataWithInt} from '../components/ApiRequest';
 import UserContext from '../../context/UserContext';
 
-const AddData = ({navigation}) => {
+const AddData = ({navigation, route}) => {
+  const formType = route.params?.formType;
+  const userdata = route.params?.user;
+  const vehicledata = route.params?.vehicle;
+  const memberdata = route.params?.family;
+  const dept = route.params.department;
+  const deptExist = route.params.departmentExists;
+
+  const {getAccessToken, L1ID} = useContext(UserContext);
+
+  console.log('object: ', dept, deptExist);
+
   const {
     control,
     handleSubmit,
     formState: {errors},
   } = useForm();
+
+  const flatexist = route.params.flat;
+  const flatdata = route.params.flatdata;
+
+  const vehicleTypeDropDown = [
+    {label: '2-wheeler', value: '2-wheeler'},
+    {label: 'Car', value: 'Car'},
+    {label: 'Bus', value: 'Bus'},
+    {label: 'Taxi', value: 'Taxi'},
+    {label: 'School Bus', value: 'School Bus'},
+    {label: 'Police Van', value: 'Police Van'},
+  ];
 
   const relationTypeDropDown = [
     {label: 'Spouse', value: 'Spouse'},
@@ -43,205 +66,342 @@ const AddData = ({navigation}) => {
   ];
 
   const [isFocus, setIsFocus] = useState(true);
-  const { getAccessToken,L1ID } = useContext(UserContext)
 
   const gender = ['Male', 'Female'];
   const [selectedGender, setSelectedGender] = useState('');
 
-  const saveMemberData = async(memeberdata) => {
-    console.log(memeberdata)
-    const user ={
-      data:{
+  const saveDataFromVehicle = async vehicledata => {
+    console.log(vehicledata);
+    const vehicle = {
+      data: {
+        App_User_lookup: L1ID,
+        Vehicle_Type: vehicledata.vehicleType,
+        Vehicle_Number: vehicledata.vehicleNumber,
+      },
+    };
+
+    const resFromVehicle = await postDataWithInt(
+      'Vehicle_Information',
+      vehicle,
+      getAccessToken(),
+    );
+
+    if (resFromVehicle.message === 'Data Added Successfully') {
+      navigation.navigate('Profile', {
+        userInfo: route.params.user,
+        vehicleInfo: route.params.vehicle,
+        familyMembersData: route.params.family,
+        flatExists: flatexist,
+        flat: flatdata,
+        dapartment: dept,
+        dapartmentExists: deptExist,
+      });
+    }
+  };
+
+  const handleCancelByMemeberInfo = () => {
+    navigation.navigate('MyProfile', {
+      userInfo: [{...userdata}],
+      vehicleInfo: vehicledata,
+      familyMembersData: route.params.family,
+      flatExists: flatexist,
+      flat: flatdata,
+      dapartment: dept,
+      dapartmentExists: deptExist,
+    });
+  };
+
+  const saveMemberData = async memeberdata => {
+    console.log(memeberdata);
+    const user = {
+      data: {
         Name_field: memeberdata.name,
         Email: memeberdata.email,
         Phone_Number: memeberdata.phone,
         Secondary_Phone: memeberdata.secondary_phone,
-        Gender: memeberdata.gender
+        Gender: memeberdata.gender,
+      },
+    };
+    console.log(user);
+    const resFromAppUser = await postDataWithInt(
+      'App_User',
+      user,
+      getAccessToken(),
+    );
+    console.log('resFromAppUser: ', resFromAppUser);
+    if (resFromAppUser.message === 'Data Added Successfully') {
+      const resFromFlat = await getDataWithInt(
+        'All_Flats',
+        'Primary_Contact_app_user_lookup',
+        L1ID,
+        getAccessToken(),
+      );
+      console.log(resFromFlat);
+      if (resFromFlat && resFromFlat.data) {
+        const residenceinfo = {
+          data: {
+            App_User_lookup: resFromAppUser.data.ID,
+            Flats_lookup: resFromFlat.data[0].ID,
+            Accommodation_Approval: 'PENDING APPROVAL',
+            Relationship_with_the_primary_contact: memeberdata.relation,
+          },
+        };
+        console.log(residenceinfo);
+        const resFromResident = await postDataWithInt(
+          'Resident',
+          residenceinfo,
+          getAccessToken(),
+        );
+        if (resFromResident.message === 'Data Added Successfully') {
+          navigation.navigate('Profile', {
+            userInfo: route.params.user,
+            vehicleInfo: route.params.vehicle,
+            familyMembersData: route.params.family,
+            flatExists: route.params.flat,
+          });
+        }
       }
-    }
-    console.log(user)
-    const resFromAppUser = await postDataWithInt("App_User",user,getAccessToken())
-    console.log(resFromAppUser)
-    if(resFromAppUser.message === "Data Added Successfully"){
-       const resFromFlat = await getDataWithInt("All_Flats","Primary_Contact_app_user_lookup",L1ID,getAccessToken())
-       console.log(resFromFlat)
-       if(resFromFlat.data){
-          const residenceinfo = {
-            data:{
-              App_User_lookup: L1ID,
-              Flats_lookup: resFromFlat.data[0].ID,
-              Accommodation_Approval: "PENDING APPROVAL",
-              Relationship_with_the_primary_contact: memeberdata.relation
-            }
-          }
-          console.log(residenceinfo)
-          const resFromResident = await postDataWithInt("Resident",residenceinfo,getAccessToken())
-          if(resFromResident.message === "Data Added Successfully"){
-            navigation.navigate("MyProfile")
-          }
-       }
     }
   };
   return (
     <View style={styles.container}>
-      <View style={styles.main}>
-      <Text style={styles.title}>Family Member Form</Text>
-        <View style={styles.field}>
-          <Text style={styles.label}>
-            Name <Text style={{color: 'red'}}>*</Text>
-          </Text>
-          <Controller
-            name="name"
-            control={control}
-            render={({field: {onChange, value}}) => (
-              <TextInput
-                style={styles.inputBox}
-                value={value}
-                onChangeText={onChange}
+      <View style={styles.infoContainer}>
+        {formType === 'FlatMember' ? (
+          <View style={styles.main}>
+            <Text style={styles.title}>Flat Member Form</Text>
+            <View style={styles.field}>
+              <Text style={styles.label}>
+                Name <Text style={{color: 'red'}}>*</Text>
+              </Text>
+              <Controller
+                name="name"
+                control={control}
+                render={({field: {onChange, value}}) => (
+                  <TextInput
+                    style={styles.inputBox}
+                    value={value}
+                    onChangeText={onChange}
+                  />
+                )}
+                rules={{required: true}}
               />
-            )}
-            rules={{required: true}}
-          />
-          {errors.name && (
-            <Text style={styles.textError}>Name is required</Text>
-          )}
-        </View>
+              {errors.name && (
+                <Text style={styles.textError}>Name is required</Text>
+              )}
+            </View>
 
-        <View style={styles.field}>
-          <Text style={styles.label}>
-            Email <Text style={{color: 'red'}}>*</Text>
-          </Text>
-          <Controller
-            name="email"
-            control={control}
-            render={({field: {onChange, value}}) => (
-              <TextInput
-                style={styles.inputBox}
-                value={value}
-                onChangeText={onChange}
+            <View style={styles.field}>
+              <Text style={styles.label}>
+                Email <Text style={{color: 'red'}}>*</Text>
+              </Text>
+              <Controller
+                name="email"
+                control={control}
+                render={({field: {onChange, value}}) => (
+                  <TextInput
+                    style={styles.inputBox}
+                    value={value}
+                    onChangeText={onChange}
+                  />
+                )}
+                rules={{required: true}}
               />
-            )}
-            rules={{required: true}}
-          />
-          {errors.email && (
-            <Text style={styles.textError}>Email is required</Text>
-          )}
-        </View>
+              {errors.email && (
+                <Text style={styles.textError}>Email is required</Text>
+              )}
+            </View>
 
-        <View style={styles.field}>
-          <Text style={styles.label}>
-            Relation Type<Text style={{color: 'red'}}>*</Text>
-          </Text>
-          <Controller
-            name="relation" // Use unique key for Controller name
-            control={control}
-            render={({field: {onChange, value}}) => (
-              <Dropdown
-                style={{
-                  borderColor: 'black',
-                  borderWidth: 1,
-                  borderRadius: 10,
-                  paddingLeft: 10,
-                  backgroundColor: '#F8F4F0',
-                  borderWidth: 1,
-                  borderColor: 'grey',
-                  paddingHorizontal: 12,
-                  width: '90%',
-                  marginTop: 5,
-                }}
-                data={relationTypeDropDown}
-                maxHeight={300}
-                labelField="label"
-                valueField="value"
-                value={value}
-                placeholder="Select an option"
-                onFocus={() => setIsFocus(true)}
-                onBlur={() => setIsFocus(false)}
-                onChange={item => {
-                  onChange(item.value); // Update the form value
-                  setIsFocus(false);
-                }}
+            <View style={styles.field}>
+              <Text style={styles.label}>
+                Relation Type <Text style={{color: 'red'}}>*</Text>
+              </Text>
+              <Controller
+                name="relation" // Use unique key for Controller name
+                control={control}
+                render={({field: {onChange, value}}) => (
+                  <Dropdown
+                    style={styles.inputBox}
+                    data={relationTypeDropDown}
+                    maxHeight={300}
+                    labelField="label"
+                    valueField="value"
+                    value={value}
+                    placeholder="Select an option"
+                    onFocus={() => setIsFocus(true)}
+                    onBlur={() => setIsFocus(false)}
+                    onChange={item => {
+                      onChange(item.value); // Update the form value
+                      setIsFocus(false);
+                    }}
+                  />
+                )}
+                rules={{required: true}}
               />
-            )}
-            rules={{required: true}}
-          />
-          {errors['relation'] && (
-            <Text style={styles.textError}>Relation type is required</Text>
-          )}
-        </View>
+              {errors['relation'] && (
+                <Text style={styles.textError}>Relation type is required</Text>
+              )}
+            </View>
 
-        <View style={styles.field}>
-          <Text style={styles.label}>
-            Phone <Text style={{color: 'red'}}>*</Text>
-          </Text>
-          <Controller
-            name="phone"
-            control={control}
-            render={({field: {onChange, value}}) => (
-              <TextInput
-                style={styles.inputBox}
-                value={value}
-                onChangeText={onChange}
+            <View style={styles.field}>
+              <Text style={styles.label}>
+                Phone <Text style={{color: 'red'}}>*</Text>
+              </Text>
+              <Controller
+                name="phone"
+                control={control}
+                render={({field: {onChange, value}}) => (
+                  <TextInput
+                    style={styles.inputBox}
+                    value={value}
+                    onChangeText={onChange}
+                  />
+                )}
+                rules={{required: true}}
               />
-            )}
-            rules={{required: true}}
-          />
-          {errors.phone && (
-            <Text style={styles.textError}>Phone number is required</Text>
-          )}
-        </View>
+              {errors.phone && (
+                <Text style={styles.textError}>Phone number is required</Text>
+              )}
+            </View>
 
-        <View style={styles.field}>
-          <Text style={styles.label}>Secondary Phone</Text>
-          <Controller
-            name="secondary_phone"
-            control={control}
-            render={({field: {onChange, value}}) => (
-              <TextInput
-                style={styles.inputBox}
-                value={value}
-                onChangeText={onChange}
+            <View style={styles.field}>
+              <Text style={styles.label}>Secondary Phone</Text>
+              <Controller
+                name="secondary_phone"
+                control={control}
+                render={({field: {onChange, value}}) => (
+                  <TextInput
+                    style={styles.inputBox}
+                    value={value}
+                    onChangeText={onChange}
+                  />
+                )}
               />
-            )}
-          />
-        </View>
+            </View>
 
-        <View>
-      <Text style={styles.label}>
-        Gender <Text style={{color: 'red'}}>*</Text>
-      </Text>
-      <Controller
-        control={control}
-        name="gender"
-        rules={{ required: 'Gender is required' }}
-        render={({ field: { onChange } }) => (
-          <View style={styles.radioButtonContainer}>
-            {gender.map(option => (
+            <View>
+              <Text style={styles.label}>
+                Gender <Text style={{color: 'red'}}>*</Text>
+              </Text>
+              <Controller
+                control={control}
+                name="gender"
+                rules={{required: 'Gender is required'}}
+                render={({field: {onChange}}) => (
+                  <View style={styles.radioButtonContainer}>
+                    {gender.map(option => (
+                      <TouchableOpacity
+                        key={option}
+                        style={styles.singleOptionContainer}
+                        onPress={() => {
+                          setSelectedGender(option);
+                          onChange(option);
+                        }}>
+                        <View style={styles.outerCircle}>
+                          {selectedGender === option && (
+                            <View style={styles.innerCircle} />
+                          )}
+                        </View>
+                        <Text style={{marginLeft: 10}}>{option}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                )}
+              />
+              {errors.gender && (
+                <Text style={{color: 'red'}}>{errors.gender.message}</Text>
+              )}
+            </View>
+
+            {/* <TouchableOpacity
+              style={styles.register}
+              onPress={handleSubmit(saveMemberData)}>
+              <Text style={styles.registerTitle}>Save</Text>
+            </TouchableOpacity>  */}
+
+            <View style={styles.footer}>
               <TouchableOpacity
-                key={option}
-                style={styles.singleOptionContainer}
-                onPress={() => {
-                  setSelectedGender(option);
-                  onChange(option);
-                }}
-              >
-                <View style={styles.outerCircle}>
-                  {selectedGender === option && <View style={styles.innerCircle} />}
-                </View>
-                <Text style={{marginLeft: 10}}>{option}</Text>
+                onPress={handleSubmit(saveMemberData)}
+                style={styles.submit}>
+                <Text style={styles.buttonText}>Submit</Text>
               </TouchableOpacity>
-            ))}
+              <TouchableOpacity
+                onPress={handleCancelByMemeberInfo}
+                style={styles.Cancel}>
+                <Text style={styles.buttonText1}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-        )}
-      />
-      {errors.gender && <Text style={{ color: 'red' }}>{errors.gender.message}</Text>}
-      </View>
+        ) : formType === 'VehicleInfo' ? (
+          // Placeholder for VehicleInfo form implementation
+          <View style={styles.main}>
+            <Text style={styles.title}>Vehicle Information Form</Text>
+            <View style={styles.field}>
+              <Text style={styles.label}>
+                Vehicle Type <Text style={{color: 'red'}}>*</Text>
+              </Text>
+              <Controller
+                name="vehicleType" // Use unique key for Controller name
+                control={control}
+                render={({field: {onChange, value}}) => (
+                  <Dropdown
+                    style={styles.inputBox}
+                    data={vehicleTypeDropDown}
+                    maxHeight={300}
+                    labelField="label"
+                    valueField="value"
+                    value={value}
+                    onFocus={() => setIsFocus(true)}
+                    onBlur={() => setIsFocus(false)}
+                    onChange={item => {
+                      onChange(item.value); // Update the form value
+                      setIsFocus(false);
+                    }}
+                  />
+                )}
+                rules={{required: true}}
+              />
+              {errors['vehicleType'] && (
+                <Text style={styles.textError}>Vehicle type is required</Text>
+              )}
+            </View>
 
-        <TouchableOpacity
-          style={styles.register}
-          onPress={handleSubmit(saveMemberData)}>
-          <Text style={styles.registerTitle}>Save</Text>
-        </TouchableOpacity>
+            <View style={styles.field}>
+              <Text style={styles.label}>
+                Vehicle Number <Text style={{color: 'red'}}>*</Text>
+              </Text>
+              <Controller
+                name="vehicleNumber"
+                control={control}
+                render={({field: {onChange, value}}) => (
+                  <TextInput
+                    style={styles.inputBox}
+                    value={value}
+                    onChangeText={onChange}
+                  />
+                )}
+                rules={{required: true}}
+              />
+              {errors.vehicleNumber && (
+                <Text style={styles.textError}>Vehicle number is required</Text>
+              )}
+            </View>
+
+            <View style={styles.footer}>
+              <TouchableOpacity
+                onPress={handleSubmit(saveDataFromVehicle)}
+                style={styles.submit}>
+                <Text style={styles.buttonText}>Submit</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => navigation.navigate('Profile')}
+                style={styles.Cancel}>
+                <Text style={styles.buttonText1}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        ) : (
+          <></>
+        )}
       </View>
     </View>
   );
@@ -251,39 +411,81 @@ export default AddData;
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#C19F83',
+    backgroundColor: '#FFF',
     flex: 1,
   },
-  main: {
-    padding: 16,
+  footer: {
+    flex: 1,
+    width: 340,
+    height: 45,
+    paddingVertical: 20,
+    paddingHorizontal: 0,
+    flexDirection: 'row',
     justifyContent: 'center',
-    backgroundColor: 'white',
-    marginStart: 10,
-    marginEnd: 10,
+    alignItems: 'center',
+    marginTop: 20,
     marginBottom: 10,
-    borderRadius: 20,
-    ...Platform.select({
-      ios: {
-        shadowOffset: {width: 2, height: 2},
-        shadowColor: '#333',
-        shadowOpacity: 0.3,
-        shadowRadius: 4,
-      },
-      android: {
-        elevation: 8,
-      },
-    }),
+    gap: 8,
+  },
+  submit: {
+    height: 50,
+    width: 110,
+    backgroundColor: '#B21E2B',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  Cancel: {
+    height: 50,
+    width: 110,
+    borderWidth: 1,
+    borderStyle: 'solid',
+    borderColor: '#B21E2B',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  buttonText: {
+    color: 'white',
+    fontSize: 14,
+    fontStyle: 'normal',
+    fontFamily: 'Inter',
+    fontWeight: '700',
+  },
+  buttonText1: {
+    color: '#B21E2B',
+    fontSize: 14,
+    fontStyle: 'normal',
+    fontFamily: 'Inter',
+    fontWeight: '700',
+  },
+  infoContainer: {
+    paddingHorizontal: 24,
+    paddingVertical: 40,
+    flexDirection: 'column',
   },
   label: {
-    fontSize: 15,
+    alignSelf: 'stretch',
+    color: '#2F3036',
+    fontFamily: 'Inter',
+    fontSize: 13,
+    fontStyle: 'normal',
+    fontWeight: '700',
   },
   inputBox: {
+    fontFamily: 'Inter',
+    fontSize: 14,
+    fontStyle: 'normal',
+    fontWeight: '400',
+    marginBottom: 8,
+    borderRadius: 12,
     borderWidth: 1,
-    borderColor: 'grey',
+    borderColor: '#C5C6CC',
     paddingHorizontal: 12,
-    borderRadius: 10,
-    width: '90%',
-    marginTop: 5,
   },
   register: {
     width: '90%',
@@ -299,9 +501,14 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   title: {
-    color: 'black',
-    fontWeight: 'bold',
-    fontSize: 25,
+    width: 327,
+    color: '#1F2024',
+    fontFamily: 'Inter',
+    fontSize: 16,
+    fontStyle: 'normal',
+    fontWeight: '900',
+    letterSpacing: 0.08,
+    marginBottom: 24,
   },
   registerVehicleTitle: {
     fontSize: 16,
@@ -356,6 +563,6 @@ const styles = StyleSheet.create({
     width: 12,
     height: 12,
     borderRadius: 11,
-    backgroundColor: '#752A26',
+    backgroundColor: '#B21E2B',
   },
 });
