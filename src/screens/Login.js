@@ -140,8 +140,17 @@ const Login = ({ navigation }) => {
                     setUserEmail(userCred.email)
                     setCurrentUser({ id: res.data[0].ID, email: userCred.email })
                     const response = await findDeviceToken(res.data[0].ID)
-                    const myDeviceToken = response.Device_Tokens+deviceToken+"||"
-                    console.log("local device token is: ", deviceToken)
+                    console.log("response is: ", response)
+                    let myDeviceToken;
+                    console.log("present token is: ", response.data.Device_Tokens )
+                    if(!response.data.Device_Tokens){
+                        console.log("first time")
+                        myDeviceToken = ""+deviceToken+"||"
+                    }else{
+                        myDeviceToken = response.data.Device_Tokens+deviceToken+"||"
+                        console.log("second time")
+                    }
+                    console.log("local device token is: ", myDeviceToken)
                     console.log("Response device token is : ",response)
                     const updateData = {
                         data: {

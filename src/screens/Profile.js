@@ -31,9 +31,10 @@ import { useForm, Controller } from 'react-hook-form';
 import { AuthContext } from '../auth/AuthProvider';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import RNRestart from 'react-native-restart';
+import { BASE_APP_URL, APP_LINK_NAME, APP_OWNER_NAME } from "@env"
 
 const Profile = ({ navigation }) => {
-  const { getAccessToken, userEmail, L1ID } = useContext(UserContext);
+  const { getAccessToken, userEmail, L1ID, deviceToken, loggedUser, accessToken } = useContext(UserContext);
   const { user, setUser } = useContext(AuthContext);
 
   const [email, setEmail] = useState('');
@@ -79,6 +80,59 @@ const Profile = ({ navigation }) => {
     }
   };
 
+
+
+
+
+  const updateDeviceToken = async (modified_data, id) => {
+    try {
+      const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/All_App_Users/${id}`
+      console.log(url)
+      const response = await fetch(url, {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Zoho-oauthtoken ${accessToken}`
+        },
+        body: JSON.stringify(modified_data)
+      });
+      return await response.json();
+    }
+    catch (err) {
+      if (err.message === 'Network request failed')
+        Alert.alert('Network Error', 'Failed to fetch data. Please check your network connection and try again.');
+      else {
+        Alert.alert("Error: ", err)
+        console.log(err)
+      }
+    }
+  }
+
+  const findDeviceToken = async (id) => {
+    try {
+      const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/All_App_Users/${id}`
+      console.log(url)
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          Authorization: `Zoho-oauthtoken ${accessToken}`
+        },
+      });
+      return await response.json();
+    }
+    catch (err) {
+      if (err.message === 'Network request failed')
+        Alert.alert('Network Error', 'Failed to fetch data. Please check your network connection and try again.');
+      else {
+        Alert.alert("Error: ", err)
+        console.log(err)
+      }
+    }
+  }
+
+
+
+
+
   const onDelete = async userCred => {
     setModalVisible(!modalVisible);
     console.log(userCred);
@@ -90,8 +144,25 @@ const Profile = ({ navigation }) => {
       .then(async (response) => {
         console.log('response :', response);
         setUser(null);
+
+        const respon = await findDeviceToken(loggedUser.userId)
+        console.log("response is: ", respon)
+        const replaceToken = deviceToken + "||"
+        let myDeviceToken = respon.data.Device_Tokens.replace(replaceToken, "")
+
+        console.log("local device token is: ", myDeviceToken)
+        console.log("Response device token is : ", respon)
+        const updateData = {
+          data: {
+            Device_Tokens: myDeviceToken
+          }
+        }
+        const updateResponse = await updateDeviceToken(updateData, loggedUser.userId)
+        console.log("update device token response: ", updateResponse)
+
+
         await AsyncStorage.removeItem("existedUser");
-        RNRestart.Restart(); 
+        RNRestart.Restart();
       })
       .catch(error => {
         console.log('error :', error);
@@ -229,7 +300,7 @@ const Profile = ({ navigation }) => {
       );
       console.log('resfromfamilyrelation: ', resFromFamilyMemberRoom.data);
       setLoading(false);
-    
+
       if (resFromEmployee.data) {
         if (resFromFamilyMemberRoom.data) {
           navigation.navigate('MyProfile', {
@@ -292,10 +363,11 @@ const Profile = ({ navigation }) => {
           <View style={styles.topSection}>
             <View>
               <Image
-                source={require('../assets/sathya.jpg')}
+                source={require('../assets/sathya.png')}
                 style={styles.propic}
+
               />
-              <TouchableOpacity style={styles.edit} onPress={changeProfile}>
+              {/* <TouchableOpacity style={styles.edit} onPress={changeProfile}>
                 <Image
                   source={require('../assets/Edit.png')}
                   style={{
@@ -303,12 +375,13 @@ const Profile = ({ navigation }) => {
                     height: 14.432,
                     marginEnd: 5,
                     flexShrink: 0,
+                    marginLeft: 70,
                     textAlign: 'right',
                   }}
                 />
-              </TouchableOpacity>
+              </TouchableOpacity> */}
             </View>
-            <Text style={styles.name}>User name</Text>
+            <Text style={styles.name}>{ }</Text>
             <View style={styles.imgdel}>
               <Text style={styles.emailVisible}>{userEmail}</Text>
               <TouchableOpacity
@@ -316,7 +389,7 @@ const Profile = ({ navigation }) => {
                 onPress={() => setModalVisible(true)}>
                 <Image
                   source={require('../assets/delete.png')}
-                  style={styles.del}
+                  style={{width: 20, height: 20}}
                 />
               </TouchableOpacity>
             </View>
@@ -557,12 +630,12 @@ const Profile = ({ navigation }) => {
                     }}>
                     <TouchableOpacity
                       style={[styles.HomeButton, { backgroundColor: '#B21E2B' }]}
-                      >
+                    >
                       <Text style={[styles.wewe, styles.wewe1]}>Camera</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                       style={[styles.HomeButton, { backgroundColor: '#FFBE65' }]}
-                      >
+                    >
                       <Text style={[styles.wewe, styles.wewe2]}>Gallery</Text>
                     </TouchableOpacity>
                   </View>
@@ -597,8 +670,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   account: {
-    width: 375,
-    height: 56,
+    height: 80,
     paddingTop: 19.5,
     paddingRight: 0,
     justifyContent: 'center',
@@ -619,6 +691,8 @@ const styles = StyleSheet.create({
     height: 82,
     borderRadius: 85,
     textAlign: 'center',
+    borderWidth: 0.2,
+    borderColor: "gray"
   },
   name: {
     color: '#1F2024',
@@ -637,7 +711,7 @@ const styles = StyleSheet.create({
     fontStyle: 'normal',
     fontWeight: '400',
     letterSpacing: 0.12,
-    marginEnd: 30,
+    marginEnd: 15,
     marginStart: 30,
     alignSelf: 'center',
   },
