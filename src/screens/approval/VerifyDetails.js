@@ -7,9 +7,9 @@ import RNFS from 'react-native-fs';
 import Share from 'react-native-share';
 
 
-export const updateRecord = async (reportName, modified_data, token) => {
+export const updateRecord = async (reportName, modified_data, token, id) => {
   try {
-    const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/${reportName}`
+    const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/${reportName}/${id}`
     console.log(url)
     const response = await fetch(url, {
       method: 'PATCH',
@@ -37,9 +37,8 @@ const VerifyDetails = ({ navigation, route }) => {
   const { user } = route.params;
 
   const [photo, setPhoto] = useState();
-  const { getAccessToken, setDeniedDataFetched, setApproveDataFetched, setPendingDataFetched, setEditData, loggedUser } = useContext(UserContext)
+  const { getAccessToken, setDeniedDataFetched, setApproveDataFetched, setPendingDataFetched, setEditData, loggedUser, accessToken } = useContext(UserContext)
   setEditData(user);
-  const token = getAccessToken()
   const [loading, setLoading] = useState(true);
   const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/${user.ID}/Photo/download`
 
@@ -48,7 +47,7 @@ const VerifyDetails = ({ navigation, route }) => {
       const response = await fetch(url, {
         method: 'GET',
         headers: {
-          Authorization: `Zoho-oauthtoken ${token}`,
+          Authorization: `Zoho-oauthtoken ${accessToken}`,
         },
       });
 
@@ -80,18 +79,26 @@ const VerifyDetails = ({ navigation, route }) => {
 
     let status = user.Referrer_Approval;
 
-    const updateField = {
-      Referrer_Approval: "APPROVED"
+    let updateField
+
+    if (loggedUser.role === "L2") {
+      updateField = {
+        Referrer_Approval: "APPROVED",
+        L2_Approval_Status: "APPROVED"
+      }
+    } else {
+      updateField = {
+        Referrer_Approval: "APPROVED"
+      }
     }
 
     const updateData = {
-      criteria: `ID==${user.ID}`,
       data: updateField
     }
 
-    const response = await updateRecord('Approval_to_Visitor_Report', updateData, getAccessToken());
+    const response = await updateRecord('Approval_to_Visitor_Report', updateData, accessToken, user.ID);
 
-    if (response.result[0].code === 3000) {
+    if (response.code === 3000) {
       if (status === "PENDING APPROVAL") {
         setPendingDataFetched(false)
         setApproveDataFetched(false)
@@ -118,13 +125,13 @@ const VerifyDetails = ({ navigation, route }) => {
     }
 
     const updateData = {
-      criteria: `ID==${user.ID}`,
       data: updateField
     }
 
-    const response = await updateRecord('Approval_to_Visitor_Report', updateData, getAccessToken());
+    const response = await updateRecord('Approval_to_Visitor_Report', updateData, accessToken, user.ID);
+    console.log("response in reject", response)
 
-    if (response.result[0].code === 3000) {
+    if (response.code === 3000) {
       if (status === "PENDING APPROVAL") {
         setPendingDataFetched(false)
         setDeniedDataFetched(false)
@@ -360,23 +367,23 @@ const VerifyDetails = ({ navigation, route }) => {
           </View>
         </View>
         {
-          user.Referrer_Approval === "APPROVED" && user.L2_Approval_Status == "APPROVED" && loggedUser.role == "L1" ? (
+          user.Referrer_Approval === "APPROVED" && user.L2_Approval_Status == "APPROVED" && user.Referrer_App_User_lookup.ID == loggedUser.userId ? (
             <View style={[styles.container, { marginTop: 20, marginBottom: 20 }]}>
               <View style={styles.left}>
                 <Text style={styles.label}>Generated QR Code</Text>
               </View>
-              <View style={[styles.right, {justifyContent: "center", alignItems:"center", marginBottom: 20}]}>
+              <View style={[styles.right, { justifyContent: "center", alignItems: "center", marginBottom: 20 }]}>
                 <Image source={{ uri: user.Generated_QR_Code }} style={{ height: 200, width: 200 }} />
                 <TouchableOpacity
-                          style={[
-                            styles.HomeButton,
-                            {backgroundColor: 'green'},
-                          ]}
-                          onPress={() => {
-                            onShare();
-                          }}>
-                          <Text style={[styles.wewe, styles.wewe1]}>Share</Text>
-                        </TouchableOpacity>
+                  style={[
+                    styles.HomeButton,
+                    { backgroundColor: 'green' },
+                  ]}
+                  onPress={() => {
+                    onShare();
+                  }}>
+                  <Text style={[styles.wewe, styles.wewe1]}>Share</Text>
+                </TouchableOpacity>
               </View>
             </View>
 
