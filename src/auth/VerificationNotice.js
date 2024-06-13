@@ -6,13 +6,14 @@ import UserContext from '../../context/UserContext';
 import { getDataWithInt } from '../components/ApiRequest';
 import { AuthContext } from './AuthProvider';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { BASE_APP_URL, APP_LINK_NAME, APP_OWNER_NAME } from "@env"
 
 const VerificationNotice = ({ route, navigation }) => {
 
   const { id } = route.params
   console.log("Id in verification notice: ", id)
   const user = auth.currentUser;
-  const { setUserEmail, setL1ID, accessToken, userType, setUserType, setLoggedUser } = useContext(UserContext)
+  const { setUserEmail, setL1ID, accessToken, userType, setUserType, setLoggedUser, deviceToken } = useContext(UserContext)
   const { setUser } = useContext(AuthContext)
   const [departmentIds, setDepartmentIds] = useState([])
 
@@ -44,6 +45,60 @@ const VerificationNotice = ({ route, navigation }) => {
       checkEmailVerification();
     }, 5000);
 
+
+
+
+
+
+
+    const updateDeviceToken = async (modified_data, id) => {
+      try {
+        const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/All_App_Users/${id}`
+        console.log(url)
+        const response = await fetch(url, {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Zoho-oauthtoken ${accessToken}`
+          },
+          body: JSON.stringify(modified_data)
+        });
+        return await response.json();
+      }
+      catch (err) {
+        if (err.message === 'Network request failed')
+          Alert.alert('Network Error', 'Failed to fetch data. Please check your network connection and try again.');
+        else {
+          Alert.alert("Error: ", err)
+          console.log(err)
+        }
+      }
+    }
+
+    const findDeviceToken = async (id) => {
+      try {
+        const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/All_App_Users/${id}`
+        console.log(url)
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            Authorization: `Zoho-oauthtoken ${accessToken}`
+          },
+        });
+        return await response.json();
+      }
+      catch (err) {
+        if (err.message === 'Network request failed')
+          Alert.alert('Network Error', 'Failed to fetch data. Please check your network connection and try again.');
+        else {
+          Alert.alert("Error: ", err)
+          console.log(err)
+        }
+      }
+    }
+
+
+
+
     const checkEmailVerification = async () => {
       if (user) {
         await user.reload();
@@ -57,6 +112,26 @@ const VerificationNotice = ({ route, navigation }) => {
             existedUser = JSON.parse(existedUser)
             console.log("Existed user in Base route useEffect:", existedUser)
             setLoggedUser(existedUser);
+            const response = await findDeviceToken(id)
+            console.log("response is: ", response)
+            let myDeviceToken;
+            console.log("present token is: ", response.data.Device_Tokens )
+            if(!response.data.Device_Tokens){
+                console.log("first time")
+                myDeviceToken = ""+deviceToken+"||"
+            }else{
+                myDeviceToken = response.data.Device_Tokens+deviceToken+"||"
+                console.log("second time")
+            }
+            console.log("local device token is: ", myDeviceToken)
+            console.log("Response device token is : ",response)
+            const updateData = {
+                data: {
+                    Device_Tokens: myDeviceToken
+                }
+              }
+              const updateResponse = await updateDeviceToken(updateData, id)
+              console.log("update device token response: ", updateResponse)
             clearInterval(interval);
             navigation.navigate('FooterTab');
           }

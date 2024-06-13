@@ -54,6 +54,7 @@ const App = () => {
     const fetchToken = async () => {
       await getAppWriteToken();
       const dToken = await getDeviceToken();
+      setDeviceToken(dToken)
       console.log("device token is app.js: ", dToken)
     };
 

@@ -15,8 +15,8 @@ export async function getDeviceToken() {
     console.log('grantedgranted', granted);
     if (granted === PermissionsAndroid.RESULTS.GRANTED) {
       console.log('object');
-      const token = getFCMToken();
-      console.log("token: ", token)
+      const token = await getFCMToken();
+      return token
 
     } else {
       console.log('permission denied');
@@ -30,12 +30,13 @@ export async function getDeviceToken() {
       console.log("enable value:", enabled)
     if (enabled) {
       console.log('Authorization status:', authStatus);
-      const token = getFCMToken();
+      const token = await getFCMToken();
       console.log("device token = ", token)
       return token
     }
   }
 }
+
 const getFCMToken = async () => {
   try {
     await messaging().registerDeviceForRemoteMessages();

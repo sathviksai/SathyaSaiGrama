@@ -3,6 +3,8 @@ import React, { useContext, useEffect, useState } from 'react'
 import { BASE_APP_URL, APP_LINK_NAME, APP_OWNER_NAME } from "@env"
 import UserContext from '../../../context/UserContext';
 import { encode } from 'base64-arraybuffer';
+import RNFS from 'react-native-fs';
+import Share from 'react-native-share';
 
 
 export const updateRecord = async (reportName, modified_data, token) => {
@@ -142,6 +144,30 @@ const VerifyDetails = ({ navigation, route }) => {
 
 
 
+  const onShare = async () => {
+    try {
+      const { Generated_QR_Code } = user;
+
+      // Define the path to download the image
+      const path = `${RNFS.DocumentDirectoryPath}/image.jpg`;
+
+      // Download the image to local storage
+      await RNFS.downloadFile({
+        fromUrl: Generated_QR_Code,
+        toFile: path,
+      }).promise;
+
+      // Share the image
+      await Share.open({
+        url: Platform.OS === 'android' ? `file://${path}` : path,
+      });
+    } catch (error) {
+      Alert.alert('Error', error.message);
+    }
+  };
+
+
+
   console.log("User in verify details : ", user)
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#FFF" }}>
@@ -155,7 +181,7 @@ const VerifyDetails = ({ navigation, route }) => {
             />
           </TouchableOpacity>
         </View>
-      </View> */} 
+      </View> */}
       <ScrollView style={styles.scrollview}>
         {
           user?.Referrer_Approval === "PENDING APPROVAL" ? (
@@ -334,19 +360,27 @@ const VerifyDetails = ({ navigation, route }) => {
           </View>
         </View>
         {
-          user.Referrer_Approval==="APPROVED" && user.L2_Approval_Status=="APPROVED" && loggedUser.role=="L1" ?(
+          user.Referrer_Approval === "APPROVED" && user.L2_Approval_Status == "APPROVED" && loggedUser.role == "L1" ? (
             <View style={[styles.container, { marginTop: 20, marginBottom: 20 }]}>
-            <View style={styles.left}>
-              <Text style={styles.label}>Generated QR Code</Text>
+              <View style={styles.left}>
+                <Text style={styles.label}>Generated QR Code</Text>
+              </View>
+              <View style={[styles.right, {justifyContent: "center", alignItems:"center", marginBottom: 20}]}>
+                <Image source={{ uri: user.Generated_QR_Code }} style={{ height: 200, width: 200 }} />
+                <TouchableOpacity
+                          style={[
+                            styles.HomeButton,
+                            {backgroundColor: 'green'},
+                          ]}
+                          onPress={() => {
+                            onShare();
+                          }}>
+                          <Text style={[styles.wewe, styles.wewe1]}>Share</Text>
+                        </TouchableOpacity>
+              </View>
             </View>
-            <View style={styles.right}>
-              <TouchableOpacity>
-              <Image source={{uri: user.Generated_QR_Code}} style={{height: 100, width: 100}}/>
-              </TouchableOpacity>
-            </View>
-          </View>
-            
-          ): null
+
+          ) : null
         }
 
       </ScrollView>
@@ -438,5 +472,28 @@ const styles = StyleSheet.create({
     fontSize: 20,
     //color: "#752A26"
     color: "#FFF"
-  }
+  },
+  HomeButton: {
+    height: 30,
+    width: 80,
+    backgroundColor: '#752A26',
+    paddingTop: 8,
+    borderRadius: 12,
+    marginTop: 20,
+    marginLeft: 4,
+    marginRight: 4,
+  },
+  wewe: {
+    fontFamily: 'Inter',
+    fontSize: 8,
+    fontStyle: 'normal',
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  wewe1: {
+    color: '#fff',
+  },
+  wewe2: {
+    color: '#B21E2B',
+  },
 })
