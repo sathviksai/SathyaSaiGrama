@@ -35,13 +35,13 @@ const FillByYourSelf = ({navigation}) => {
   const [selectedSG, setSelectedSG] = useState('');
   const [selectedHO, setSelectedHO] = useState('');
   const [value, setValue] = useState('');
-  const [countryCode, setCountryCode] = useState('');
+  // const [countryCode, setCountryCode] = useState('');
   const [formattedValue, setFormattedValue] = useState('');
   const [disabled, setDisabled] = useState(false);
   const [phoneError, setPhoneError] = useState(true);
   const [image, setImage] = useState('Upload Image');
-  const [imageurl, setImageUrl] = useState('');
-  const [RES_ID, setRES_ID] = useState('');
+  // const [imageurl, setImageUrl] = useState('');
+  // const [RES_ID, setRES_ID] = useState('');
   const [guestCategory, setGuestCategory] = useState('');
   const [isFocus, setIsFocus] = useState(false);
   const [focus, setFocus] = useState(false);
@@ -78,7 +78,7 @@ const FillByYourSelf = ({navigation}) => {
       'DD-MMM-YYYY',
     );
     setDate(formatteddate);
-    setShowModal(!showModal);
+    setShowModal(!showModal); //Date Picker
   };
 
   const prefixValues = [
@@ -125,6 +125,7 @@ const FillByYourSelf = ({navigation}) => {
     {label: 'Other', value: 'Other'},
   ];
 
+  //To get employee record
   const getEmpId = async () => {
     try {
       console.log('into getEmpId');
@@ -176,7 +177,8 @@ const FillByYourSelf = ({navigation}) => {
   //     Alert.alert('Error', 'Something went wrong');
   //   }
   // };
-
+//==============================
+//Post data to Approver_to_visitor table
   const posttoL1aprroved = async DepartmentID => {
     // const Vehicle_Info = await postVehicle();
     const formData = {
@@ -224,6 +226,7 @@ const FillByYourSelf = ({navigation}) => {
       Alert.alert('Error', 'Something went wrong');
     }
   };
+  //Validate Phone Number
   useEffect(() => {
     const timer = setTimeout(() => {
       if (/^\+91\d{10}$/.test(formattedValue)) {
@@ -255,7 +258,8 @@ const FillByYourSelf = ({navigation}) => {
   //     }
   //   }
   // };
-
+  //==============================================
+//Below are validations
   const validateName = () => {
     if (prefix == ' ') {
       Alert.alert('Please Select Prefix ');

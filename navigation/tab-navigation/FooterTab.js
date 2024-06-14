@@ -7,7 +7,7 @@ import { StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native';
 import ApprovalTab from '../../src/screens/approval/ApprovalTab';
 import Profile from '../../src/screens/Profile';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import VisitorFills from '../../src/screens/VisitorFills';
+// import VisitorFills from '../../src/screens/VisitorFills';
 import FillByYourSelf from '../../src/screens/FillByYourSelf';
 import MyProfile from '../../src/screens/MyProfile'
 import Notifications from '../../src/screens/Notifications';
@@ -37,10 +37,10 @@ function InviteStackScreen() {
     return (
         <InviteStack.Navigator screenOptions={{ headerShown: true }}>
             <InviteStack.Screen name="Invite" component={Invite} options={{headerShown: false}}/>
-            <InviteStack.Screen
+            {/* <InviteStack.Screen
                 name="VisitorFills"
                 component={VisitorFills}
-            />
+            /> */}
             <InviteStack.Screen
                 name="FillByYourSelf"
                 component={FillByYourSelf}
@@ -212,7 +212,8 @@ const L2ApprovalStack = () => {
 
 }
 
-
+//================================================
+//Footer Tab Navigation
 
 function FooterTab({ navigation }) {
 

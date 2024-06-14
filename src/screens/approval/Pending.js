@@ -42,7 +42,7 @@ const Pending = ({ navigation }) => {
         <FlatList
           data={Pendings}
           renderItem={({ item }) => (
-            <ApprovalComponent navigation={navigation} key={item.ID} user={item}  />
+            <ApprovalComponent navigation={navigation} key={item.ID} user={item}  />// Approval component is the card in the approvals
           )}
           keyExtractor={(item) => item.ID.toString()}
           refreshControl={

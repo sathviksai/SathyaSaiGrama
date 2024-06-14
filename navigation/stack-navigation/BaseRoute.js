@@ -15,14 +15,14 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const BaseRoute = () => {
 
-  const { user } = useContext(AuthContext);
+  // const { user } = useContext(AuthContext);
   
   const { setAccessToken, loggedUser, setLoggedUser } = useContext(UserContext);
   const [loading, setLoading] = useState(true)
 
   const Stack = createNativeStackNavigator();
 
-
+//To get Apprwrite token
   const getAppWriteToken = async () => {
     try {
       let res = await fetch(`https://cloud.appwrite.io/v1/databases/${DATABASE_ID}/collections/${COLLECTION_ID}/documents`, {
@@ -43,9 +43,9 @@ const BaseRoute = () => {
     }
 
   }
-
+//To fetch Zoho Access token from Appwrite for every 30 mins
   useEffect(() => {
-    const intervalId = setInterval(getAppWriteToken, 600000);
+    const intervalId = setInterval(getAppWriteToken, 1800000);
     return () => clearInterval(intervalId);
   }, []);
 
