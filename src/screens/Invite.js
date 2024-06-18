@@ -25,12 +25,16 @@ const Invite = ({navigation}) => {
   const [selectedOption, setSelectedOption] = useState(null);
   const [modal, setModal] = useState(false);
 
+
+  //Popup when clicked on Visitor fills the form
   const handleModal = () => {
     setModal(!modal);
   };
-  const handleCheckboxChange = option => {
-    setSelectedOption(selectedOption === option ? null : option);
-  };
+  // const handleCheckboxChange = option => {
+  //   setSelectedOption(selectedOption === option ? null : option);
+  // };
+  //===========================================================
+  //To short the Zoho visitor Info form URL 
   const shortUrl = async url => {
     console.log('short');
     try {
@@ -55,6 +59,7 @@ const Invite = ({navigation}) => {
     }
   };
 
+  //To fetch existed link IDs
   const generatedData = async () => {
     try {
       const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/All_Link_Ids`;
@@ -78,10 +83,11 @@ const Invite = ({navigation}) => {
     }
   };
 
+  //To generate random number for Iink ID
   const randomNumber = (min, max) => {
     return Math.floor(Math.random() * (max - min + 1)) + min;
   };
-
+// To check the uniqueness of generated ID
   const generateUniqueLinkID = async () => {
     let link_id = 0;
     const Generated_Link_ID = await generatedData();
@@ -112,6 +118,8 @@ const Invite = ({navigation}) => {
       },
     };
 
+    //============
+    //To post the generated random link id
     try {
       const response = await fetch(
         `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/form/Generated_Link_ID`,
@@ -145,7 +153,8 @@ const Invite = ({navigation}) => {
   };
 
   const [loading, setLoading] = useState(false);
-
+//================
+//To Share the generated URL
   const onShare = async selected => {
     try {
       if (selected !== null) {

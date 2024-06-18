@@ -27,6 +27,8 @@ const App = () => {
   } = useContext(UserContext);
   const [loading, setLoading] = useState(true);
 
+  //==============================
+  //To get zoho access token from Appwrite
   const getAppWriteToken = async () => {
     try {
       console.log(DATABASE_ID);
@@ -50,6 +52,7 @@ const App = () => {
     }
   };
 
+  //UseEffect to call Appwrite and device token functions
   useEffect(() => {
     const fetchToken = async () => {
       await getAppWriteToken();
@@ -62,6 +65,8 @@ const App = () => {
     
   }, []);
 
+  //===================================
+  //To check user exists in local storage, if exists set in Context
   useEffect(() => {
     const checkUserExist = async () => {
       let existedUser = await AsyncStorage.getItem('existedUser');
