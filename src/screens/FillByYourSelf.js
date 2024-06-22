@@ -35,7 +35,7 @@ const FillByYourSelf = ({navigation}) => {
   const [selectedSG, setSelectedSG] = useState('');
   const [selectedHO, setSelectedHO] = useState('');
   const [value, setValue] = useState('');
-  // const [countryCode, setCountryCode] = useState('');
+  const [countryCode, setCountryCode] = useState('');
   const [formattedValue, setFormattedValue] = useState('');
   const [disabled, setDisabled] = useState(false);
   const [phoneError, setPhoneError] = useState(true);
@@ -46,9 +46,9 @@ const FillByYourSelf = ({navigation}) => {
   const [isFocus, setIsFocus] = useState(false);
   const [focus, setFocus] = useState(false);
   const [priority, setPriority] = useState('');
-  // const [vehicleType, setVehicleType] = useState('');
-  // const [isVehicle, setIsVehicle] = useState(false);
-  // const [vehicleNumber, setVehicleNumber] = useState('');
+  const [vehicleType, setVehicleType] = useState('');
+  const [isVehicle, setIsVehicle] = useState(false);
+  const [vehicleNumber, setVehicleNumber] = useState('');
 
   const phoneInput = useRef(null);
 
