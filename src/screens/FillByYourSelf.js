@@ -49,7 +49,7 @@ const FillByYourSelf = ({navigation}) => {
   const [vehicleType, setVehicleType] = useState('');
   const [isVehicle, setIsVehicle] = useState(false);
   const [vehicleNumber, setVehicleNumber] = useState('');
-
+//just so that the othe code gets commited can delete after
   const phoneInput = useRef(null);
 
   const handleChange = text => {
