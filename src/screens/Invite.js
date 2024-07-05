@@ -271,6 +271,14 @@ const Invite = ({navigation}) => {
                 Fill it by yourself!
               </Text>
             </TouchableOpacity>
+        <TouchableOpacity  style={[styles.register, styles.register2]}
+               onPress={() => navigation.navigate('DummyImageScreen')}>
+               <Text style={[styles.registerTitle, {color: '#B21E2B'}]}>
+                Dummybutton
+               </Text>
+          
+        </TouchableOpacity>
+        
           </View>
         </View>
       </ScrollView>
