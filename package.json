@@ -37,6 +37,7 @@
     "react-native-get-random-values": "^1.11.0",
     "react-native-modern-datepicker": "^1.0.0-beta.91",
     "react-native-pager-view": "^6.3.1",
+    "react-native-paper": "^5.12.3",
     "react-native-phone-number-input": "^2.1.0",
     "react-native-qrcode-svg": "^6.3.1",
     "react-native-reanimated": "^3.11.0",

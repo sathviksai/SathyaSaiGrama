@@ -174,7 +174,12 @@ if (response.ok) {
     useEffect(()=>{
         codeGenrator();
     }, []);
-
+    
+ useEffect(()=>{
+if(DummyImageScreen){
+    ScreenshotQR()
+}
+ }, [DummyImageScreen]);
     return (<View  ref={viewRef} style={[heightStyles.container]}><View  style={{flex:1}} >
         <View style={[heightStyles.qrCodeContainer]}>
         <Text style={[heightStyles.title]}>L1 approver has invited you</Text>
