@@ -26,12 +26,15 @@ import { captureRef } from 'react-native-view-shot';
 import RNFS from 'react-native-fs';
 import UserContext from '../../context/UserContext';
 import 'react-native-get-random-values';
+import { BackgroundImage } from 'react-native-elements/dist/config';
+import LinearGradient from 'react-native-linear-gradient';
 
 
 const {height} = Dimensions.get('window')
 
 const DummyImageScreen  = (dateOfVisit) => {
 
+    
     console.log("Screen Height:", height);
     
     let heightStyles;
@@ -99,7 +102,7 @@ const payload =  {
     }
 }
 
-const url1 = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/3318254000029131075`
+const url1 = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/3318254000029679027`
 console.log(url1);
 const response1 = await fetch(url1,{
     method:'PATCH',
@@ -123,7 +126,7 @@ if (response1.ok) {
 
 
 
-const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/3318254000029131075/Generated_QR_Code/upload`
+const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/3318254000029679027/Generated_QR_Code/upload`
 console.log(url);
 const response = await fetch(url,{
     method:'POST',
@@ -175,12 +178,13 @@ if (response.ok) {
         codeGenrator();
     }, []);
     
- useEffect(()=>{
-if(DummyImageScreen){
-    ScreenshotQR()
-}
- }, [DummyImageScreen]);
-    return (<View  ref={viewRef} style={[heightStyles.container]}><View  style={{flex:1}} >
+//  useEffect(()=>{
+// if(DummyImageScreen){
+//     ScreenshotQR()
+// }
+//  }, [DummyImageScreen]);
+    return (<View style={[heightStyles.hidden]}>
+        <View  ref={viewRef} style={[heightStyles.container]}><View  style={{flex:1}} >
         <View style={[heightStyles.qrCodeContainer]}>
         <Text style={[heightStyles.title]}>L1 approver has invited you</Text>
         <Text style={[heightStyles.text]}>Show this QR code or OTP to the guard at the gate</Text>
@@ -200,7 +204,8 @@ if(DummyImageScreen){
 </View>
 </View>
 </View>
-<View style={{flex:0.7}}><ImageBackground style={[heightStyles.BottomImage]} source={require('../../src/assets/ashramQrScreen.jpg')} /></View>
+<View style={{flex:0.7}}><ImageBackground style={[heightStyles.BottomImage]} source={require('../../src/assets/ashramQrScreen.jpg')}>
+    <LinearGradient colors={['rgba(0,0,0,0.4)', 'rgba(0,0,0,0.0)']} style={heightStyles.gradient} /></ImageBackground></View>
 </View>
     
     {/* <View style={[styles.Buttons]}>
@@ -209,13 +214,28 @@ if(DummyImageScreen){
     
     </View> */}
 </View>
+</View>
 </View>);
 };
 
 
 
 const mediumScreen = StyleSheet.create({
-    
+    gradient:{
+        ...StyleSheet.absoluteFillObject,
+    },
+
+    hidden:{
+   opacity:0,
+   position:'absolute'
+
+
+    },
+
+
+
+
+
     BottomImage:{
 
     flex: 1,
@@ -325,6 +345,13 @@ const mediumScreen = StyleSheet.create({
 
 
 const smallScreen = StyleSheet.create({
+    hidden:{
+        opacity:100,
+        position:'absolute',
+   
+     
+     
+         },
     
     BottomImage:{
 
@@ -332,11 +359,16 @@ const smallScreen = StyleSheet.create({
     position: 'relative',
     justifyContent: 'flex-end',
     alignSelf:'center',
-    width: 385,
+    width: 440,
     height: 110, // height as a percentage of screen height
     position: 'absolute',
     bottom: -34,
     
+    
+    },
+
+    gradient:{
+        ...StyleSheet.absoluteFillObject,
     },
     
     pageContainer:{
@@ -460,6 +492,22 @@ const smallScreen = StyleSheet.create({
 
 
 const styles = StyleSheet.create({
+
+    hidden:{
+        opacity:0,
+        position:'absolute',
+    top: -9999,
+    left: -9999,
+     
+     
+         },
+
+
+
+
+    gradient:{
+        ...StyleSheet.absoluteFillObject,
+    },
 
 pageContainer:{
     backgroundColor:'white'
