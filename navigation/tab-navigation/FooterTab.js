@@ -26,7 +26,7 @@ import L2ApprovalTab from '../../src/screens/L2-approval/L2ApprovalTab';
 import ViewDetails from '../../src/screens/L2-approval/ViewDetails';
 import FlatMembers from '../../src/screens/FlatMembers';
 import Feedback from '../../src/screens/Feedback';
-import DummyImageScreen from '../../src/screens/DummyImageScreen';
+
 
 const Tab = createBottomTabNavigator();
 const InviteStack = createNativeStackNavigator();
@@ -62,11 +62,6 @@ function InviteStackScreen() {
                     alignItems: 'center',
                   },
                 }}
-            />
-     <InviteStack.Screen
-                name="DummyImageScreen"
-                component={DummyImageScreen}
-                
             />
 
         </InviteStack.Navigator>

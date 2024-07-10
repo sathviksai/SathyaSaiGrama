@@ -227,7 +227,7 @@ const payload =  {
   }
 }
 
-const url1 = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/3318254000028623074`
+const url1 = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/${user.ID}`
 console.log(url1);
 const response1 = await fetch(url1,{
   method:'PATCH',
@@ -251,7 +251,7 @@ if (response1.ok) {
 
 
 
-const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/3318254000028623074/Generated_QR_Code/upload`
+const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/${user.ID}/Generated_QR_Code/upload`
 console.log(url);
 const response = await fetch(url,{
   method:'POST',
@@ -535,7 +535,7 @@ console.error('Error capturing and uploading QR code:', error);
             <View style={[heightStyles.codeBackdrop]}>
               <Text style={[heightStyles.code]}>{code}</Text>
               <View style={[heightStyles.BottomtextContainer]}>
-                <Text style={[heightStyles.dateOfArrivalText]}>15-July-2024</Text>
+                <Text style={[heightStyles.dateOfArrivalText]}>{user.Date_of_Visit}</Text>
                 <Text style={[heightStyles.Bottomtext]}>Sri Sathya Sai Grama -</Text>
                 <Text style={[heightStyles.Bottomtext]}>Muddenahalli Rd,</Text>
                 <Text style={[heightStyles.Bottomtext]}> Karnataka 562103,</Text>
@@ -545,7 +545,12 @@ console.error('Error capturing and uploading QR code:', error);
               </View>
             </View>
             <View style={{ flex: 0.7 }}><ImageBackground style={[heightStyles.BottomImage]} source={require('../../../src/assets/ashramQrScreen.jpg')}>
-              <LinearGradient colors={['rgba(255,255,255,1)', 'rgba(255,255,255,0)']} style={[heightStyles.gradient, heightStyles.topGradient]} /><LinearGradient colors={['rgba(255,255,255,0)', 'rgba(255,255,255,1)']} style={[heightStyles.gradient , heightStyles.bottomGradient]} /></ImageBackground></View>
+              <LinearGradient colors={['rgba(255,255,255,1)', 'rgba(255,255,255,0)']} style={[heightStyles.gradient, heightStyles.topGradient]} /><LinearGradient colors={['rgba(255,255,255,0)', 'rgba(255,255,255,1)']} style={[heightStyles.gradient , heightStyles.bottomGradient]} /></ImageBackground>
+              
+              <ImageBackground style={[heightStyles.BottomLogoImage]} source={require('../../../src/assets/SSG_OWOF.png')}></ImageBackground>
+              
+              
+              </View>
           </View>
 
           {/* <View style={[styles.Buttons]}>
@@ -564,10 +569,6 @@ export default ViewDetails
 
 
 const mediumScreen = StyleSheet.create({
-  gradient:{
-      ...StyleSheet.absoluteFillObject,
-  },
-
   hidden:{
  opacity:0,
  position:'absolute',
@@ -575,15 +576,24 @@ const mediumScreen = StyleSheet.create({
 
   },
 
+  gradient:{
+    ...StyleSheet.absoluteFillObject,
+    position:'absolute',
+    left:0,
+    top:0,
+},
+
+
   topGradient:{
     top:0,
-    height:'30%'
-      },
-    
-      bottomGradient:{
-    bottom:0,
-    height:'30%'
-      },
+    height:'180%'
+            },
+          
+    bottomGradient:{
+          bottom:0,
+          height:'9%',
+          backgroundColor:'#F9ECDF'
+            },
 
 
 
@@ -599,6 +609,20 @@ const mediumScreen = StyleSheet.create({
   bottom: -76,
   
   },
+
+
+  BottomLogoImage:{
+
+    flex: 1,
+    position: 'relative',
+    justifyContent: 'flex-end',
+    alignSelf:'center',
+    width: 145,
+    height: 95, // height as a percentage of screen height
+    position: 'absolute',
+    bottom: -76,
+    
+    },
   
   pageContainer:{
       backgroundColor:'white'
@@ -699,7 +723,7 @@ const mediumScreen = StyleSheet.create({
 
 const smallScreen = StyleSheet.create({
   hidden:{
-      opacity:100,
+      opacity:0,
       position:'absolute',
       zIndex:0,
    
@@ -707,13 +731,14 @@ const smallScreen = StyleSheet.create({
        },
 
 topGradient:{
-        top:0,
-        height:'30%'
+  top:0,
+  height:'180%'
           },
         
   bottomGradient:{
         bottom:0,
-        height:'30%'
+        height:'9%',
+        backgroundColor:'#F9ECDF'
           },
   
   BottomImage:{
@@ -730,8 +755,19 @@ topGradient:{
   
   },
 
+
+  BottomLogoImage:{
+
+    
+    },
+  
+
   gradient:{
       ...StyleSheet.absoluteFillObject,
+      ...StyleSheet.absoluteFillObject,
+      position:'absolute',
+      left:0,
+      top:0,
   },
   
   pageContainer:{
@@ -861,7 +897,7 @@ const normalScreen = StyleSheet.create({
       opacity:0,
       position:'absolute',
       zIndex:0,
-   
+ 
    
        },
 
@@ -895,6 +931,20 @@ pageContainer:{
   backgroundColor:'white'
 },
 
+BottomLogoImage:{
+
+  flex: 1,
+  position: 'relative',
+  justifyContent: 'flex-end',
+  alignSelf:'center',
+  width: 170,
+  height: 120, // height as a percentage of screen height
+  position: 'absolute',
+  bottom: -40,
+alignItems:'center'
+  },
+
+
 container: {
   flex:1,
   justifyContent:'center',
@@ -902,7 +952,7 @@ container: {
   backgroundColor:'#F9ECDF',
   width:450,
   height:780,
-
+ 
 
 
 },
