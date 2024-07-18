@@ -402,19 +402,6 @@ console.error('Error capturing and uploading QR code:', error);
 
 
 
-// const path = `${RNFS.DocumentDirectoryPath}/QRCode.png`;
-// console.log('Saving image to path:', path);form
-// await RNFS.writeFile(path, base64Data, 'base64');
-// console.log('image saved');
-
-
-// await Share.open({
-// URL: `file://${path}`,
-// type: 'image/png',
-
-// });
-// console.log('image shared');
-
 
 
 
@@ -424,12 +411,6 @@ console.error('Error capturing and uploading QR code:', error);
 useEffect(()=>{
     codeGenrator();
 }, []);
-
-//  useEffect(()=>{
-// if(DummyImageScreen){
-//     ScreenshotQR()
-// }
-//  }, [DummyImageScreen]);
 
 
 
@@ -697,11 +678,7 @@ useEffect(()=>{
             </View>
           </View>
 
-          {/* <View style={[styles.Buttons]}>
-<Button title="Generate new Qr code"  onPress={codeGenrator}/>
-<Button title="Upload Qr code"  onPress={ScreenshotQR}></Button>
-
-</View> */}
+         
         </View>
         </View>
       </View></>
@@ -1232,150 +1209,6 @@ BottomImage:{
 }
 
 });
-
-
-
-
-// const mainStyles = StyleSheet.create({
-
-//     pageContainer:{
-//         backgroundColor:'white'
-//     },
-  
-//      container: {
-//         flex:1,
-//         justifyContent:'center',
-//         alignItems:'center',
-//         backgroundColor:'#F9ECDF',
-  
-  
-    
-  
-//     },
-  
-//     title:{
-//         fontSize:30,
-//         textAlign: 'center',
-//         margin:10,
-//         color:'#6E260E',
-//         fontWeight:'bold'
-//     },
-  
-//     code:{
-//         fontSize:35,
-//         textAlign:'center',
-//         color:'brown',
-     
-//     },
-  
-//     codeBackdrop:{
-//         marginTop:12,
-//         backgroundColor:'pink',
-//         borderRadius:20,
-//         flexGrow:0,
-//         width:170,
-//         height:50
-      
-  
-//     },
-  
-  
-//     text:{
-//         fontSize:14,
-//         textAlign:'center',
-//         color:'#6E260E',
-//         marginBottom:10
-     
-//     },
-  
-//     middleText:{
-//     fontSize:17,
-//     color:'#6E260E',
-//     marginTop:10
-  
-  
-//     },
-  
-//     BottomtextContainer:{
-//     marginTop:15
-  
-  
-//     },
-  
-  
-//     Bottomtext:{
-//         fontSize:10,
-//         textAlign:'center',
-//         color:'#6E260E',
-      
-//         },
-  
-  
-//     dateOfArrivalText:{
-//         color:'#6E260E',
-//         fontWeight:'bold',
-//        alignSelf:'center',
-//        fontSize:20,
-     
-  
-//     },
-  
-//     qrCodeContainer:{
-//     flex:1,
-//         alignItems:'center',
-//         justifyContent:'center',
-      
-//     },
-  
-//     Buttons:{
-//         marginTop:100
-//     },
-  
-//     BottomImage:{
-  
-//         flex: 1,
-//         position: 'relative',
-//         justifyContent: 'flex-end',
-//         alignSelf:'center',
-//         width: 500,
-//         height: 200, // height as a percentage of screen height
-//         position: 'absolute',
-//         bottom: -198,
-      
-  
-  
-  
-//     }
-  
-//     });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
