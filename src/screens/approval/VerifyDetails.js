@@ -47,23 +47,16 @@ const {height} = Dimensions.get('window')
 
 
 
-const VerifyDetails = ({ navigation, route }) => {
+const VerifyDetails = ({ navigation, route}) => {
 
   const { user } = route.params;
 
   const [photo, setPhoto] = useState();
   const { getAccessToken, setDeniedDataFetched, setApproveDataFetched, setPendingDataFetched, setEditData, loggedUser, accessToken } = useContext(UserContext)
+  const token = accessToken
   setEditData(user);
   const [loading, setLoading] = useState(true);
   const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/${user.ID}/Photo/download`
-
-  console.log("Screen Height:", height);
-    
-  let heightStyles;
-  if(height > 900){
-      heightStyles = normalScreen;
-  } else if(height>750){  heightStyles = mediumScreen;}
-  else{ heightStyles = smallScreen;}
   const viewRef = useRef();
   const [code, setCode] = useState('');
   const codeGenrator = () => {
@@ -71,139 +64,79 @@ const VerifyDetails = ({ navigation, route }) => {
       setCode(newCode);
   };
 
+  console.log("Screen Height:", height);
 
-
-const ScreenshotQR = async () => {
-try{
-console.log('capturing view.......')
-const uri = await captureRef(viewRef, {
-format:'png',
-quality:0.8,
-
-});
-
-console.log('view captured Uri:', uri);
-
-// if (!uri){throw new Error('failed to capture, uri is undefined or null');
-// } 
-
-let base64Data = '';
-if (uri.startsWith('data:image/png;base64,')) {
-base64Data = uri.split('data:image/png;base64,')[1];
-} else if (uri.startsWith('file://')) {
-base64Data = await RNFS.readFile(uri, 'base64');
-} else {
-throw new Error(`Unexpected URI format: ${uri}`);
-}
-
-
-
-
-
-
-console.log('extracted base 64 data:', base64Data.length);
-
-
-if (!base64Data){
-  throw new Error('failed to extract base64 Data from URI');
-} 
-
-const postData = new FormData ();
-postData.append( 'file',{
-
-  uri: `data:image/png;base64, ${base64Data}`,
-  name: 'qrcode.png',
-  type: 'image/png',
-
-});
-
-const payload =  {
-  data: {
-      Generated_Passcode: code
-  }
-}
-
-const url1 = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/${user.ID}`
-console.log(url1);
-const response1 = await fetch(url1,{
-  method:'PATCH',
-  body: JSON.stringify(payload),
-  headers:{
-Authorization: `Zoho-oauthtoken ${accessToken}`,
-'Content-Type': 'application/json',
-
-
-
-  },
-}, console.log('posting to zoho....'));
-if (response1.ok) {
-  console.log('code posted successfully to Zoho.');
-  console.log("response",response1);
-} else {
-  console.log('Failed to post code to Zoho:', response1.status, response1.statusText, response1.ok);
-
-};
-
-
-
-
-const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/${user.ID}/Generated_QR_Code/upload`
-console.log(url);
-const response = await fetch(url,{
-  method:'POST',
-  body: postData,
-  headers:{
-Authorization: `Zoho-oauthtoken ${accessToken}`,
-'Content-Type': 'multipart/form-data',
-
-
-  },
-}, console.log('posting to zoho....'));
-
-if (response.ok) {
-  console.log('Image uploaded successfully to Zoho.');
-} else {
-  console.log('Failed to upload image to Zoho:', response.status, response.statusText);
-}
-} catch (error) {
-console.error('Error capturing and uploading QR code:', error);
-}
-};
-
-
-
-
-
-
-
-// const path = `${RNFS.DocumentDirectoryPath}/QRCode.png`;
-// console.log('Saving image to path:', path);form
-// await RNFS.writeFile(path, base64Data, 'base64');
-// console.log('image saved');
-
-
-// await Share.open({
-// URL: `file://${path}`,
-// type: 'image/png',
-
-// });
-// console.log('image shared');
-
-
-
-
-
-
-
-  useEffect(()=>{
-      codeGenrator();
-  }, []);
   
-//  useEffect(()=>{
-// if(DummyImageScreen){
-//     ScreenshotQR()
-// }
-//  }, [DummyImageScreen]);
+  const PasscodeUrl = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/form/Passcode`
+  
+      const payload =  {
+        data: {
+            Passcode: code
+        }
+      }
+    
+      const PasscodeData = async () => {
+        console.log("in PasscodeData function")
+      try{
+        const passcodeResponse = await fetch(PasscodeUrl, {
+          method: 'POST',
+          body: JSON.stringify(payload),
+          headers: {
+            Authorization: `Zoho-oauthtoken ${token}`,
+            'Content-Type': 'application/json',
+          }
+      });
+      const responseData = await passcodeResponse.json();
+  
+      console.log( "here is the passcode response" + responseData.code)
+    
+      if(responseData.code === 3002){
+        console.log('Post of code was un-sucessfull')
+        codeGenrator();
+        PasscodeData();
+      } else if(responseData.code === 3000){
+        console.log('code posted successfully to Zoho.');
+        ScreenshotQR();
+        
+      }
+    //   while (responseData.code === 3002){ 
+       
+       
+  
+    //     if(!responseData.code === 3002){
+    //       ScreenshotQR();
+    
+    
+    //   }
+    
+    
+    
+    // }
+  
+    console.log("Passcode data:" + passcodeResponse);
+  }
+      catch(error){ 
+      console.log(error)
+      return false;
+    }
+    //   while(response.code === 3002){ 
+    //     console.log('Post of code was un-sucessfull')
+    //      const data = await response.json();
+    //      codeGenrator();
+    
+    // if(!response.code === 3002){
+    //   ScreenshotQR();
+      
+    // }
+  
+    
+     return codeExsits;
+  }
+    
+
+
+
+
 
 
 
@@ -242,17 +175,23 @@ console.error('Error capturing and uploading QR code:', error);
 
   const onApprove = async () => {
 
+console.log("in OnApprove function")
+    
+    
+
     let status = user.Referrer_Approval;
 
     let updateField
+    
 
     if (loggedUser.role === "L2") {
       updateField = {
         Referrer_Approval: "APPROVED",
         L2_Approval_Status: "APPROVED"
       }
-       
-     ScreenshotQR();
+      PasscodeData();
+
+     
       
     } else {
       updateField = {
@@ -288,8 +227,16 @@ console.error('Error capturing and uploading QR code:', error);
 
     let status = user.Referrer_Approval;
 
-    const updateField = {
-      Referrer_Approval: "DENIED"
+    if (loggedUser.role === "L2") {
+      updateField = {
+        Referrer_Approval: "DENIED",
+        L2_Approval_Status: "DENIED"
+      }
+         
+    } else {
+      updateField = {
+        Referrer_Approval: "DENIED"
+      }
     }
 
     const updateData = {
@@ -341,6 +288,169 @@ console.error('Error capturing and uploading QR code:', error);
     }
 
 };
+
+console.log("Screen Height:", height);
+    
+let heightStyles;
+if(height > 900){
+    heightStyles = normalScreen;
+} else if(height>750){  heightStyles = mediumScreen;}
+else{ heightStyles = smallScreen;}
+
+
+
+const ScreenshotQR = async () => {
+try{
+console.log('capturing view.......')
+const uri = await captureRef(viewRef, {
+format:'png',
+quality:0.8,
+
+});
+
+console.log('view captured Uri:', uri);
+
+// if (!uri){throw new Error('failed to capture, uri is undefined or null');
+// } 
+
+let base64Data = '';
+if (uri.startsWith('data:image/png;base64,')) {
+base64Data = uri.split('data:image/png;base64,')[1];
+} else if (uri.startsWith('file://')) {
+base64Data = await RNFS.readFile(uri, 'base64');
+} else {
+throw new Error(`Unexpected URI format: ${uri}`);
+}
+
+
+
+
+
+
+console.log('extracted base 64 data:', base64Data.length);
+
+
+if (!base64Data){
+throw new Error('failed to extract base64 Data from URI');
+} 
+
+const postData = new FormData ();
+postData.append( 'file',{
+
+uri: `data:image/png;base64, ${base64Data}`,
+name: 'qrcode.png',
+type: 'image/png',
+
+});
+
+const payload =  {
+data: {
+    Generated_Passcode: code
+}
+}
+
+const url1 = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/${user.ID}`
+console.log(url1);
+const response1 = await fetch(url1,{
+method:'PATCH',
+body: JSON.stringify(payload),
+headers:{
+Authorization: `Zoho-oauthtoken ${accessToken}`,
+'Content-Type': 'application/json',
+
+
+
+},
+}, console.log('posting to zoho....'));
+if (response1.ok) {
+console.log('code posted successfully to Zoho.');
+console.log("response",response1);
+} else {
+console.log('Failed to post code to Zoho:', response1.status, response1.statusText, response1.ok);
+
+};
+
+
+
+
+const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/${user.ID}/Generated_QR_Code/upload`
+console.log(url);
+const response = await fetch(url,{
+method:'POST',
+body: postData,
+headers:{
+Authorization: `Zoho-oauthtoken ${accessToken}`,
+'Content-Type': 'multipart/form-data',
+
+
+},
+}, console.log('posting to zoho....'));
+
+if (response.ok) {
+console.log('Image uploaded successfully to Zoho.');
+} else {
+console.log('Failed to upload image to Zoho:', response.status, response.statusText);
+}
+} catch (error) {
+console.error('Error capturing and uploading QR code:', error);
+}
+};
+
+
+
+
+
+
+
+// const path = `${RNFS.DocumentDirectoryPath}/QRCode.png`;
+// console.log('Saving image to path:', path);form
+// await RNFS.writeFile(path, base64Data, 'base64');
+// console.log('image saved');
+
+
+// await Share.open({
+// URL: `file://${path}`,
+// type: 'image/png',
+
+// });
+// console.log('image shared');
+
+
+
+
+
+
+
+useEffect(()=>{
+    codeGenrator();
+}, []);
+
+//  useEffect(()=>{
+// if(DummyImageScreen){
+//     ScreenshotQR()
+// }
+//  }, [DummyImageScreen]);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -559,7 +669,8 @@ console.error('Error capturing and uploading QR code:', error);
     </SafeAreaView><View style={[heightStyles.hidden]}>
         <View ref={viewRef} style={[heightStyles.container]}><View style={{ flex: 1 }}>
           <View style={[heightStyles.qrCodeContainer]}>
-            <Text style={[heightStyles.title]}>L1 approver has invited you</Text>
+          <Text style={[heightStyles.title]}>{user.Referrer_App_User_lookup.Name_field}</Text>
+            <Text style={[heightStyles. title2]}>has invited you</Text>
             <Text style={[heightStyles.text]}>Show this QR code or OTP to the guard at the gate</Text>
             {code ? (
               <QRCode value={code} size={160} />
@@ -635,9 +746,9 @@ const mediumScreen = StyleSheet.create({
   justifyContent: 'flex-end',
   alignSelf:'center',
   width: 385,
-  height: 120, // height as a percentage of screen height
+  height: 130, // height as a percentage of screen height
   position: 'absolute',
-  bottom: -76,
+  bottom: -79,
   
   },
 
@@ -673,12 +784,22 @@ const mediumScreen = StyleSheet.create({
   },
   
   title:{
-      fontSize:30,
+      fontSize:25,
       textAlign: 'center',
-      margin:10,
+      margin:0,
       color:'#6E260E',
       fontWeight:'bold'
   },
+
+
+   title2:{
+      fontSize:25,
+      textAlign: 'center',
+      marginBottom:10,
+      color:'#6E260E',
+      fontWeight:'bold'
+  },
+  
   
   code:{
       fontSize:35,
@@ -818,13 +939,29 @@ topGradient:{
   },
   
   title:{
-      fontSize:30,
+      fontSize:25,
       textAlign: 'center',
-      margin:10,
+      margin:0,
       color:'#6E260E',
       fontWeight:'bold'
   },
   
+
+  title2:{
+    fontSize:25,
+    textAlign: 'center',
+    marginBottom:5,
+    color:'#6E260E',
+    fontWeight:'bold'
+},
+
+
+
+
+
+
+
+
   code:{
       fontSize:35,
       textAlign:'center',
@@ -989,12 +1126,24 @@ container: {
 },
 
 title:{
-  fontSize:30,
+  fontSize:25,
   textAlign: 'center',
-  margin:10,
+  margin:0,
   color:'#6E260E',
   fontWeight:'bold'
 },
+
+
+title2:{
+  fontSize:25,
+  textAlign: 'center',
+ marginBottom:10,
+  color:'#6E260E',
+  fontWeight:'bold'
+},
+
+
+
 
 code:{
   fontSize:35,
@@ -1199,6 +1348,8 @@ BottomImage:{
 //     }
   
 //     });
+
+
 
 
 
