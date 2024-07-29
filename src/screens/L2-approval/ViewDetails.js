@@ -1,3 +1,4 @@
+
 import {
   Image,
   Platform,
@@ -14,6 +15,7 @@ import React, {useContext, useEffect, useState} from 'react';
 import {BASE_APP_URL, APP_LINK_NAME, APP_OWNER_NAME} from '@env';
 import UserContext from '../../../context/UserContext';
 import {encode} from 'base64-arraybuffer';
+
 
 export const updateRecord = async (reportName, id, modified_data, token) => {
   try {
@@ -81,7 +83,9 @@ const ViewDetails = ({navigation, route}) => {
   } = useContext(UserContext);
   const token = accessToken;
   const [loading, setLoading] = useState(true);
+
   const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/${user.ID}/Photo/download`;
+
 
   const getImage = async () => {
     try {
@@ -107,6 +111,78 @@ const ViewDetails = ({navigation, route}) => {
     }
   };
 
+
+
+  const PasscodeUrl = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/form/Passcode`
+  
+      const payload =  {
+        data: {
+            Passcode: code
+        }
+      }
+    
+      const PasscodeData = async () => {
+      try{
+        const passcodeResponse = await fetch(PasscodeUrl, {
+          method: 'POST',
+          body: JSON.stringify(payload),
+          headers: {
+            Authorization: `Zoho-oauthtoken ${token}`,
+            'Content-Type': 'application/json',
+          }
+      });
+      const responseData = await passcodeResponse.json();
+  
+      console.log( "here is the passcode response" + responseData.code)
+    
+      if(responseData.code === 3002){
+        console.log('Post of code was un-sucessfull')
+        codeGenrator();
+        PasscodeData();
+      } else if(responseData.code === 3000){
+        console.log('code posted successfully to Zoho.');
+        ScreenshotQR();
+        
+      }
+  
+  
+    console.log("Passcode data:" + passcodeResponse);
+  }
+      catch(error){ 
+      
+      return false;
+    }
+    
+    
+     return codeExsits;
+  }
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   useEffect(() => {
     const fetchImage = async () => {
       const dataUrl = await getImage();
@@ -117,6 +193,7 @@ const ViewDetails = ({navigation, route}) => {
   }, []);
 
   const onApprove = async () => {
+
     const status = user.L2_Approval_Status;
 
     const updateField = {
@@ -186,18 +263,22 @@ const ViewDetails = ({navigation, route}) => {
     }
   };
 
+
   console.log('User in View details of L2 : ', user);
   return (
     <SafeAreaView style={{flex: 1, backgroundColor: '#EEEEEE'}}>
+
       {/* <View style={styles.header}>
-        <View style={styles.headerContainer}>
-          <Text style={styles.headertxt}>Visitor details</Text>
-        </View>
-      </View> */}
+      <View style={styles.headerContainer}>
+        <Text style={styles.headertxt}>Visitor details</Text>
+      </View>
+    </View> */}
       <ScrollView style={styles.scrollview}>
+
         {user?.L2_Approval_Status === 'PENDING APPROVAL' ? (
           <View style={[styles.container, {marginTop: 20}]}>
             <View style={[styles.left, {width: '50%'}]}>
+
               <TouchableOpacity style={styles.btnAccept} onPress={onApprove}>
                 <Text style={styles.btntxt}>Approve</Text>
               </TouchableOpacity>
@@ -208,20 +289,26 @@ const ViewDetails = ({navigation, route}) => {
               </TouchableOpacity>
             </View>
           </View>
+
         ) : user?.L2_Approval_Status === 'APPROVED' ? (
           <View style={{width: '100%', padding: 10, marginLeft: '30%'}}>
+
             <TouchableOpacity style={[styles.btnReject]} onPress={onReject}>
               <Text style={[styles.btntxt]}>Reject</Text>
             </TouchableOpacity>
           </View>
+
         ) : user?.L2_Approval_Status === 'DENIED' ? (
           <View style={{width: '100%', padding: 10, marginLeft: '15%'}}>
+
             <TouchableOpacity style={styles.btnAccept} onPress={onApprove}>
               <Text style={styles.btntxt}>Approve</Text>
             </TouchableOpacity>
           </View>
         ) : null}
+
         <View style={[styles.container, {marginTop: 20}]}>
+
           <View style={styles.left}>
             <Text style={styles.label}>Name</Text>
           </View>
@@ -388,11 +475,539 @@ const ViewDetails = ({navigation, route}) => {
           </View>
         </View>
       </ScrollView>
+
     </SafeAreaView>
   );
 };
 
+
 export default ViewDetails;
+
+
+
+const mediumScreen = StyleSheet.create({
+  hidden:{
+ opacity:0,
+ position:'absolute',
+ zIndex:0,
+
+  },
+
+  gradient:{
+    ...StyleSheet.absoluteFillObject,
+    position:'absolute',
+    left:0,
+    top:0,
+},
+
+
+  topGradient:{
+    top:0,
+    height:'180%'
+            },
+          
+    bottomGradient:{
+          bottom:0,
+          height:'9%',
+          backgroundColor:'#F9ECDF'
+            },
+
+
+
+  BottomImage:{
+
+  flex: 1,
+  position: 'relative',
+  justifyContent: 'flex-end',
+  alignSelf:'center',
+  width: 385,
+  height: 130, // height as a percentage of screen height
+  position: 'absolute',
+  bottom: -79,
+  
+  },
+
+
+  BottomLogoImage:{
+
+    flex: 1,
+    position: 'relative',
+    justifyContent: 'flex-end',
+    alignSelf:'center',
+    width: 145,
+    height: 95, // height as a percentage of screen height
+    position: 'absolute',
+    bottom: -76,
+    
+    },
+  
+  pageContainer:{
+      backgroundColor:'white'
+  },
+  
+   container: {
+      flex:1,
+      justifyContent:'center',
+      alignItems:'center',
+      backgroundColor:'#F9ECDF',
+      width:385,
+      height:612
+  
+  
+    
+  
+  },
+  
+  title:{
+      fontSize:25,
+      textAlign: 'center',
+      margin:0,
+      color:'#6E260E',
+      fontWeight:'bold'
+  },
+
+
+   title2:{
+      fontSize:25,
+      textAlign: 'center',
+      marginBottom:10,
+      color:'#6E260E',
+      fontWeight:'bold'
+  },
+  
+  
+  code:{
+      fontSize:35,
+      textAlign:'center',
+      color:'brown',
+     
+  },
+  
+  codeBackdrop:{
+      marginTop:12,
+      backgroundColor:'pink',
+      borderRadius:20,
+      flexGrow:0,
+      width:170,
+      height:50
+      
+  
+  },
+  
+  
+  text:{
+      fontSize:14,
+      textAlign:'center',
+      color:'#6E260E',
+      marginBottom:10
+     
+  },
+  
+  middleText:{
+  fontSize:17,
+  color:'#6E260E',
+  marginTop:10
+  
+  
+  },
+  
+  BottomtextContainer:{
+  marginTop:15
+  
+  
+  },
+  
+  
+  Bottomtext:{
+      fontSize:10,
+      textAlign:'center',
+      color:'#6E260E',
+      
+      },
+  
+  
+  dateOfArrivalText:{
+      color:'#6E260E',
+      fontWeight:'bold',
+     alignSelf:'center',
+     fontSize:20,
+     
+  
+  },
+  
+  qrCodeContainer:{
+  flex:0.92,
+      alignItems:'center',
+      justifyContent:'center',
+      
+  },
+  
+  Buttons:{
+      marginTop:100
+  },
+})
+
+
+const smallScreen = StyleSheet.create({
+  hidden:{
+      opacity:0,
+      position:'absolute',
+      zIndex:0,
+   
+   
+       },
+
+topGradient:{
+  top:0,
+  height:'180%'
+          },
+        
+  bottomGradient:{
+        bottom:0,
+        height:'9%',
+        backgroundColor:'#F9ECDF'
+          },
+  
+  BottomImage:{
+
+  flex: 1,
+  position: 'relative',
+  justifyContent: 'flex-end',
+  alignSelf:'center',
+  width: 440,
+  height: 90, // height as a percentage of screen height
+  position: 'absolute',
+  bottom: -35
+  
+  
+  },
+
+
+  BottomLogoImage:{
+
+    
+    },
+  
+
+  gradient:{
+      ...StyleSheet.absoluteFillObject,
+      ...StyleSheet.absoluteFillObject,
+      position:'absolute',
+      left:0,
+      top:0,
+  },
+  
+  pageContainer:{
+      backgroundColor:'white'
+  },
+  
+   container: {
+      flex:0,
+      justifyContent:'center',
+      alignItems:'center',
+      backgroundColor:'#F9ECDF',
+      width:430,
+      height:570
+  
+    
+  
+  },
+  
+  title:{
+      fontSize:25,
+      textAlign: 'center',
+      margin:0,
+      color:'#6E260E',
+      fontWeight:'bold'
+  },
+  
+
+  title2:{
+    fontSize:25,
+    textAlign: 'center',
+    marginBottom:5,
+    color:'#6E260E',
+    fontWeight:'bold'
+},
+
+
+
+
+
+
+
+
+  code:{
+      fontSize:35,
+      textAlign:'center',
+      color:'brown',
+     
+  },
+  
+  codeBackdrop:{
+      marginTop:12,
+      backgroundColor:'pink',
+      borderRadius:20,
+      flexGrow:0,
+      width:170,
+      height:50
+      
+  
+  },
+  
+  
+  text:{
+      fontSize:14,
+      textAlign:'center',
+      color:'#6E260E',
+      marginBottom:10
+     
+  },
+  
+  middleText:{
+  fontSize:17,
+  color:'#6E260E',
+  marginTop:10
+  
+  
+  },
+  
+  BottomtextContainer:{
+  marginTop:15
+  
+  
+  },
+  
+  
+  Bottomtext:{
+      fontSize:10,
+      textAlign:'center',
+      color:'#6E260E',
+      
+      },
+  
+  
+  dateOfArrivalText:{
+      color:'#6E260E',
+      fontWeight:'bold',
+     alignSelf:'center',
+     fontSize:20,
+     
+  
+  },
+  
+  qrCodeContainer:{
+  flex:1,
+      alignItems:'center',
+      justifyContent:'center',
+      
+  },
+  
+  Buttons:{
+      marginTop:100
+  },
+})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+const normalScreen = StyleSheet.create({
+
+  hidden:{
+      opacity:0,
+      position:'absolute',
+      zIndex:0,
+ 
+   
+       },
+
+
+
+
+  gradient:{
+    ...StyleSheet.absoluteFillObject,
+      position:'absolute',
+      left:0,
+      top:0,
+  },
+
+
+  topGradient:{
+top:0,
+height:'180%'
+  },
+
+  bottomGradient:{
+bottom:0,
+height:'10%',
+backgroundColor:'#F9ECDF'
+
+
+  },
+
+
+
+pageContainer:{
+  backgroundColor:'white'
+},
+
+BottomLogoImage:{
+
+  flex: 1,
+  position: 'relative',
+  justifyContent: 'flex-end',
+  alignSelf:'center',
+  width: 170,
+  height: 120, // height as a percentage of screen height
+  position: 'absolute',
+  bottom: -40,
+alignItems:'center'
+  },
+
+
+container: {
+  flex:1,
+  justifyContent:'center',
+  alignItems:'center',
+  backgroundColor:'#F9ECDF',
+  width:450,
+  height:780,
+ 
+
+
+},
+
+title:{
+  fontSize:25,
+  textAlign: 'center',
+  margin:0,
+  color:'#6E260E',
+  fontWeight:'bold'
+},
+
+
+title2:{
+  fontSize:25,
+  textAlign: 'center',
+ marginBottom:10,
+  color:'#6E260E',
+  fontWeight:'bold'
+},
+
+
+
+
+code:{
+  fontSize:35,
+  textAlign:'center',
+  color:'brown',
+ 
+},
+
+codeBackdrop:{
+  marginTop:12,
+  backgroundColor:'pink',
+  borderRadius:20,
+  flexGrow:0,
+  width:170,
+  height:50
+  
+
+},
+
+
+text:{
+  fontSize:14,
+  textAlign:'center',
+  color:'#6E260E',
+  marginBottom:10
+ 
+},
+
+middleText:{
+fontSize:17,
+color:'#6E260E',
+marginTop:10
+
+
+},
+
+BottomtextContainer:{
+marginTop:19
+
+
+},
+
+
+Bottomtext:{
+  fontSize:18,
+  textAlign:'center',
+  color:'#6E260E',
+  
+  },
+
+
+dateOfArrivalText:{
+  color:'#6E260E',
+  fontWeight:'bold',
+ alignSelf:'center',
+ fontSize:20,
+ 
+
+},
+
+qrCodeContainer:{
+flex:1,
+  alignItems:'center',
+  justifyContent:'center',
+  
+},
+
+Buttons:{
+  marginTop:100
+},
+
+BottomImage:{
+
+  flex: 1,
+  position: 'relative',
+  justifyContent: 'flex-end',
+  alignSelf:'center',
+  width: 500,
+  height: 200, 
+  position: 'absolute',
+  bottom: -78,
+  
+
+
+
+}
+
+});
+
 
 const styles = StyleSheet.create({
   header: {

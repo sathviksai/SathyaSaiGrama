@@ -17,6 +17,7 @@ import {AuthContext} from '../auth/AuthProvider';
 import {BASE_APP_URL, APP_OWNER_NAME, APP_LINK_NAME, YOURLS_KEY} from '@env';
 import axios from 'axios';
 
+
 const Invite = ({navigation}) => {
   const {user} = useContext(AuthContext);
 
@@ -29,6 +30,7 @@ const Invite = ({navigation}) => {
   const handleModal = () => {
     setModal(!modal);
   };
+  
   // const handleCheckboxChange = option => {
   //   setSelectedOption(selectedOption === option ? null : option);
   // };
@@ -270,7 +272,7 @@ const Invite = ({navigation}) => {
                 Fill it by yourself!
               </Text>
             </TouchableOpacity>
-          </View>
+    </View>
         </View>
       </ScrollView>
     </SafeAreaView>

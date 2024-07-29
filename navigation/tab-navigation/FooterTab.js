@@ -27,6 +27,7 @@ import ViewDetails from '../../src/screens/L2-approval/ViewDetails';
 import FlatMembers from '../../src/screens/FlatMembers';
 import Feedback from '../../src/screens/Feedback';
 
+
 const Tab = createBottomTabNavigator();
 const InviteStack = createNativeStackNavigator();
 const ProfileStack = createNativeStackNavigator();
@@ -62,6 +63,7 @@ function InviteStackScreen() {
                   },
                 }}
             />
+
         </InviteStack.Navigator>
     );
 }
