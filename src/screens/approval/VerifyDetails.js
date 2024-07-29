@@ -58,7 +58,7 @@ const VerifyDetails = ({ navigation, route}) => {
   const [loading, setLoading] = useState(true);
   const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/${user.ID}/Photo/download`
   const viewRef = useRef();
-  const [code, setCode] = useState('');
+  const [code, setCode] = useState('417525');
   const codeGenrator = () => {
       const newCode =  Math.floor(100000 + Math.random() * (999999 - 100001 + 1)).toString();
       setCode(newCode);
@@ -93,7 +93,6 @@ const VerifyDetails = ({ navigation, route}) => {
       if(responseData.code === 3002){
         console.log('Post of code was un-sucessfull')
         codeGenrator();
-        PasscodeData();
       } else if(responseData.code === 3000){
         console.log('code posted successfully to Zoho.');
         ScreenshotQR();
@@ -407,10 +406,15 @@ console.error('Error capturing and uploading QR code:', error);
 
 
 
+useEffect(() => {
+  PasscodeData();
+}, [setCode]);
 
-useEffect(()=>{
-    codeGenrator();
-}, []);
+
+
+// useEffect(()=>{
+//     codeGenrator();
+// }, []);
 
 
 
