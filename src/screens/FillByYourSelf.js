@@ -177,8 +177,8 @@ const FillByYourSelf = ({navigation}) => {
   //     Alert.alert('Error', 'Something went wrong');
   //   }
   // };
-//==============================
-//Post data to Approver_to_visitor table
+  //==============================
+  //Post data to Approver_to_visitor table
   const posttoL1aprroved = async DepartmentID => {
     // const Vehicle_Info = await postVehicle();
     const formData = {
@@ -259,7 +259,7 @@ const FillByYourSelf = ({navigation}) => {
   //   }
   // };
   //==============================================
-//Below are validations
+  //Below are validations
   const validateName = () => {
     if (prefix == ' ') {
       Alert.alert('Please Select Prefix ');
@@ -328,10 +328,19 @@ const FillByYourSelf = ({navigation}) => {
   const handleSubmit = async () => {
     if (validateForm()) {
       setIsSubmitted(true);
-      const empId = await getEmpId();
-      console.log(empId);
+      let office_id;
+
+      if (selectedHO === 'Home') {
+        office_id = '3318254000027832015';
+        console.log('In Home conditional block');
+      } else {
+        const empId = await getEmpId();
+        console.log(empId);
+        office_id = empId.data[0].Office_lookup.ID;
+      }
+
       try {
-        const rese = await posttoL1aprroved(empId.data[0].Office_lookup.ID);
+        const rese = await posttoL1aprroved(office_id);
         console.log('Response', rese);
         navigation.navigate('Invite');
         setIsSubmitted(false);
@@ -745,8 +754,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'white',
     flexShrink: 0,
-    justifyContent: "center",
-    paddingLeft: 12
+    justifyContent: 'center',
+    paddingLeft: 12,
   },
   header: {
     fontFamily: 'Inter',

@@ -23,7 +23,7 @@ const App = () => {
     setLoggedUser,
     setL1ID,
     setUserEmail,
-    setDeviceToken
+    setDeviceToken,
   } = useContext(UserContext);
   const [loading, setLoading] = useState(true);
 
@@ -47,7 +47,7 @@ const App = () => {
       //console.log("Access token in App: ", res.documents[0].Token)
       setAccessToken(res.documents[0].Token);
     } catch (error) {
-      console.log('Error in App.js: ', error);
+      console.log('Error in App.js in getAppWriteToken function: ', error);
       Alert.alert(error);
     }
   };
@@ -57,12 +57,11 @@ const App = () => {
     const fetchToken = async () => {
       await getAppWriteToken();
       const dToken = await getDeviceToken();
-      setDeviceToken(dToken)
-      console.log("device token is app.js: ", dToken)
+      setDeviceToken(dToken);
+      console.log('device token is app.js: ', dToken);
     };
 
     fetchToken();
-    
   }, []);
 
   //===================================

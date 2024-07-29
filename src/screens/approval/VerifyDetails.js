@@ -1,8 +1,21 @@
-import { Image, Platform, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View, ActivityIndicator, Alert, ImageBackground, Dimensions } from 'react-native'
-import React, { useContext, useEffect, useState, useRef } from 'react'
-import { BASE_APP_URL, APP_LINK_NAME, APP_OWNER_NAME } from "@env"
+
+import {
+  Image,
+  Platform,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  ActivityIndicator,
+  Alert,
+} from 'react-native';
+import React, {useContext, useEffect, useState} from 'react';
+import {BASE_APP_URL, APP_LINK_NAME, APP_OWNER_NAME} from '@env';
+
 import UserContext from '../../../context/UserContext';
-import { encode } from 'base64-arraybuffer';
+import {encode} from 'base64-arraybuffer';
 import RNFS from 'react-native-fs';
 import Share from 'react-native-share';
 import LinearGradient from 'react-native-linear-gradient';
@@ -11,133 +24,80 @@ import { captureRef } from 'react-native-view-shot';
 import 'react-native-get-random-values';
 import { BackgroundImage } from 'react-native-elements/dist/config';
 
-
 export const updateRecord = async (reportName, modified_data, token, id) => {
   try {
-    const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/${reportName}/${id}`
-    console.log(url)
+    const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/${reportName}/${id}`;
+    console.log(url);
     const response = await fetch(url, {
       method: 'PATCH',
       headers: {
-        Authorization: `Zoho-oauthtoken ${token}`
+        Authorization: `Zoho-oauthtoken ${token}`,
       },
-      body: JSON.stringify(modified_data)
+      body: JSON.stringify(modified_data),
     });
     return await response.json();
-  }
-  catch (err) {
+  } catch (err) {
     if (err.message === 'Network request failed')
-      Alert.alert('Network Error', 'Failed to fetch data. Please check your network connection and try again.');
+      Alert.alert(
+        'Network Error',
+        'Failed to fetch data. Please check your network connection and try again.',
+      );
     else {
-      Alert.alert("Error: ", err)
-      console.log(err)
+      Alert.alert('Error: ', err);
+      console.log(err);
     }
   }
-}
+};
+
+const VerifyDetails = ({navigation, route}) => {
+  const {stringified} = route.params;
+  console.log('stringified', stringified);
+  let {user} = route.params;
+
+  // console.log('user outside stringified', user);
+
+  if (stringified) {
+    console.log('inside if stringified');
+    // const {user} = route.params;
+    user = JSON.parse(user);
+
+    user.Name_field = JSON.parse(user.Name_field);
+    user.Referrer_App_User_lookup = JSON.parse(user.Referrer_App_User_lookup);
+    user.Department = JSON.parse(user.Department);
 
 
+    // Format the received string
+    let formattedString = `[${user.Vehicle_Information}]`;
 
 
+    try {
+      // Parse the formatted string
+      user.Vehicle_Information = JSON.parse(formattedString);
+      console.log(parsedArray);
+    } catch (error) {
+      console.error('Parsing error:', error.message);
+    }
 
-const {height} = Dimensions.get('window')
-
-
-
-
-
-
-
-const VerifyDetails = ({ navigation, route}) => {
-
-  const { user } = route.params;
+    console.log('user in stringified', user);
+  }
 
   const [photo, setPhoto] = useState();
-  const { getAccessToken, setDeniedDataFetched, setApproveDataFetched, setPendingDataFetched, setEditData, loggedUser, accessToken } = useContext(UserContext)
-  const token = accessToken
-  setEditData(user);
+
+  const {
+    getAccessToken,
+    setDeniedDataFetched,
+    setApproveDataFetched,
+    setPendingDataFetched,
+    setEditData,
+    loggedUser,
+    accessToken,
+  } = useContext(UserContext);
+
+  useEffect(() => {
+    setEditData(user);
+  }, []);
   const [loading, setLoading] = useState(true);
-  const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/${user.ID}/Photo/download`
-  const viewRef = useRef();
-  const [code, setCode] = useState('');
-  const codeGenrator = () => {
-      const newCode =  Math.floor(100000 + Math.random() * (999999 - 100001 + 1)).toString();
-      setCode(newCode);
-  };
-
-  console.log("Screen Height:", height);
-
-  
-  const PasscodeUrl = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/form/Passcode`
-  
-      const payload =  {
-        data: {
-            Passcode: code
-        }
-      }
-    
-      const PasscodeData = async () => {
-        console.log("in PasscodeData function")
-      try{
-        const passcodeResponse = await fetch(PasscodeUrl, {
-          method: 'POST',
-          body: JSON.stringify(payload),
-          headers: {
-            Authorization: `Zoho-oauthtoken ${token}`,
-            'Content-Type': 'application/json',
-          }
-      });
-      const responseData = await passcodeResponse.json();
-  
-      console.log( "here is the passcode response" + responseData.code)
-    
-      if(responseData.code === 3002){
-        console.log('Post of code was un-sucessfull')
-        codeGenrator();
-        PasscodeData();
-      } else if(responseData.code === 3000){
-        console.log('code posted successfully to Zoho.');
-        ScreenshotQR();
-        
-      }
-    //   while (responseData.code === 3002){ 
-       
-       
-  
-    //     if(!responseData.code === 3002){
-    //       ScreenshotQR();
-    
-    
-    //   }
-    
-    
-    
-    // }
-  
-    console.log("Passcode data:" + passcodeResponse);
-  }
-      catch(error){ 
-      console.log(error)
-      return false;
-    }
-    //   while(response.code === 3002){ 
-    //     console.log('Post of code was un-sucessfull')
-    //      const data = await response.json();
-    //      codeGenrator();
-    
-    // if(!response.code === 3002){
-    //   ScreenshotQR();
-      
-    // }
-  
-    
-     return codeExsits;
-  }
-    
-
-
-
-
-
+  const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/${user.ID}/Photo/download`;
 
 
   const getImage = async () => {
@@ -175,100 +135,89 @@ const VerifyDetails = ({ navigation, route}) => {
 
   const onApprove = async () => {
 
-console.log("in OnApprove function")
-    
-    
-
     let status = user.Referrer_Approval;
 
-    let updateField
-    
+    let updateField;
 
-    if (loggedUser.role === "L2") {
+
+    if (loggedUser.role === 'L2') {
       updateField = {
-        Referrer_Approval: "APPROVED",
-        L2_Approval_Status: "APPROVED"
-      }
-      PasscodeData();
 
-     
-      
+        Referrer_Approval: 'APPROVED',
+        L2_Approval_Status: 'APPROVED',
+      };
+
     } else {
       updateField = {
-        Referrer_Approval: "APPROVED"
-      }
+        Referrer_Approval: 'APPROVED',
+      };
     }
 
     const updateData = {
-      data: updateField
-    }
+      data: updateField,
+    };
 
-    const response = await updateRecord('Approval_to_Visitor_Report', updateData, accessToken, user.ID);
+    const response = await updateRecord(
+      'Approval_to_Visitor_Report',
+      updateData,
+      accessToken,
+      user.ID,
+    );
 
     if (response.code === 3000) {
-      if (status === "PENDING APPROVAL") {
-        setPendingDataFetched(false)
-        setApproveDataFetched(false)
+      if (status === 'PENDING APPROVAL') {
+        setPendingDataFetched(false);
+        setApproveDataFetched(false);
+      } else if (status === 'DENIED') {
+        setDeniedDataFetched(false);
+        setApproveDataFetched(false);
       }
-      else if (status === "DENIED") {
-        setDeniedDataFetched(false)
-        setApproveDataFetched(false)
-      }
-      Alert.alert("Visitor Approved")
-      navigation.navigate('Approved')
+      Alert.alert('Visitor Approved');
+      navigation.navigate('Approved');
+    } else {
+      Alert.alert('Error: ', response.code);
     }
-    else {
-      Alert.alert("Error: ", response.code)
-    }
-
-  }
+  };
 
   const onReject = async () => {
-
     let status = user.Referrer_Approval;
 
-    if (loggedUser.role === "L2") {
-      updateField = {
-        Referrer_Approval: "DENIED",
-        L2_Approval_Status: "DENIED"
-      }
-         
-    } else {
-      updateField = {
-        Referrer_Approval: "DENIED"
-      }
-    }
+
+    const updateField = {
+      Referrer_Approval: 'DENIED',
+    };
+
 
     const updateData = {
-      data: updateField
-    }
+      data: updateField,
+    };
 
-    const response = await updateRecord('Approval_to_Visitor_Report', updateData, accessToken, user.ID);
-    console.log("response in reject", response)
+    const response = await updateRecord(
+      'Approval_to_Visitor_Report',
+      updateData,
+      accessToken,
+      user.ID,
+    );
+    console.log('response in reject', response);
 
     if (response.code === 3000) {
-      if (status === "PENDING APPROVAL") {
-        setPendingDataFetched(false)
-        setDeniedDataFetched(false)
+      if (status === 'PENDING APPROVAL') {
+        setPendingDataFetched(false);
+        setDeniedDataFetched(false);
+      } else if (status === 'APPROVED') {
+        setDeniedDataFetched(false);
+        setApproveDataFetched(false);
       }
-      else if (status === "APPROVED") {
-        setDeniedDataFetched(false)
-        setApproveDataFetched(false)
-      }
-      Alert.alert("Visitor Rejected")
-      navigation.navigate('Denied')
+      Alert.alert('Visitor Rejected');
+      navigation.navigate('Denied');
+    } else {
+      Alert.alert('Error: ', response.code);
     }
-    else {
-      Alert.alert("Error: ", response.code)
-    }
-
-  }
-
-
+  };
 
   const onShare = async () => {
     try {
-      const { Generated_QR_Code } = user;
+      const {Generated_QR_Code} = user;
 
       // Define the path to download the image
       const path = `${RNFS.DocumentDirectoryPath}/image.jpg`;
@@ -433,11 +382,11 @@ useEffect(()=>{
 
 
 
-
-
-  console.log("User in verify details : ", user)
+  console.log('User in verify details : ', user);
   return (
-    <><SafeAreaView style={{ flex: 1, backgroundColor: "#FFF", zIndex:1 }}>
+
+    <SafeAreaView style={{flex: 1, backgroundColor: '#FFF'}}>
+
       {/* <View style={styles.header}>
       <View style={styles.headerContainer}>
         <Text style={styles.headertxt}>Visitor details</Text>
@@ -450,9 +399,11 @@ useEffect(()=>{
       </View>
     </View> */}
       <ScrollView style={styles.scrollview}>
-        {user?.Referrer_Approval === "PENDING APPROVAL" ? (
-          <View style={[styles.container, { marginTop: 20 }]}>
-            <View style={[styles.left, { width: "50%" }]}>
+
+        {user?.Referrer_Approval === 'PENDING APPROVAL' ? (
+          <View style={[styles.container, {marginTop: 20}]}>
+            <View style={[styles.left, {width: '50%'}]}>
+
               <TouchableOpacity style={styles.btnAccept} onPress={onApprove}>
                 <Text style={styles.btntxt}>Approve</Text>
               </TouchableOpacity>
@@ -463,21 +414,25 @@ useEffect(()=>{
               </TouchableOpacity>
             </View>
           </View>
-        ) : user?.Referrer_Approval === "APPROVED" ? (
-          <View style={{ width: "100%", padding: 10, marginLeft: "30%" }}>
+
+        ) : user?.Referrer_Approval === 'APPROVED' ? (
+          <View style={{width: '100%', padding: 10, marginLeft: '30%'}}>
+
             <TouchableOpacity style={[styles.btnReject]} onPress={onReject}>
               <Text style={[styles.btntxt]}>Reject</Text>
             </TouchableOpacity>
           </View>
-        ) : user?.Referrer_Approval === "DENIED" ? (
-          <View style={{ width: "100%", padding: 10, marginLeft: "15%" }}>
+
+        ) : user?.Referrer_Approval === 'DENIED' ? (
+          <View style={{width: '100%', padding: 10, marginLeft: '15%'}}>
+
             <TouchableOpacity style={styles.btnAccept} onPress={onApprove}>
               <Text style={styles.btntxt}>Approve</Text>
             </TouchableOpacity>
           </View>
         ) : null}
 
-        <View style={[styles.container, { marginTop: 20 }]}>
+        <View style={[styles.container, {marginTop: 20}]}>
           <View style={styles.left}>
             <Text style={styles.label}>Name</Text>
           </View>
@@ -485,7 +440,7 @@ useEffect(()=>{
             <Text style={styles.value}>{user.Name_field.zc_display_value}</Text>
           </View>
         </View>
-        <View style={[styles.container, { marginTop: 20 }]}>
+        <View style={[styles.container, {marginTop: 20}]}>
           <View style={styles.left}>
             <Text style={styles.label}>Phone</Text>
           </View>
@@ -493,7 +448,7 @@ useEffect(()=>{
             <Text style={styles.value}>{user.Phone_Number}</Text>
           </View>
         </View>
-        <View style={[styles.container, { marginTop: 20 }]}>
+        <View style={[styles.container, {marginTop: 20}]}>
           <View style={styles.left}>
             <Text style={styles.label}>Single or Group Visit</Text>
           </View>
@@ -501,7 +456,7 @@ useEffect(()=>{
             <Text style={styles.value}>{user.Single_or_Group_Visit}</Text>
           </View>
         </View>
-        <View style={[styles.container, { marginTop: 20 }]}>
+        <View style={[styles.container, {marginTop: 20}]}>
           <View style={styles.left}>
             <Text style={styles.label}>Date of Visit</Text>
           </View>
@@ -509,7 +464,7 @@ useEffect(()=>{
             <Text style={styles.value}>{user.Date_of_Visit}</Text>
           </View>
         </View>
-        <View style={[styles.container, { marginTop: 20 }]}>
+        <View style={[styles.container, {marginTop: 20}]}>
           <View style={styles.left}>
             <Text style={styles.label}>Guest Category</Text>
           </View>
@@ -517,7 +472,7 @@ useEffect(()=>{
             <Text style={styles.value}>{user.Guest_Category}</Text>
           </View>
         </View>
-        <View style={[styles.container, { marginTop: 20 }]}>
+        <View style={[styles.container, {marginTop: 20}]}>
           <View style={styles.left}>
             <Text style={styles.label}>Priority</Text>
           </View>
@@ -525,7 +480,7 @@ useEffect(()=>{
             <Text style={styles.value}>{user.Priority}</Text>
           </View>
         </View>
-        <View style={[styles.container, { marginTop: 20 }]}>
+        <View style={[styles.container, {marginTop: 20}]}>
           <View style={styles.left}>
             <Text style={styles.label}>Remarks</Text>
           </View>
@@ -533,7 +488,7 @@ useEffect(()=>{
             <Text style={styles.value}>{user.Remarks}</Text>
           </View>
         </View>
-        <View style={[styles.container, { marginTop: 20 }]}>
+        <View style={[styles.container, {marginTop: 20}]}>
           <View style={styles.left}>
             <Text style={styles.label}>Gender</Text>
           </View>
@@ -541,7 +496,7 @@ useEffect(()=>{
             <Text style={styles.value}>{user.Gender}</Text>
           </View>
         </View>
-        <View style={[styles.container, { marginTop: 20 }]}>
+        <View style={[styles.container, {marginTop: 20}]}>
           <View style={styles.left}>
             <Text style={styles.label}>Photo</Text>
           </View>
@@ -549,20 +504,29 @@ useEffect(()=>{
             {loading ? (
               <ActivityIndicator size="large" color="#0000ff" />
             ) : (
-              photo && <Image source={{ uri: photo }} style={{ width: "98%", height: 200 }} />
+              photo && (
+                <Image
+                  source={{uri: photo}}
+                  style={{width: '98%', height: 200}}
+                />
+              )
             )}
           </View>
         </View>
-        <View style={[styles.container, { marginTop: 20 }]}>
+        <View style={[styles.container, {marginTop: 20}]}>
           <View style={styles.left}>
             <Text style={styles.label}>Referrer</Text>
           </View>
           <View style={styles.right}>
-            <Text style={styles.value}>{user.Referrer_App_User_lookup.Name_field} - </Text>
-            <Text style={styles.value}>{user.Referrer_App_User_lookup.Email}</Text>
+            <Text style={styles.value}>
+              {user.Referrer_App_User_lookup.Name_field} -{' '}
+            </Text>
+            <Text style={styles.value}>
+              {user.Referrer_App_User_lookup.Email}
+            </Text>
           </View>
         </View>
-        <View style={[styles.container, { marginTop: 20 }]}>
+        <View style={[styles.container, {marginTop: 20}]}>
           <View style={styles.left}>
             <Text style={styles.label}>Department</Text>
           </View>
@@ -570,7 +534,7 @@ useEffect(()=>{
             <Text style={styles.value}>{user.Department.Department}</Text>
           </View>
         </View>
-        <View style={[styles.container, { marginTop: 20 }]}>
+        <View style={[styles.container, {marginTop: 20}]}>
           <View style={styles.left}>
             <Text style={styles.label}>Number of Men</Text>
           </View>
@@ -578,7 +542,7 @@ useEffect(()=>{
             <Text style={styles.value}>{user.Number_of_Men}</Text>
           </View>
         </View>
-        <View style={[styles.container, { marginTop: 20 }]}>
+        <View style={[styles.container, {marginTop: 20}]}>
           <View style={styles.left}>
             <Text style={styles.label}>Number of Women</Text>
           </View>
@@ -586,7 +550,7 @@ useEffect(()=>{
             <Text style={styles.value}>{user.Number_of_Women}</Text>
           </View>
         </View>
-        <View style={[styles.container, { marginTop: 20 }]}>
+        <View style={[styles.container, {marginTop: 20}]}>
           <View style={styles.left}>
             <Text style={styles.label}>Number of Boys</Text>
           </View>
@@ -594,7 +558,7 @@ useEffect(()=>{
             <Text style={styles.value}>{user.Number_of_Boys}</Text>
           </View>
         </View>
-        <View style={[styles.container, { marginTop: 20 }]}>
+        <View style={[styles.container, {marginTop: 20}]}>
           <View style={styles.left}>
             <Text style={styles.label}>Number of Boys</Text>
           </View>
@@ -602,90 +566,71 @@ useEffect(()=>{
             <Text style={styles.value}>{user.Number_of_Girls}</Text>
           </View>
         </View>
-        <View style={[styles.container, { marginTop: 20 }]}>
+        <View style={[styles.container, {marginTop: 20}]}>
           <View style={styles.left}>
             <Text style={styles.label}>Vehicle Information</Text>
           </View>
+
           <View style={styles.right}>
-            {user?.Vehicle_Information?.length > 0 ? (
-              user.Vehicle_Information.map((vehicle, index) => (
-                <Text key={index}>{vehicle.zc_display_value}</Text>
-              ))
-            ) : (
-              null
-            )}
+            {user?.Vehicle_Information?.length > 0
+              ? user.Vehicle_Information.map((vehicle, index) => (
+                  <Text key={index}>{vehicle.zc_display_value}</Text>
+                ))
+              : null}
           </View>
         </View>
-        <View style={[styles.container, { marginTop: 20, marginBottom: 20 }]}>
+        <View style={[styles.container, {marginTop: 20, marginBottom: 20}]}>
           <View style={styles.left}>
-            <Text style={styles.label}>Is the guest being invited to your Home or Office</Text>
+            <Text style={styles.label}>
+              Is the guest being invited to your Home or Office
+            </Text>
           </View>
           <View style={styles.right}>
             <Text style={styles.value}>{user.Home_or_Office}</Text>
           </View>
         </View>
-        {user.Referrer_Approval === "APPROVED" && user.L2_Approval_Status == "APPROVED" && user.Referrer_App_User_lookup.ID == loggedUser.userId ? (
-          <View style={[styles.container, { marginTop: 20, marginBottom: 20 }]}>
+
+        {user.Referrer_Approval === 'APPROVED' &&
+        user.L2_Approval_Status == 'APPROVED' &&
+        user.Referrer_App_User_lookup.ID == loggedUser.userId ? (
+          <View style={[styles.container, {marginTop: 20, marginBottom: 20}]}>
             <View style={styles.left}>
               <Text style={styles.label}>Generated QR Code</Text>
             </View>
-            <View style={[styles.right, { justifyContent: "center", alignItems: "center", marginBottom: 20 }]}>
-              <Image source={{ uri: user.Generated_QR_Code }} style={{ height: 200, width: 200 }} />
+            <View
+              style={[
+                styles.right,
+                {
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  marginBottom: 20,
+                },
+              ]}>
+              <Image
+                source={{
+                  uri: user.Generated_QR_Code,
+                }}
+                style={{height: 200, width: 200}}
+              />
               <TouchableOpacity
-                style={[
-                  styles.HomeButton,
-                  { backgroundColor: 'green' },
-                ]}
+                style={[styles.HomeButton, {backgroundColor: 'green'}]}
                 onPress={() => {
                   onShare();
-                } }>
+                }}>
+
                 <Text style={[styles.wewe, styles.wewe1]}>Share</Text>
               </TouchableOpacity>
             </View>
           </View>
 
         ) : null}
-
       </ScrollView>
-    </SafeAreaView><View style={[heightStyles.hidden]}>
-        <View ref={viewRef} style={[heightStyles.container]}><View style={{ flex: 1 }}>
-          <View style={[heightStyles.qrCodeContainer]}>
-          <Text style={[heightStyles.title]}>{user.Referrer_App_User_lookup.Name_field}</Text>
-            <Text style={[heightStyles. title2]}>has invited you</Text>
-            <Text style={[heightStyles.text]}>Show this QR code or OTP to the guard at the gate</Text>
-            {code ? (
-              <QRCode value={code} size={160} />
-            ) : (<Text>Genrating Qr code....</Text>)}
-            <Text style={[heightStyles.middleText]}>---OR---</Text>
-            <View style={[heightStyles.codeBackdrop]}>
-              <Text style={[heightStyles.code]}>{code}</Text>
-              <View style={[heightStyles.BottomtextContainer]}>
-                <Text style={[heightStyles.dateOfArrivalText]}>{user.Date_of_Visit}</Text>
-                <Text style={[heightStyles.Bottomtext]}>Sri Sathya Sai Grama -</Text>
-                <Text style={[heightStyles.Bottomtext]}>Muddenahalli Rd,</Text>
-                <Text style={[heightStyles.Bottomtext]}> Karnataka 562103,</Text>
-                <View style={{ flex: 1 }}>
-
-                </View>
-              </View>
-            </View>
-            <View style={{ flex: 0.7 }}><ImageBackground style={[heightStyles.BottomImage]} source={require('../../../src/assets/ashramQrScreen.jpg')}>
-              <LinearGradient colors={['rgba(255,255,255,1)', 'rgba(255,255,255,0)']} style={[heightStyles.gradient, heightStyles.topGradient]} /><LinearGradient colors={['rgba(255,255,255,0)', 'rgba(255,255,255,1)']} style={[heightStyles.gradient, heightStyles.bottomGradient]} /></ImageBackground>
-
-              <ImageBackground style={[heightStyles.BottomLogoImage]} source={require('../../../src/assets/SSG_OWOF.png')}></ImageBackground>
+    </SafeAreaView>
+  );
+};
 
 
-            </View>
-          </View>
-
-         
-        </View>
-        </View>
-      </View></>
-  )
-}
-
-export default VerifyDetails
+export default VerifyDetails;
 
 const mediumScreen = StyleSheet.create({
   hidden:{
@@ -1215,51 +1160,51 @@ BottomImage:{
 
 const styles = StyleSheet.create({
   header: {
-    width: "100%",
-    height: "8%",
-    backgroundColor: "#752a26",
+    width: '100%',
+    height: '8%',
+    backgroundColor: '#752a26',
   },
   headerContainer: {
     flex: 1,
-    flexDirection: "row",
-    justifyContent: "space-between"
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
   headertxt: {
     padding: 10,
     fontSize: 25,
-    fontWeight: "bold",
-    color: "white"
+    fontWeight: 'bold',
+    color: 'white',
   },
   container: {
-    width: "100%",
-    flexDirection: "row",
-    marginBottom: 0
+    width: '100%',
+    flexDirection: 'row',
+    marginBottom: 0,
   },
   left: {
-    width: "40%",
+    width: '40%',
   },
   right: {
-    width: "60%"
+    width: '60%',
   },
   label: {
-    textAlign: "right",
+    textAlign: 'right',
     marginEnd: 20,
-    fontSize: 15
+    fontSize: 15,
   },
   value: {
     marginStart: 10,
     fontSize: 15,
-    fontWeight: "800",
-    color: "black",
+    fontWeight: '800',
+    color: 'black',
   },
   scrollview: {
-    backgroundColor: "#FFF",
+    backgroundColor: '#FFF',
     marginVertical: 10,
     marginHorizontal: 10,
     padding: 15,
     ...Platform.select({
       ios: {
-        shadowOffset: { width: 2, height: 2 },
+        shadowOffset: {width: 2, height: 2},
         shadowColor: '#333',
         shadowOpacity: 0.3,
         shadowRadius: 4,
@@ -1274,27 +1219,27 @@ const styles = StyleSheet.create({
     height: 40,
     borderWidth: 1,
     borderColor: 'grey',
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
     borderRadius: 5,
-    marginLeft: "20%",
-    backgroundColor: "green"
+    marginLeft: '20%',
+    backgroundColor: 'green',
   },
   btnReject: {
     width: 100,
     height: 40,
     borderWidth: 1,
     borderColor: 'grey',
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
     borderRadius: 5,
-    backgroundColor: "red"
+    backgroundColor: 'red',
   },
   btntxt: {
-    fontWeight: "bold",
+    fontWeight: 'bold',
     fontSize: 20,
     //color: "#752A26"
-    color: "#FFF"
+    color: '#FFF',
   },
   HomeButton: {
     height: 30,
@@ -1319,4 +1264,4 @@ const styles = StyleSheet.create({
   wewe2: {
     color: '#B21E2B',
   },
-})
+});
