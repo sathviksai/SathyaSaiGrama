@@ -25,7 +25,6 @@ const Invite = ({navigation}) => {
   const [selectedOption, setSelectedOption] = useState(null);
   const [modal, setModal] = useState(false);
 
-
   //Popup when clicked on Visitor fills the form
   const handleModal = () => {
     setModal(!modal);
@@ -34,7 +33,7 @@ const Invite = ({navigation}) => {
   //   setSelectedOption(selectedOption === option ? null : option);
   // };
   //===========================================================
-  //To short the Zoho visitor Info form URL 
+  //To short the Zoho visitor Info form URL
   const shortUrl = async url => {
     console.log('short');
     try {
@@ -87,7 +86,7 @@ const Invite = ({navigation}) => {
   const randomNumber = (min, max) => {
     return Math.floor(Math.random() * (max - min + 1)) + min;
   };
-// To check the uniqueness of generated ID
+  // To check the uniqueness of generated ID
   const generateUniqueLinkID = async () => {
     let link_id = 0;
     const Generated_Link_ID = await generatedData();
@@ -146,15 +145,15 @@ const Invite = ({navigation}) => {
 
     if (id) {
       const shareURL = `https://creatorapp.zohopublic.com/${APP_OWNER_NAME}/${APP_LINK_NAME}/form-perma/Visitor_Information/t253nXrNhjgOHEpBs8EmZMTmpfP1UQejdGPB07QXDWt9NV2SjENZJmXwHJUuPbwFmXpT2Wsm72zAnyXwtZdy8Y4YgBdGyb6mOKee?L1_lookup=${L1ID}&LinkIDLookup=${id}&Home_Office=${selectedOpttion}`;
-      console.log("L1ID:", L1ID, " id:", id, "selected:", selected)
+      console.log('L1ID:', L1ID, ' id:', id, 'selected:', selected);
 
       veryshortUrl = await shortUrl(shareURL);
     }
   };
 
   const [loading, setLoading] = useState(false);
-//================
-//To Share the generated URL
+  //================
+  //To Share the generated URL
   const onShare = async selected => {
     try {
       if (selected !== null) {
@@ -198,7 +197,7 @@ const Invite = ({navigation}) => {
                 visitor.
               </Text>
               <Text style={[styles.text2, styles.text]}>
-                Visitor can fill the for or you can fill it yourself.
+                Visitor can fill the form or you can fill it yourself.
               </Text>
               <Text style={[styles.text3, styles.text]}>
                 Please select one.

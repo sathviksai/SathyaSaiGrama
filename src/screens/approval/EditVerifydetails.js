@@ -1,77 +1,103 @@
-import { Modal, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, TouchableWithoutFeedback } from 'react-native'
-import React, { useState, useContext } from 'react'
-import DatePicker, { getFormatedDate } from 'react-native-modern-datepicker';
-import { Dropdown } from 'react-native-element-dropdown';
+import {
+  Modal,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+  TouchableWithoutFeedback,
+} from 'react-native';
+import React, {useState, useContext} from 'react';
+import DatePicker, {getFormatedDate} from 'react-native-modern-datepicker';
+import {Dropdown} from 'react-native-element-dropdown';
 import moment from 'moment';
-import { updateRecord } from "./VerifyDetails"
+import {updateRecord} from './VerifyDetails';
 import UserContext from '../../../context/UserContext';
-import { Alert } from 'react-native';
+import {Alert} from 'react-native';
 
-const EditVerifyDetails = ({ navigation, route }) => {
+const EditVerifyDetails = ({navigation, route}) => {
+  const {user} = route.params;
+  if (typeof user === 'string') {
+    console.log('inside if stringified');
+    // const {user} = route.params;
+    user = JSON.parse(user);
 
-  const { user } = route.params;
+    user.Name_field = JSON.parse(user.Name_field);
+    user.Referrer_App_User_lookup = JSON.parse(user.Referrer_App_User_lookup);
+    user.Department = JSON.parse(user.Department);
 
-  const [date, setDate] = useState(user.Date_of_Visit)
-  const [phone, setPhone] = useState(user.Phone_Number)
+    // Format the received string
+    let formattedString = `[${user.Vehicle_Information}]`;
+
+    try {
+      // Parse the formatted string
+      user.Vehicle_Information = JSON.parse(formattedString);
+      console.log(parsedArray);
+    } catch (error) {
+      console.error('Parsing error:', error.message);
+    }
+
+    console.log('user in stringified', user);
+  }
+
+  const [date, setDate] = useState(user.Date_of_Visit);
+  const [phone, setPhone] = useState(user.Phone_Number);
   const [isSingleFocus, setIsSingleFocus] = useState(false);
   const [isHomeFocus, setIsHomeFocus] = useState(false);
   const [isCategoryFocus, setIsCategoryFocus] = useState(false);
   const [isPriorityFocus, setIsPriorityFocus] = useState(false);
-  const [isHome, setIsHome] = useState(user.Home_or_Office)
-  const [isSingle, setIsSingle] = useState(user.Single_or_Group_Visit)
-  const [category, setCategory] = useState(user.Guest_Category)
-  const [priority, setPriority] = useState(user.Priority)
-  const [men, setMen] = useState(user.Number_of_Men)
-  const [women, setWomen] = useState(user.Number_of_Women)
-  const [boys, setBoys] = useState(user.Number_of_Boys)
-  const [girls, setGirls] = useState(user.Number_of_Girls)
-  const [remarks, setRemarks] = useState(user.Remarks)
+  const [isHome, setIsHome] = useState(user.Home_or_Office);
+  const [isSingle, setIsSingle] = useState(user.Single_or_Group_Visit);
+  const [category, setCategory] = useState(user.Guest_Category);
+  const [priority, setPriority] = useState(user.Priority);
+  const [men, setMen] = useState(user.Number_of_Men);
+  const [women, setWomen] = useState(user.Number_of_Women);
+  const [boys, setBoys] = useState(user.Number_of_Boys);
+  const [girls, setGirls] = useState(user.Number_of_Girls);
+  const [remarks, setRemarks] = useState(user.Remarks);
   const [selectedGender, setSelectedGender] = useState(user.Gender);
-
 
   const [showModal, setShowModal] = useState(false);
   const gender = ['Male', 'Female'];
 
-  console.log("No of boys initially : ", user)
+  console.log('No of boys initially : ', user);
 
-  const { getAccessToken } = useContext(UserContext)
+  const {getAccessToken} = useContext(UserContext);
 
-  const handleDateChange = (selectedDate) => {
-    const formattedDate = moment(selectedDate, 'YYYY-MM-DD').format('DD-MMM-YYYY');
+  const handleDateChange = selectedDate => {
+    const formattedDate = moment(selectedDate, 'YYYY-MM-DD').format(
+      'DD-MMM-YYYY',
+    );
     setDate(formattedDate);
     setShowModal(false);
   };
 
-
-
-
-
   const homeOrOffice = [
-    { label: 'Home', value: 'Home' },
-    { label: 'Office', value: 'Office' },
+    {label: 'Home', value: 'Home'},
+    {label: 'Office', value: 'Office'},
   ];
 
   const singleOrGroup = [
-    { label: 'Single', value: 'Single' },
-    { label: 'Group', value: 'Group' },
+    {label: 'Single', value: 'Single'},
+    {label: 'Group', value: 'Group'},
   ];
 
   const guestCategory = [
-    { label: "Govt Officials", value: "Govt Officials" },
-    { label: "Politician", value: "Politician" },
-    { label: "Corporate", value: "Corporate" },
-    { label: "Press", value: "Press" },
-    { label: "Parent", value: "Parent" },
-    { label: "Devotee", value: "Devotee" }
-  ]
+    {label: 'Govt Officials', value: 'Govt Officials'},
+    {label: 'Politician', value: 'Politician'},
+    {label: 'Corporate', value: 'Corporate'},
+    {label: 'Press', value: 'Press'},
+    {label: 'Parent', value: 'Parent'},
+    {label: 'Devotee', value: 'Devotee'},
+  ];
 
   const guestPriority = [
-    { label: "P1", value: "P1" },
-    { label: "P2", value: "P2" },
-    { label: "P3", value: "P3" },
-  ]
-
-
+    {label: 'P1', value: 'P1'},
+    {label: 'P2', value: 'P2'},
+    {label: 'P3', value: 'P3'},
+  ];
 
   const today = new Date();
 
@@ -81,9 +107,8 @@ const EditVerifyDetails = ({ navigation, route }) => {
   );
 
   const onSave = async () => {
-
     if (!remarks) {
-      setRemarks("")
+      setRemarks('');
     }
 
     let menCount = men;
@@ -91,20 +116,20 @@ const EditVerifyDetails = ({ navigation, route }) => {
     let boysCount = boys;
     let girlsCount = girls;
 
-    if (selectedGender == "Male" && isSingle == "Single") {
-      menCount = 1
-      womenCount = 0
-      boysCount = 0
+    if (selectedGender == 'Male' && isSingle == 'Single') {
+      menCount = 1;
+      womenCount = 0;
+      boysCount = 0;
       girlsCount = 0;
-    } else if (selectedGender == "Female" && isSingle == "Single") {
-      menCount = 0
-      womenCount = 1
-      boysCount = 0
+    } else if (selectedGender == 'Female' && isSingle == 'Single') {
+      menCount = 0;
+      womenCount = 1;
+      boysCount = 0;
       girlsCount = 0;
     }
 
     let people = menCount + womenCount + boysCount + girlsCount;
-    console.log("Total people : ", people)
+    console.log('Total people : ', people);
 
     const updateField = {
       Date_of_Visit: date,
@@ -119,67 +144,73 @@ const EditVerifyDetails = ({ navigation, route }) => {
       Remarks: remarks,
       Single_or_Group_Visit: isSingle,
       Guest_Category: category,
-    }
+    };
 
     const updateData = {
       criteria: `ID==${user.ID}`,
-      data: updateField
-    }
+      data: updateField,
+    };
 
-    console.log("saved details : ", updateField)
-    const response = await updateRecord('Approval_to_Visitor_Report', updateData, getAccessToken());
+    console.log('saved details : ', updateField);
+    const response = await updateRecord(
+      'Approval_to_Visitor_Report',
+      updateData,
+      getAccessToken(),
+    );
 
     if (response.result[0].code === 3000) {
-      Alert.alert("Edit Successful")
-      const newUser = { ...user, ...updateData }
-      console.log("New user data is:", newUser)
-      navigation.navigate('VerifyDetails', { user: { ...user, ...updateField } })
+      Alert.alert('Edit Successful');
+      const newUser = {...user, ...updateData};
+      console.log('New user data is:', newUser);
+      navigation.navigate('VerifyDetails', {user: {...user, ...updateField}});
+    } else {
+      Alert.alert('Error: ', response.code);
     }
-    else {
-      Alert.alert("Error: ", response.code)
-    }
-  }
+  };
 
   const onCancel = () => {
-    navigation.navigate("VerifyDetails", { user: user })
-  }
+    navigation.navigate('VerifyDetails', {user: user});
+  };
 
-  console.log("User in verify details : ", user)
+  console.log('User in verify details : ', user);
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView style={{flex: 1}}>
       {/* <View style={styles.header}>
         <Text style={styles.headertxt}>Edit visitor details</Text>
       </View> */}
-      <ScrollView style={{ height: "92%s", backgroundColor: "#FFF", fontFamily: "Inter" }}>
-
+      <ScrollView
+        style={{height: '92%s', backgroundColor: '#FFF', fontFamily: 'Inter'}}>
         <View style={styles.v}>
-          <Text style={[styles.txt, { marginTop: 20 }]}>Visitor Name</Text>
-          <TextInput style={styles.inputtxt} value={user.Name_field.zc_display_value} editable={false} />
+          <Text style={[styles.txt, {marginTop: 20}]}>Visitor Name</Text>
+          <TextInput
+            style={styles.inputtxt}
+            value={user.Name_field.zc_display_value}
+            editable={false}
+          />
         </View>
         <View style={styles.v}>
           <Text style={styles.txt}>Phone</Text>
-          <TextInput
-            style={styles.inputtxt}
-            value={phone}
-            editable={false}
-          />
+          <TextInput style={styles.inputtxt} value={phone} editable={false} />
         </View>
 
         <View style={styles.v}>
           <Text style={styles.txt}>Date of visit</Text>
           <TouchableOpacity onPress={() => setShowModal(true)}>
-            <TextInput style={[styles.inputtxt, { color: "black" }]} value={date} editable={false} />
+            <TextInput
+              style={[styles.inputtxt, {color: 'black'}]}
+              value={date}
+              editable={false}
+            />
           </TouchableOpacity>
 
           <Modal
             animationType="slide"
             transparent={true}
             visible={showModal}
-            onRequestClose={() => setShowModal(false)}
-          >
+            onRequestClose={() => setShowModal(false)}>
             <TouchableWithoutFeedback onPress={() => setShowModal(false)}>
               <View style={styles.modalContainer}>
-                <TouchableWithoutFeedback onPress={() => { }}>
+                <TouchableWithoutFeedback onPress={() => {}}>
                   <View style={styles.modalContent}>
                     <DatePicker
                       mode="calendar"
@@ -210,12 +241,13 @@ const EditVerifyDetails = ({ navigation, route }) => {
                 style={styles.singleOptionContainer}
                 onPress={() => {
                   setSelectedGender(option);
-                }}
-              >
+                }}>
                 <View style={styles.outerCircle}>
-                  {selectedGender === option && <View style={styles.innerCircle} />}
+                  {selectedGender === option && (
+                    <View style={styles.innerCircle} />
+                  )}
                 </View>
-                <Text style={{ marginLeft: 10, fontSize: 14 }}>{option}</Text>
+                <Text style={{marginLeft: 10, fontSize: 14}}>{option}</Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -235,33 +267,51 @@ const EditVerifyDetails = ({ navigation, route }) => {
             onChange={item => {
               setIsSingle(item.value);
               setIsSingleFocus(false);
-            }} />
+            }}
+          />
         </View>
-        {
-          isSingle === 'Group' &&
-          <View style={{ width: "90%", height: "20%", marginTop: 10, marginLeft: 20 }}>
+        {isSingle === 'Group' && (
+          <View
+            style={{
+              width: '90%',
+              height: '20%',
+              marginTop: 10,
+              marginLeft: 20,
+            }}>
             <View style={styles.single}>
               <View style={styles.left}>
                 <Text style={styles.singleTxt}>No. of Men</Text>
               </View>
               <View style={styles.right}>
-                <TextInput style={styles.num} value={men} onChangeText={txt => setMen(Number(txt))} />
+                <TextInput
+                  style={styles.num}
+                  value={men}
+                  onChangeText={txt => setMen(Number(txt))}
+                />
               </View>
             </View>
             <View style={styles.single}>
               <View style={styles.left}>
-                <Text style={styles.singleTxt} >No. of Women</Text>
+                <Text style={styles.singleTxt}>No. of Women</Text>
               </View>
               <View style={styles.right}>
-                <TextInput style={styles.num} value={women} onChangeText={txt => setWomen(Number(txt))} />
+                <TextInput
+                  style={styles.num}
+                  value={women}
+                  onChangeText={txt => setWomen(Number(txt))}
+                />
               </View>
             </View>
             <View style={styles.single}>
               <View style={styles.left}>
-                <Text style={styles.singleTxt} >No. of Boys</Text>
+                <Text style={styles.singleTxt}>No. of Boys</Text>
               </View>
               <View style={styles.right}>
-                <TextInput style={styles.num} value={boys} onChangeText={txt => setBoys(Number(txt))} />
+                <TextInput
+                  style={styles.num}
+                  value={boys}
+                  onChangeText={txt => setBoys(Number(txt))}
+                />
               </View>
             </View>
             <View style={styles.single}>
@@ -269,16 +319,20 @@ const EditVerifyDetails = ({ navigation, route }) => {
                 <Text style={styles.singleTxt}>No. of Girls</Text>
               </View>
               <View style={styles.right}>
-                <TextInput style={styles.num} value={girls} onChangeText={txt => setGirls(Number(txt))} />
+                <TextInput
+                  style={styles.num}
+                  value={girls}
+                  onChangeText={txt => setGirls(Number(txt))}
+                />
               </View>
             </View>
           </View>
-
-        }
-
+        )}
 
         <View style={styles.v}>
-          <Text style={styles.txt}>Is the guest being invited to your Home or Office</Text>
+          <Text style={styles.txt}>
+            Is the guest being invited to your Home or Office
+          </Text>
           <Dropdown
             style={styles.dropdownstyle}
             data={homeOrOffice}
@@ -291,7 +345,8 @@ const EditVerifyDetails = ({ navigation, route }) => {
             onChange={item => {
               setIsHome(item.value);
               setIsHomeFocus(false);
-            }} />
+            }}
+          />
         </View>
 
         <View style={styles.v}>
@@ -309,12 +364,13 @@ const EditVerifyDetails = ({ navigation, route }) => {
             onChange={item => {
               setCategory(item.value);
               setIsCategoryFocus(false);
-            }} />
+            }}
+          />
         </View>
         <View style={styles.v}>
           <Text style={styles.txt}>Priority</Text>
           <Dropdown
-           style={styles.dropdownstyle}
+            style={styles.dropdownstyle}
             data={guestPriority}
             maxHeight={300}
             labelField="label"
@@ -326,11 +382,23 @@ const EditVerifyDetails = ({ navigation, route }) => {
             onChange={item => {
               setPriority(item.value);
               setIsPriorityFocus(false);
-            }} />
+            }}
+          />
         </View>
         <View style={styles.v}>
           <Text style={styles.txt}>Remark</Text>
-          <TextInput style={{ height: 100, borderWidth: 1, borderColor: "gray", borderRadius: 6, padding: 10 }} multiline={true} value={remarks} onChangeText={txt => setRemarks(txt)} />
+          <TextInput
+            style={{
+              height: 100,
+              borderWidth: 1,
+              borderColor: 'gray',
+              borderRadius: 6,
+              padding: 10,
+            }}
+            multiline={true}
+            value={remarks}
+            onChangeText={txt => setRemarks(txt)}
+          />
         </View>
 
         <View style={styles.btnRoot}>
@@ -342,10 +410,10 @@ const EditVerifyDetails = ({ navigation, route }) => {
         </View>
       </ScrollView>
     </SafeAreaView>
-  )
-}
+  );
+};
 
-export default EditVerifyDetails
+export default EditVerifyDetails;
 
 const styles = StyleSheet.create({
   errorText: {
@@ -356,40 +424,40 @@ const styles = StyleSheet.create({
   headertxt: {
     padding: 10,
     fontSize: 25,
-    fontWeight: "bold",
-    color: "white"
+    fontWeight: 'bold',
+    color: 'white',
   },
   dropdownstyle: {
-    borderWidth: 1, 
-    borderRadius: 10, 
-    paddingLeft: 10, 
-    backgroundColor: "#FFF", 
-    borderColor: "gray", 
-    height: 48, 
-    fontSize: 14
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingLeft: 10,
+    backgroundColor: '#FFF',
+    borderColor: 'gray',
+    height: 48,
+    fontSize: 14,
   },
   inputtxt: {
     height: 48,
     marginTop: 5,
-    backgroundColor: "#FFF",
+    backgroundColor: '#FFF',
     borderWidth: 1,
     borderColor: 'gray',
     borderRadius: 6,
     paddingLeft: 10,
-    fontSize: 16
+    fontSize: 16,
   },
   v: {
     marginLeft: 20,
     marginBottom: 10,
-    marginRight: 20
+    marginRight: 20,
   },
   txt: {
     fontSize: 16,
-    fontFamily: "Inter",
-    fontStyle: "normal",
-    fontWeight: "700",
+    fontFamily: 'Inter',
+    fontStyle: 'normal',
+    fontWeight: '700',
     marginBottom: 6,
-    color: "#2F3036"
+    color: '#2F3036',
   },
   modalContainer: {
     flex: 1,
@@ -406,70 +474,69 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   save: {
-    marginRight: 10
+    marginRight: 10,
   },
   cancel: {
-    marginLeft: 10
+    marginLeft: 10,
   },
   btn: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   btnsave: {
     borderWidth: 1,
     width: 135,
     height: 40,
-    textAlign: "center",
+    textAlign: 'center',
     paddingTop: 5,
     borderRadius: 8,
     fontSize: 20,
     marginBottom: 20,
-    backgroundColor: "#b21e2b",
-    color: "white",
+    backgroundColor: '#b21e2b',
+    color: 'white',
     borderColor: '#b21e2b',
-    elevation: 5
+    elevation: 5,
   },
   single: {
-    flexDirection: "row",
+    flexDirection: 'row',
     marginHorizontal: 25,
   },
   left: {
-    width: "60%"
+    width: '60%',
   },
   right: {
-    width: "40%"
+    width: '40%',
   },
   num: {
     borderWidth: 1,
-    backgroundColor: "#FFF",
+    backgroundColor: '#FFF',
     borderColor: 'gray',
     borderRadius: 6,
     paddingLeft: 10,
     marginVertical: 5,
-    height: 35
+    height: 35,
   },
   singleTxt: {
     marginVertical: 5,
     fontSize: 16,
-    fontFamily: "Inter",
-    fontStyle: "normal",
-    fontWeight: "700",
+    fontFamily: 'Inter',
+    fontStyle: 'normal',
+    fontWeight: '700',
     marginBottom: 6,
-    color: "#2F3036"
+    color: '#2F3036',
   },
 
   btnRoot: {
-    flexDirection: "row",
-    justifyContent: "center",
+    flexDirection: 'row',
+    justifyContent: 'center',
     marginTop: 30,
-    marginBottom: 80
+    marginBottom: 80,
   },
 
   radioButtonContainer: {
     flexDirection: 'row',
     alignSelf: 'auto',
-
   },
   singleOptionContainer: {
     flexDirection: 'row', // ensure the circle and text are in a row
@@ -485,7 +552,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#FFFF',
-    borderColor: "gray"
+    borderColor: 'gray',
   },
   innerCircle: {
     width: 12,
@@ -493,6 +560,4 @@ const styles = StyleSheet.create({
     borderRadius: 11,
     backgroundColor: '#b21e2b',
   },
-
-
-})
+});
