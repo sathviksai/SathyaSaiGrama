@@ -9,7 +9,7 @@ const FamilyMemberVerifyDetails = ({navigation,route}) => {
         <View style={styles.head}>
           <Text style={styles.title}>Basic Information</Text>
           <TouchableOpacity onPress={() => navigation.navigate('Edit',{formType: "MemberBasicInfo",memberdata:familymember})} style={styles.edit}>
-            <Image source={require('../assets/Edit.png')} style={{width:30, height: 30}}/>
+            <Image source={require('../assets/edit.png')} style={{width:30, height: 30}}/>
             <Text style={{color: 'blue', fontWeight: 'bold',alignSelf:"center"}}>Edit</Text>
           </TouchableOpacity>
         </View>

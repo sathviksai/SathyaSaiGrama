@@ -253,6 +253,7 @@ const Login = ({navigation}) => {
                       onFocus={() => setFocusedInput('email')}
                       onChangeText={onChange}
                       autoCapitalize="none"
+                      style={{color: "black"}}
                     />
                   )}
                   rules={{required: true, pattern: /^\S+@\S+$/i}}

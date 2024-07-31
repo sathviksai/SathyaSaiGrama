@@ -157,6 +157,7 @@ const Invite = ({navigation}) => {
   //================
   //To Share the generated URL
   const onShare = async selected => {
+    console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
     try {
       if (selected !== null) {
         setLoading(true);

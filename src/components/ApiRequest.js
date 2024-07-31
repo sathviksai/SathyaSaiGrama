@@ -57,6 +57,7 @@ export const getDataWithInt = async (reportName, criteria, value, token) => {
 
 export const getDataWithString = async (reportName, criteria, value, token) => {
   try {
+    console.log("Base app url is : ", BASE_APP_URL);
     console.log('token in getDataWithString: ', token, value);
     const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/${reportName}?criteria=${criteria}=="${value}"`;
     console.log('url', url);

@@ -9,7 +9,7 @@ import {
   MESSAGINGSENDERID,
   APPID,
   MEASUREMENTID,
-} from '@env';
+} from '@env'; 
 
 const firebaseConfig = {
   apiKey: APIKEY,

@@ -1,20 +1,33 @@
 import BaseRoute from './navigation/stack-navigation/BaseRoute';
 import UserContext from './context/UserContext';
-import {useContext, useEffect, useState} from 'react';
+import { useContext, useEffect, useState } from 'react';
+import { Appearance, AppearanceProvider } from 'react-native';
+import { DefaultTheme, Provider as PaperProvider } from 'react-native-paper';
+
 import {
   DATABASE_ID,
   COLLECTION_ID,
   APPWRITE_FUNCTION_PROJECT_ID,
   APPWRITE_API_KEY,
 } from '@env';
-import {StyleSheet, ActivityIndicator, Alert} from 'react-native';
-import {AuthContext, AuthProvider} from './src/auth/AuthProvider';
+import { StyleSheet, ActivityIndicator, Alert } from 'react-native';
+import { AuthContext, AuthProvider } from './src/auth/AuthProvider';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import SplashScreen from './src/screens/SplashScreen';
-import {getDeviceToken} from './src/utils/notificationService';
+import { getDeviceToken } from './src/utils/notificationService';
+
+const lightTheme = {
+  ...DefaultTheme,
+  colors: {
+    ...DefaultTheme.colors,
+    background: '#ffffff',
+    text: '#000000',
+    // Add other light mode styles here
+  },
+};
 
 const App = () => {
-  const {user} = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
 
   const {
     setAccessToken,
@@ -31,7 +44,7 @@ const App = () => {
   //To get zoho access token from Appwrite
   const getAppWriteToken = async () => {
     try {
-      console.log(DATABASE_ID);
+      console.log("database id : ", DATABASE_ID);
       let res = await fetch(
         `https://cloud.appwrite.io/v1/databases/${DATABASE_ID}/collections/${COLLECTION_ID}/documents`,
         {
@@ -43,6 +56,7 @@ const App = () => {
           },
         },
       );
+      console.log("After api call")
       res = await res.json();
       //console.log("Access token in App: ", res.documents[0].Token)
       setAccessToken(res.documents[0].Token);
@@ -90,14 +104,14 @@ const App = () => {
   }, [accessToken]);
 
   return (
-    <>
-      {loading ? (
-        // <ActivityIndicator size="large" color="#752A26" style={styles.loadingContainer}/>
-        <SplashScreen />
-      ) : (
-        <BaseRoute />
-      )}
-    </>
+      <PaperProvider theme={lightTheme}>
+        {loading ? (
+          // <ActivityIndicator size="large" color="#752A26" style={styles.loadingContainer}/>
+          <SplashScreen />
+        ) : (
+          <BaseRoute />
+        )}
+      </PaperProvider>
   );
 };
 

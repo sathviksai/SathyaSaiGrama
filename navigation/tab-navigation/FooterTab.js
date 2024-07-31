@@ -130,7 +130,7 @@ const ApprovalStack = ({ navigation }) => {
                 headerRight: () => (
                     <TouchableOpacity onPress={() => navigation.navigate("EditVerifydetails", { user: editData })}>
                         <Image
-                            source={require("../../src/assets/Edit.png")} // Your icon URL here
+                            source={require("../../src/assets/edit.png")} // Your icon URL here
                             style={{ width: 20, height: 20, marginRight: 15, tintColor: "#B21E2B" }} // Adjust style as needed
                         />
                     </TouchableOpacity>
