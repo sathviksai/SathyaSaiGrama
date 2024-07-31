@@ -52,11 +52,13 @@ const VerifyDetails = ({ navigation, route}) => {
   const { user } = route.params;
 
   const [photo, setPhoto] = useState();
+  const [QrCodephoto, setQrCodephoto] = useState();
   const { getAccessToken, setDeniedDataFetched, setApproveDataFetched, setPendingDataFetched, setEditData, loggedUser, accessToken } = useContext(UserContext)
   const token = accessToken
   setEditData(user);
   const [loading, setLoading] = useState(true);
   const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/${user.ID}/Photo/download`
+  const qrCodeurl = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/${user.ID}/Generated_QR_Code/download`
   const viewRef = useRef();
   const [code, setCode] = useState('');
   const [codeReload, setcodeReload] = useState(false);
@@ -172,10 +174,36 @@ const VerifyDetails = ({ navigation, route}) => {
     }
   };
 
+  const getQrCodeImage = async () => {
+    try {
+      const response = await fetch(qrCodeurl, {
+        method: 'GET',
+        headers: {
+          Authorization: `Zoho-oauthtoken ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`HTTP error! status: ${response.status}, ${errorText}`);
+      }
+
+      const buffer = await response.arrayBuffer();
+      const base64Image = encode(buffer); // Use the encode function from base64-arraybuffer
+      const qrCodeDataUrl = `data:image/jpeg;base64,${base64Image}`;
+
+      return qrCodeDataUrl;
+    } catch (error) {
+      console.error('Error fetching image:', error);
+    }
+  };
+
   useEffect(() => {
     const fetchImage = async () => {
       const dataUrl = await getImage();
+      const qrCodeDataUrl = await getQrCodeImage();
       setPhoto(dataUrl);
+      setQrCodephoto(qrCodeDataUrl);
       setLoading(false);
     };
     fetchImage();
@@ -248,8 +276,10 @@ if(response.code === 3000 && !loggedUser.role === "L2"){
     if (loggedUser.role === "L2") {
       updateField = {
         Referrer_Approval: "DENIED",
-        L2_Approval_Status: "DENIED"
-      }
+        L2_Approval_Status: "DENIED",
+        Generated_Passcode: null,
+        Generated_QR_Code : null
+      } 
          
     } else {
       updateField = {
@@ -286,20 +316,27 @@ if(response.code === 3000 && !loggedUser.role === "L2"){
 
   const onShare = async () => {
     try {
-      const { Generated_QR_Code } = user;
+      
+      const path =`${RNFS.DocumentDirectoryPath}/image.jpg`;
+      const base64string = QrCodephoto.replace( `data:image/jpeg;base64`, '');
+      await RNFS.writeFile(path,base64string,'base64');
+      
+      // const { Generated_QR_Code } = user;
 
-      // Define the path to download the image
-      const path = `${RNFS.DocumentDirectoryPath}/image.jpg`;
+      // // Define the path to download the image
+      // const path = `${RNFS.DocumentDirectoryPath}/image.jpg`;
 
-      // Download the image to local storage
-      await RNFS.downloadFile({
-        fromUrl: Generated_QR_Code,
-        toFile: path,
-      }).promise;
+      // // Download the image to local storage
+      // await RNFS.downloadFile({
+      //   from: QrCodephoto,
+      //   toFile: path,
+      // }).promise;
 
       // Share the image
+
+      
       await Share.open({
-        url: Platform.OS === 'android' ? `file://${path}` : path,
+        url:  `file://${path}`,
       });
     } catch (error) {
       Alert.alert('Error', error.message);
@@ -507,6 +544,32 @@ useEffect(() => {
           </View>
         ) : null}
 
+{user.Referrer_Approval === "APPROVED" && user.L2_Approval_Status == "APPROVED" && user.Referrer_App_User_lookup.ID == loggedUser.userId ? (
+          <View style={[styles.container, { marginTop: 20, marginBottom: 20 }]}>
+            <View style={styles.left}>
+              <Text style={styles.label}>Generated QR Code</Text>
+            </View>
+            <View style={[styles.right, { justifyContent: "center", alignItems: "center", marginBottom: 20 }]}>
+            {loading ? (
+              <ActivityIndicator size="large" color="#0000ff" />
+            ) : (
+              QrCodephoto && <Image source={{ uri: QrCodephoto }} style={{ width: "98%", height: 200 }}  resizeMode="contain"/>
+            )}
+              <TouchableOpacity
+                style={[
+                  styles.HomeButton,
+                  { backgroundColor: 'green' },
+                ]}
+                onPress={() => {
+                  onShare();
+                } }>
+                <Text style={[styles.wewe, styles.wewe1]}>Share</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
+        ) : null}
+
         <View style={[styles.container, { marginTop: 20 }]}>
           <View style={styles.left}>
             <Text style={styles.label}>Name</Text>
@@ -654,27 +717,7 @@ useEffect(() => {
             <Text style={styles.value}>{user.Home_or_Office}</Text>
           </View>
         </View>
-        {user.Referrer_Approval === "APPROVED" && user.L2_Approval_Status == "APPROVED" && user.Referrer_App_User_lookup.ID == loggedUser.userId ? (
-          <View style={[styles.container, { marginTop: 20, marginBottom: 20 }]}>
-            <View style={styles.left}>
-              <Text style={styles.label}>Generated QR Code</Text>
-            </View>
-            <View style={[styles.right, { justifyContent: "center", alignItems: "center", marginBottom: 20 }]}>
-              <Image source={{ uri: user.Generated_QR_Code }} style={{ height: 200, width: 200 }} />
-              <TouchableOpacity
-                style={[
-                  styles.HomeButton,
-                  { backgroundColor: 'green' },
-                ]}
-                onPress={() => {
-                  onShare();
-                } }>
-                <Text style={[styles.wewe, styles.wewe1]}>Share</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-
-        ) : null}
+    
 
       </ScrollView>
     </SafeAreaView><View style={[heightStyles.hidden]}>

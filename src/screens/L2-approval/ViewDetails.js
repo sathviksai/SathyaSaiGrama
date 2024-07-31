@@ -235,7 +235,9 @@ const ViewDetails = ({ navigation, route }) => {
     let status = user.L2_Approval_Status;
 
     const updateField = {
-      L2_Approval_Status: "DENIED"
+      L2_Approval_Status: "DENIED",
+      Generated_Passcode: null,
+      Generated_QR_Code : null
     }
 
     const updateData = {
@@ -601,6 +603,7 @@ console.error('Error capturing and uploading QR code:', error);
           <View style={styles.right}>
             <Text style={styles.value}>{user.Home_or_Office}</Text>
           </View>
+          
         </View>
       </ScrollView>
     </SafeAreaView><View style={[heightStyles.hidden]}>
