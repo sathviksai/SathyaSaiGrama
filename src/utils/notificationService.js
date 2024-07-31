@@ -1,5 +1,5 @@
 import messaging from '@react-native-firebase/messaging';
-import {PermissionsAndroid, Platform} from 'react-native';
+import { PermissionsAndroid, Platform } from 'react-native';
 
 PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS);
 
@@ -27,7 +27,7 @@ export async function getDeviceToken() {
       authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
       authStatus === messaging.AuthorizationStatus.PROVISIONAL;
 
-      console.log("enable value:", enabled)
+    console.log("enable value:", enabled)
     if (enabled) {
       console.log('Authorization status:', authStatus);
       const token = await getFCMToken();
@@ -41,7 +41,8 @@ const getFCMToken = async () => {
   try {
     await messaging().registerDeviceForRemoteMessages();
     const token = await messaging().getToken();
-    console.log('device token is  ', token);
+    console.log("#####################################################")
+    console.log('Generated device token is :   ', token);
     return token;
   } catch (err) {
     console.log('error during token generation: ', err);

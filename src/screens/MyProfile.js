@@ -54,7 +54,7 @@ const MyProfile = ({route, navigation}) => {
             }
             style={styles.edit}>
             <Image
-              source={require('../assets/Edit.png')}
+              source={require('../assets/edit.png')}
               style={{width: 17, height: 14.432, marginEnd: 5, flexShrink: 0}}
             />
             <Text style={[styles.title, styles.editText]}>Edit</Text>
@@ -98,7 +98,7 @@ const MyProfile = ({route, navigation}) => {
             }
             style={styles.edit}>
             <Image
-              source={require('../assets/Edit.png')}
+              source={require('../assets/edit.png')}
               style={{width: 17, height: 14.432, marginEnd: 5, flexShrink: 0}}
             />
             <Text style={[styles.title, styles.editText]}>Edit</Text>

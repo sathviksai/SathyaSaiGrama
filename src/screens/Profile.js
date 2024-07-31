@@ -10,8 +10,8 @@ import {
   ActivityIndicator,
   TouchableWithoutFeedback,
 } from 'react-native';
-import React, {useContext, useState} from 'react';
-import {auth} from '../auth/firebaseConfig';
+import React, { useContext, useState } from 'react';
+import { auth } from '../auth/firebaseConfig';
 // import ImagePicker from 'react-native-image-crop-picker';
 import {
   signOut,
@@ -19,7 +19,7 @@ import {
   reauthenticateWithCredential,
   EmailAuthProvider,
 } from 'firebase/auth';
-import {SafeAreaView} from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import UserContext from '../../context/UserContext';
 import {
   getDataWithInt,
@@ -27,13 +27,13 @@ import {
   getDataWithStringAndInt,
   getDataWithoutStringAndWithInt,
 } from '../components/ApiRequest';
-import {useForm, Controller} from 'react-hook-form';
-import {AuthContext} from '../auth/AuthProvider';
+import { useForm, Controller } from 'react-hook-form';
+import { AuthContext } from '../auth/AuthProvider';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import RNRestart from 'react-native-restart';
-import {BASE_APP_URL, APP_LINK_NAME, APP_OWNER_NAME} from '@env';
+import { BASE_APP_URL, APP_LINK_NAME, APP_OWNER_NAME } from '@env';
 
-const Profile = ({navigation}) => {
+const Profile = ({ navigation }) => {
   const {
     getAccessToken,
     userEmail,
@@ -42,13 +42,12 @@ const Profile = ({navigation}) => {
     loggedUser,
     accessToken,
   } = useContext(UserContext);
-  const {user, setUser} = useContext(AuthContext);
+  const { user, setUser } = useContext(AuthContext);
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
-  const [profileImageModalVisible, setProfileImageModalVisible] =
-    useState(false);
+  const [profileImageModalVisible, setProfileImageModalVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const [focusedInput, setFocusedInput] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
@@ -64,7 +63,7 @@ const Profile = ({navigation}) => {
   const {
     control,
     handleSubmit,
-    formState: {errors},
+    formState: { errors },
   } = useForm();
 
   const handleDeleteAccount = async (email, password) => {
@@ -385,7 +384,7 @@ const Profile = ({navigation}) => {
                 />
               </TouchableOpacity> */}
             </View>
-            <Text style={styles.name}>{}</Text>
+            <Text style={styles.name}>{ }</Text>
             <View style={styles.imgdel}>
               <Text style={styles.emailVisible}>{userEmail}</Text>
               <TouchableOpacity
@@ -393,7 +392,7 @@ const Profile = ({navigation}) => {
                 onPress={() => setModalVisible(true)}>
                 <Image
                   source={require('../assets/delete.png')}
-                  style={{width: 20, height: 20}}
+                  style={{ width: 20, height: 20 }}
                 />
               </TouchableOpacity>
             </View>
@@ -508,7 +507,7 @@ const Profile = ({navigation}) => {
                   <Controller
                     name="email"
                     control={control}
-                    render={({field: {onChange, value}}) => (
+                    render={({ field: { onChange, value } }) => (
                       <TextInput
                         placeholder="Email Address"
                         value={value}
@@ -522,7 +521,7 @@ const Profile = ({navigation}) => {
                         autoCapitalize="none"
                       />
                     )}
-                    rules={{required: true, pattern: /^\S+@\S+$/i}}
+                    rules={{ required: true, pattern: /^\S+@\S+$/i }}
                   />
                   {errors.email?.type === 'required' && (
                     <Text style={styles.textError}>Email is required</Text>
@@ -539,7 +538,7 @@ const Profile = ({navigation}) => {
                     <Controller
                       name="password"
                       control={control}
-                      render={({field: {onChange, value}}) => (
+                      render={({ field: { onChange, value } }) => (
                         <TextInput
                           placeholder="Password"
                           style={styles.inputBox}
@@ -564,7 +563,7 @@ const Profile = ({navigation}) => {
                         }}>
                         <Image
                           source={require('../assets/eyestrike.png')}
-                          style={{width: 16, height: 16}}
+                          style={{ width: 16, height: 16 }}
                         />
                       </TouchableOpacity>
                     ) : (
@@ -572,7 +571,7 @@ const Profile = ({navigation}) => {
                         onPress={() => setShowPassword(!showPassword)}>
                         <Image
                           source={require('../assets/eye.png')}
-                          style={{width: 16, height: 16}}
+                          style={{ width: 16, height: 16 }}
                         />
                       </TouchableOpacity>
                     )}
@@ -598,12 +597,12 @@ const Profile = ({navigation}) => {
                       flexDirection: 'row',
                     }}>
                     <TouchableOpacity
-                      style={[styles.HomeButton, {backgroundColor: '#B21E2B'}]}
+                      style={[styles.HomeButton, { backgroundColor: '#B21E2B' }]}
                       onPress={handleSubmit(onDelete)}>
                       <Text style={[styles.wewe, styles.wewe1]}>Delete</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
-                      style={[styles.HomeButton, {backgroundColor: '#FFBE65'}]}
+                      style={[styles.HomeButton, { backgroundColor: '#FFBE65' }]}
                       onPress={() => setModalVisible(!modalVisible)}>
                       <Text style={[styles.wewe, styles.wewe2]}>Cancel</Text>
                     </TouchableOpacity>
@@ -633,11 +632,11 @@ const Profile = ({navigation}) => {
                       flexDirection: 'row',
                     }}>
                     <TouchableOpacity
-                      style={[styles.HomeButton, {backgroundColor: '#B21E2B'}]}>
+                      style={[styles.HomeButton, { backgroundColor: '#B21E2B' }]}>
                       <Text style={[styles.wewe, styles.wewe1]}>Camera</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
-                      style={[styles.HomeButton, {backgroundColor: '#FFBE65'}]}>
+                      style={[styles.HomeButton, { backgroundColor: '#FFBE65' }]}>
                       <Text style={[styles.wewe, styles.wewe2]}>Gallery</Text>
                     </TouchableOpacity>
                   </View>
