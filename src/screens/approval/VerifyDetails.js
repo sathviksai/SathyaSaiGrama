@@ -1,4 +1,3 @@
-
 import {
   Image,
   Platform,
@@ -20,9 +19,9 @@ import RNFS from 'react-native-fs';
 import Share from 'react-native-share';
 import LinearGradient from 'react-native-linear-gradient';
 import QRCode from 'react-native-qrcode-svg';
-import { captureRef } from 'react-native-view-shot';
+import {captureRef} from 'react-native-view-shot';
 import 'react-native-get-random-values';
-import { BackgroundImage } from 'react-native-elements/dist/config';
+import {BackgroundImage} from 'react-native-elements/dist/config';
 
 export const updateRecord = async (reportName, modified_data, token, id) => {
   try {
@@ -65,10 +64,8 @@ const VerifyDetails = ({navigation, route}) => {
     user.Referrer_App_User_lookup = JSON.parse(user.Referrer_App_User_lookup);
     user.Department = JSON.parse(user.Department);
 
-
     // Format the received string
     let formattedString = `[${user.Vehicle_Information}]`;
-
 
     try {
       // Parse the formatted string
@@ -98,7 +95,6 @@ const VerifyDetails = ({navigation, route}) => {
   }, []);
   const [loading, setLoading] = useState(true);
   const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/${user.ID}/Photo/download`;
-
 
   const getImage = async () => {
     try {
@@ -134,19 +130,15 @@ const VerifyDetails = ({navigation, route}) => {
   }, []);
 
   const onApprove = async () => {
-
     let status = user.Referrer_Approval;
 
     let updateField;
 
-
     if (loggedUser.role === 'L2') {
       updateField = {
-
         Referrer_Approval: 'APPROVED',
         L2_Approval_Status: 'APPROVED',
       };
-
     } else {
       updateField = {
         Referrer_Approval: 'APPROVED',
@@ -182,11 +174,9 @@ const VerifyDetails = ({navigation, route}) => {
   const onReject = async () => {
     let status = user.Referrer_Approval;
 
-
     const updateField = {
       Referrer_Approval: 'DENIED',
     };
-
 
     const updateData = {
       data: updateField,
@@ -235,158 +225,119 @@ const VerifyDetails = ({navigation, route}) => {
     } catch (error) {
       Alert.alert('Error', error.message);
     }
-
-};
-
-console.log("Screen Height:", height);
-    
-let heightStyles;
-if(height > 900){
-    heightStyles = normalScreen;
-} else if(height>750){  heightStyles = mediumScreen;}
-else{ heightStyles = smallScreen;}
-
-
-
-const ScreenshotQR = async () => {
-try{
-console.log('capturing view.......')
-const uri = await captureRef(viewRef, {
-format:'png',
-quality:0.8,
-
-});
-
-console.log('view captured Uri:', uri);
-
-// if (!uri){throw new Error('failed to capture, uri is undefined or null');
-// } 
-
-let base64Data = '';
-if (uri.startsWith('data:image/png;base64,')) {
-base64Data = uri.split('data:image/png;base64,')[1];
-} else if (uri.startsWith('file://')) {
-base64Data = await RNFS.readFile(uri, 'base64');
-} else {
-throw new Error(`Unexpected URI format: ${uri}`);
-}
-
-
-
-
-
-
-console.log('extracted base 64 data:', base64Data.length);
-
-
-if (!base64Data){
-throw new Error('failed to extract base64 Data from URI');
-} 
-
-const postData = new FormData ();
-postData.append( 'file',{
-
-uri: `data:image/png;base64, ${base64Data}`,
-name: 'qrcode.png',
-type: 'image/png',
-
-});
-
-const payload =  {
-data: {
-    Generated_Passcode: code
-}
-}
-
-const url1 = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/${user.ID}`
-console.log(url1);
-const response1 = await fetch(url1,{
-method:'PATCH',
-body: JSON.stringify(payload),
-headers:{
-Authorization: `Zoho-oauthtoken ${accessToken}`,
-'Content-Type': 'application/json',
-
-
-
-},
-}, console.log('posting to zoho....'));
-if (response1.ok) {
-console.log('code posted successfully to Zoho.');
-console.log("response",response1);
-} else {
-console.log('Failed to post code to Zoho:', response1.status, response1.statusText, response1.ok);
-
-};
-
-
-
-
-const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/${user.ID}/Generated_QR_Code/upload`
-console.log(url);
-const response = await fetch(url,{
-method:'POST',
-body: postData,
-headers:{
-Authorization: `Zoho-oauthtoken ${accessToken}`,
-'Content-Type': 'multipart/form-data',
-
-
-},
-}, console.log('posting to zoho....'));
-
-if (response.ok) {
-console.log('Image uploaded successfully to Zoho.');
-} else {
-console.log('Failed to upload image to Zoho:', response.status, response.statusText);
-}
-} catch (error) {
-console.error('Error capturing and uploading QR code:', error);
-}
-};
-
-
-
-
-
-
-
-
-
-
-
-
-
-useEffect(()=>{
-    codeGenrator();
-}, []);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  };
+
+  // console.log("Screen Height:", height);
+
+  // let heightStyles;
+  // if(height > 900){
+  //     heightStyles = normalScreen;
+  // } else if(height>750){  heightStyles = mediumScreen;}
+  // else{ heightStyles = smallScreen;}
+
+  const ScreenshotQR = async () => {
+    try {
+      console.log('capturing view.......');
+      const uri = await captureRef(viewRef, {
+        format: 'png',
+        quality: 0.8,
+      });
+
+      console.log('view captured Uri:', uri);
+
+      // if (!uri){throw new Error('failed to capture, uri is undefined or null');
+      // }
+
+      let base64Data = '';
+      if (uri.startsWith('data:image/png;base64,')) {
+        base64Data = uri.split('data:image/png;base64,')[1];
+      } else if (uri.startsWith('file://')) {
+        base64Data = await RNFS.readFile(uri, 'base64');
+      } else {
+        throw new Error(`Unexpected URI format: ${uri}`);
+      }
+
+      console.log('extracted base 64 data:', base64Data.length);
+
+      if (!base64Data) {
+        throw new Error('failed to extract base64 Data from URI');
+      }
+
+      const postData = new FormData();
+      postData.append('file', {
+        uri: `data:image/png;base64, ${base64Data}`,
+        name: 'qrcode.png',
+        type: 'image/png',
+      });
+
+      const payload = {
+        data: {
+          Generated_Passcode: code,
+        },
+      };
+
+      const url1 = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/${user.ID}`;
+      console.log(url1);
+      const response1 = await fetch(
+        url1,
+        {
+          method: 'PATCH',
+          body: JSON.stringify(payload),
+          headers: {
+            Authorization: `Zoho-oauthtoken ${accessToken}`,
+            'Content-Type': 'application/json',
+          },
+        },
+        console.log('posting to zoho....'),
+      );
+      if (response1.ok) {
+        console.log('code posted successfully to Zoho.');
+        console.log('response', response1);
+      } else {
+        console.log(
+          'Failed to post code to Zoho:',
+          response1.status,
+          response1.statusText,
+          response1.ok,
+        );
+      }
+
+      const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/${user.ID}/Generated_QR_Code/upload`;
+      console.log(url);
+      const response = await fetch(
+        url,
+        {
+          method: 'POST',
+          body: postData,
+          headers: {
+            Authorization: `Zoho-oauthtoken ${accessToken}`,
+            'Content-Type': 'multipart/form-data',
+          },
+        },
+        console.log('posting to zoho....'),
+      );
+
+      if (response.ok) {
+        console.log('Image uploaded successfully to Zoho.');
+      } else {
+        console.log(
+          'Failed to upload image to Zoho:',
+          response.status,
+          response.statusText,
+        );
+      }
+    } catch (error) {
+      console.error('Error capturing and uploading QR code:', error);
+    }
+  };
+
+  // useEffect(() => {
+  //   codeGenrator();
+  // }, []);
 
   console.log('User in verify details : ', user);
   return (
-
     <SafeAreaView style={{flex: 1, backgroundColor: '#FFF'}}>
-
       {/* <View style={styles.header}>
       <View style={styles.headerContainer}>
         <Text style={styles.headertxt}>Visitor details</Text>
@@ -399,11 +350,9 @@ useEffect(()=>{
       </View>
     </View> */}
       <ScrollView style={styles.scrollview}>
-
         {user?.Referrer_Approval === 'PENDING APPROVAL' ? (
           <View style={[styles.container, {marginTop: 20}]}>
             <View style={[styles.left, {width: '50%'}]}>
-
               <TouchableOpacity style={styles.btnAccept} onPress={onApprove}>
                 <Text style={styles.btntxt}>Approve</Text>
               </TouchableOpacity>
@@ -414,18 +363,14 @@ useEffect(()=>{
               </TouchableOpacity>
             </View>
           </View>
-
         ) : user?.Referrer_Approval === 'APPROVED' ? (
           <View style={{width: '100%', padding: 10, marginLeft: '30%'}}>
-
             <TouchableOpacity style={[styles.btnReject]} onPress={onReject}>
               <Text style={[styles.btntxt]}>Reject</Text>
             </TouchableOpacity>
           </View>
-
         ) : user?.Referrer_Approval === 'DENIED' ? (
           <View style={{width: '100%', padding: 10, marginLeft: '15%'}}>
-
             <TouchableOpacity style={styles.btnAccept} onPress={onApprove}>
               <Text style={styles.btntxt}>Approve</Text>
             </TouchableOpacity>
@@ -617,546 +562,406 @@ useEffect(()=>{
                 onPress={() => {
                   onShare();
                 }}>
-
                 <Text style={[styles.wewe, styles.wewe1]}>Share</Text>
               </TouchableOpacity>
             </View>
           </View>
-
         ) : null}
       </ScrollView>
     </SafeAreaView>
   );
 };
 
-
 export default VerifyDetails;
 
 const mediumScreen = StyleSheet.create({
-  hidden:{
- opacity:0,
- position:'absolute',
- zIndex:0,
-
+  hidden: {
+    opacity: 0,
+    position: 'absolute',
+    zIndex: 0,
   },
 
-  gradient:{
+  gradient: {
     ...StyleSheet.absoluteFillObject,
-    position:'absolute',
-    left:0,
-    top:0,
-},
-
-
-  topGradient:{
-    top:0,
-    height:'180%'
-            },
-          
-    bottomGradient:{
-          bottom:0,
-          height:'9%',
-          backgroundColor:'#F9ECDF'
-            },
-
-
-
-  BottomImage:{
-
-  flex: 1,
-  position: 'relative',
-  justifyContent: 'flex-end',
-  alignSelf:'center',
-  width: 385,
-  height: 130, // height as a percentage of screen height
-  position: 'absolute',
-  bottom: -79,
-  
+    position: 'absolute',
+    left: 0,
+    top: 0,
   },
 
+  topGradient: {
+    top: 0,
+    height: '180%',
+  },
 
-  BottomLogoImage:{
+  bottomGradient: {
+    bottom: 0,
+    height: '9%',
+    backgroundColor: '#F9ECDF',
+  },
 
+  BottomImage: {
     flex: 1,
     position: 'relative',
     justifyContent: 'flex-end',
-    alignSelf:'center',
+    alignSelf: 'center',
+    width: 385,
+    height: 130, // height as a percentage of screen height
+    position: 'absolute',
+    bottom: -79,
+  },
+
+  BottomLogoImage: {
+    flex: 1,
+    position: 'relative',
+    justifyContent: 'flex-end',
+    alignSelf: 'center',
     width: 145,
     height: 95, // height as a percentage of screen height
     position: 'absolute',
     bottom: -76,
-    
-    },
-  
-  pageContainer:{
-      backgroundColor:'white'
-  },
-  
-   container: {
-      flex:1,
-      justifyContent:'center',
-      alignItems:'center',
-      backgroundColor:'#F9ECDF',
-      width:385,
-      height:612
-  
-  
-    
-  
-  },
-  
-  title:{
-      fontSize:25,
-      textAlign: 'center',
-      margin:0,
-      color:'#6E260E',
-      fontWeight:'bold'
   },
 
-
-   title2:{
-      fontSize:25,
-      textAlign: 'center',
-      marginBottom:10,
-      color:'#6E260E',
-      fontWeight:'bold'
-  },
-  
-  
-  code:{
-      fontSize:35,
-      textAlign:'center',
-      color:'brown',
-     
-  },
-  
-  codeBackdrop:{
-      marginTop:12,
-      backgroundColor:'pink',
-      borderRadius:20,
-      flexGrow:0,
-      width:170,
-      height:50
-      
-  
-  },
-  
-  
-  text:{
-      fontSize:14,
-      textAlign:'center',
-      color:'#6E260E',
-      marginBottom:10
-     
-  },
-  
-  middleText:{
-  fontSize:17,
-  color:'#6E260E',
-  marginTop:10
-  
-  
-  },
-  
-  BottomtextContainer:{
-  marginTop:15
-  
-  
-  },
-  
-  
-  Bottomtext:{
-      fontSize:10,
-      textAlign:'center',
-      color:'#6E260E',
-      
-      },
-  
-  
-  dateOfArrivalText:{
-      color:'#6E260E',
-      fontWeight:'bold',
-     alignSelf:'center',
-     fontSize:20,
-     
-  
-  },
-  
-  qrCodeContainer:{
-  flex:0.92,
-      alignItems:'center',
-      justifyContent:'center',
-      
-  },
-  
-  Buttons:{
-      marginTop:100
-  },
-})
-
-
-const smallScreen = StyleSheet.create({
-  hidden:{
-      opacity:0,
-      position:'absolute',
-      zIndex:0,
-   
-   
-       },
-
-topGradient:{
-  top:0,
-  height:'180%'
-          },
-        
-  bottomGradient:{
-        bottom:0,
-        height:'9%',
-        backgroundColor:'#F9ECDF'
-          },
-  
-  BottomImage:{
-
-  flex: 1,
-  position: 'relative',
-  justifyContent: 'flex-end',
-  alignSelf:'center',
-  width: 440,
-  height: 90, // height as a percentage of screen height
-  position: 'absolute',
-  bottom: -35
-  
-  
+  pageContainer: {
+    backgroundColor: 'white',
   },
 
-
-  BottomLogoImage:{
-
-    
-    },
-  
-
-  gradient:{
-      ...StyleSheet.absoluteFillObject,
-      ...StyleSheet.absoluteFillObject,
-      position:'absolute',
-      left:0,
-      top:0,
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F9ECDF',
+    width: 385,
+    height: 612,
   },
-  
-  pageContainer:{
-      backgroundColor:'white'
-  },
-  
-   container: {
-      flex:0,
-      justifyContent:'center',
-      alignItems:'center',
-      backgroundColor:'#F9ECDF',
-      width:430,
-      height:570
-  
-    
-  
-  },
-  
-  title:{
-      fontSize:25,
-      textAlign: 'center',
-      margin:0,
-      color:'#6E260E',
-      fontWeight:'bold'
-  },
-  
 
-  title2:{
-    fontSize:25,
+  title: {
+    fontSize: 25,
     textAlign: 'center',
-    marginBottom:5,
-    color:'#6E260E',
-    fontWeight:'bold'
-},
-
-
-
-
-
-
-
-
-  code:{
-      fontSize:35,
-      textAlign:'center',
-      color:'brown',
-     
-  },
-  
-  codeBackdrop:{
-      marginTop:12,
-      backgroundColor:'pink',
-      borderRadius:20,
-      flexGrow:0,
-      width:170,
-      height:50
-      
-  
-  },
-  
-  
-  text:{
-      fontSize:14,
-      textAlign:'center',
-      color:'#6E260E',
-      marginBottom:10
-     
-  },
-  
-  middleText:{
-  fontSize:17,
-  color:'#6E260E',
-  marginTop:10
-  
-  
-  },
-  
-  BottomtextContainer:{
-  marginTop:15
-  
-  
-  },
-  
-  
-  Bottomtext:{
-      fontSize:10,
-      textAlign:'center',
-      color:'#6E260E',
-      
-      },
-  
-  
-  dateOfArrivalText:{
-      color:'#6E260E',
-      fontWeight:'bold',
-     alignSelf:'center',
-     fontSize:20,
-     
-  
-  },
-  
-  qrCodeContainer:{
-  flex:1,
-      alignItems:'center',
-      justifyContent:'center',
-      
-  },
-  
-  Buttons:{
-      marginTop:100
-  },
-})
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-const normalScreen = StyleSheet.create({
-
-  hidden:{
-      opacity:0,
-      position:'absolute',
-      zIndex:0,
- 
-   
-       },
-
-
-
-
-  gradient:{
-    ...StyleSheet.absoluteFillObject,
-      position:'absolute',
-      left:0,
-      top:0,
+    margin: 0,
+    color: '#6E260E',
+    fontWeight: 'bold',
   },
 
-
-  topGradient:{
-top:0,
-height:'180%'
+  title2: {
+    fontSize: 25,
+    textAlign: 'center',
+    marginBottom: 10,
+    color: '#6E260E',
+    fontWeight: 'bold',
   },
 
-  bottomGradient:{
-bottom:0,
-height:'10%',
-backgroundColor:'#F9ECDF'
-
-
+  code: {
+    fontSize: 35,
+    textAlign: 'center',
+    color: 'brown',
   },
 
-
-
-pageContainer:{
-  backgroundColor:'white'
-},
-
-BottomLogoImage:{
-
-  flex: 1,
-  position: 'relative',
-  justifyContent: 'flex-end',
-  alignSelf:'center',
-  width: 170,
-  height: 120, // height as a percentage of screen height
-  position: 'absolute',
-  bottom: -40,
-alignItems:'center'
+  codeBackdrop: {
+    marginTop: 12,
+    backgroundColor: 'pink',
+    borderRadius: 20,
+    flexGrow: 0,
+    width: 170,
+    height: 50,
   },
 
-
-container: {
-  flex:1,
-  justifyContent:'center',
-  alignItems:'center',
-  backgroundColor:'#F9ECDF',
-  width:450,
-  height:780,
- 
-
-
-},
-
-title:{
-  fontSize:25,
-  textAlign: 'center',
-  margin:0,
-  color:'#6E260E',
-  fontWeight:'bold'
-},
-
-
-title2:{
-  fontSize:25,
-  textAlign: 'center',
- marginBottom:10,
-  color:'#6E260E',
-  fontWeight:'bold'
-},
-
-
-
-
-code:{
-  fontSize:35,
-  textAlign:'center',
-  color:'brown',
- 
-},
-
-codeBackdrop:{
-  marginTop:12,
-  backgroundColor:'pink',
-  borderRadius:20,
-  flexGrow:0,
-  width:170,
-  height:50
-  
-
-},
-
-
-text:{
-  fontSize:14,
-  textAlign:'center',
-  color:'#6E260E',
-  marginBottom:10
- 
-},
-
-middleText:{
-fontSize:17,
-color:'#6E260E',
-marginTop:10
-
-
-},
-
-BottomtextContainer:{
-marginTop:19
-
-
-},
-
-
-Bottomtext:{
-  fontSize:18,
-  textAlign:'center',
-  color:'#6E260E',
-  
+  text: {
+    fontSize: 14,
+    textAlign: 'center',
+    color: '#6E260E',
+    marginBottom: 10,
   },
 
+  middleText: {
+    fontSize: 17,
+    color: '#6E260E',
+    marginTop: 10,
+  },
 
-dateOfArrivalText:{
-  color:'#6E260E',
-  fontWeight:'bold',
- alignSelf:'center',
- fontSize:20,
- 
+  BottomtextContainer: {
+    marginTop: 15,
+  },
 
-},
+  Bottomtext: {
+    fontSize: 10,
+    textAlign: 'center',
+    color: '#6E260E',
+  },
 
-qrCodeContainer:{
-flex:1,
-  alignItems:'center',
-  justifyContent:'center',
-  
-},
+  dateOfArrivalText: {
+    color: '#6E260E',
+    fontWeight: 'bold',
+    alignSelf: 'center',
+    fontSize: 20,
+  },
 
-Buttons:{
-  marginTop:100
-},
+  qrCodeContainer: {
+    flex: 0.92,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 
-BottomImage:{
-
-  flex: 1,
-  position: 'relative',
-  justifyContent: 'flex-end',
-  alignSelf:'center',
-  width: 500,
-  height: 200, // height as a percentage of screen height
-  position: 'absolute',
-  bottom: -78,
-  
-
-
-
-}
-
+  Buttons: {
+    marginTop: 100,
+  },
 });
 
+const smallScreen = StyleSheet.create({
+  hidden: {
+    opacity: 0,
+    position: 'absolute',
+    zIndex: 0,
+  },
 
+  topGradient: {
+    top: 0,
+    height: '180%',
+  },
 
+  bottomGradient: {
+    bottom: 0,
+    height: '9%',
+    backgroundColor: '#F9ECDF',
+  },
+
+  BottomImage: {
+    flex: 1,
+    position: 'relative',
+    justifyContent: 'flex-end',
+    alignSelf: 'center',
+    width: 440,
+    height: 90, // height as a percentage of screen height
+    position: 'absolute',
+    bottom: -35,
+  },
+
+  BottomLogoImage: {},
+
+  gradient: {
+    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFillObject,
+    position: 'absolute',
+    left: 0,
+    top: 0,
+  },
+
+  pageContainer: {
+    backgroundColor: 'white',
+  },
+
+  container: {
+    flex: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F9ECDF',
+    width: 430,
+    height: 570,
+  },
+
+  title: {
+    fontSize: 25,
+    textAlign: 'center',
+    margin: 0,
+    color: '#6E260E',
+    fontWeight: 'bold',
+  },
+
+  title2: {
+    fontSize: 25,
+    textAlign: 'center',
+    marginBottom: 5,
+    color: '#6E260E',
+    fontWeight: 'bold',
+  },
+
+  code: {
+    fontSize: 35,
+    textAlign: 'center',
+    color: 'brown',
+  },
+
+  codeBackdrop: {
+    marginTop: 12,
+    backgroundColor: 'pink',
+    borderRadius: 20,
+    flexGrow: 0,
+    width: 170,
+    height: 50,
+  },
+
+  text: {
+    fontSize: 14,
+    textAlign: 'center',
+    color: '#6E260E',
+    marginBottom: 10,
+  },
+
+  middleText: {
+    fontSize: 17,
+    color: '#6E260E',
+    marginTop: 10,
+  },
+
+  BottomtextContainer: {
+    marginTop: 15,
+  },
+
+  Bottomtext: {
+    fontSize: 10,
+    textAlign: 'center',
+    color: '#6E260E',
+  },
+
+  dateOfArrivalText: {
+    color: '#6E260E',
+    fontWeight: 'bold',
+    alignSelf: 'center',
+    fontSize: 20,
+  },
+
+  qrCodeContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  Buttons: {
+    marginTop: 100,
+  },
+});
+
+const normalScreen = StyleSheet.create({
+  hidden: {
+    opacity: 0,
+    position: 'absolute',
+    zIndex: 0,
+  },
+
+  gradient: {
+    ...StyleSheet.absoluteFillObject,
+    position: 'absolute',
+    left: 0,
+    top: 0,
+  },
+
+  topGradient: {
+    top: 0,
+    height: '180%',
+  },
+
+  bottomGradient: {
+    bottom: 0,
+    height: '10%',
+    backgroundColor: '#F9ECDF',
+  },
+
+  pageContainer: {
+    backgroundColor: 'white',
+  },
+
+  BottomLogoImage: {
+    flex: 1,
+    position: 'relative',
+    justifyContent: 'flex-end',
+    alignSelf: 'center',
+    width: 170,
+    height: 120, // height as a percentage of screen height
+    position: 'absolute',
+    bottom: -40,
+    alignItems: 'center',
+  },
+
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F9ECDF',
+    width: 450,
+    height: 780,
+  },
+
+  title: {
+    fontSize: 25,
+    textAlign: 'center',
+    margin: 0,
+    color: '#6E260E',
+    fontWeight: 'bold',
+  },
+
+  title2: {
+    fontSize: 25,
+    textAlign: 'center',
+    marginBottom: 10,
+    color: '#6E260E',
+    fontWeight: 'bold',
+  },
+
+  code: {
+    fontSize: 35,
+    textAlign: 'center',
+    color: 'brown',
+  },
+
+  codeBackdrop: {
+    marginTop: 12,
+    backgroundColor: 'pink',
+    borderRadius: 20,
+    flexGrow: 0,
+    width: 170,
+    height: 50,
+  },
+
+  text: {
+    fontSize: 14,
+    textAlign: 'center',
+    color: '#6E260E',
+    marginBottom: 10,
+  },
+
+  middleText: {
+    fontSize: 17,
+    color: '#6E260E',
+    marginTop: 10,
+  },
+
+  BottomtextContainer: {
+    marginTop: 19,
+  },
+
+  Bottomtext: {
+    fontSize: 18,
+    textAlign: 'center',
+    color: '#6E260E',
+  },
+
+  dateOfArrivalText: {
+    color: '#6E260E',
+    fontWeight: 'bold',
+    alignSelf: 'center',
+    fontSize: 20,
+  },
+
+  qrCodeContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  Buttons: {
+    marginTop: 100,
+  },
+
+  BottomImage: {
+    flex: 1,
+    position: 'relative',
+    justifyContent: 'flex-end',
+    alignSelf: 'center',
+    width: 500,
+    height: 200, // height as a percentage of screen height
+    position: 'absolute',
+    bottom: -78,
+  },
+});
 
 const styles = StyleSheet.create({
   header: {
