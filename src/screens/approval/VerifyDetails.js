@@ -58,11 +58,15 @@ const VerifyDetails = ({ navigation, route}) => {
   const [loading, setLoading] = useState(true);
   const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/${user.ID}/Photo/download`
   const viewRef = useRef();
-  const [code, setCode] = useState('417525');
+  const [code, setCode] = useState('');
+  const [codeReload, setcodeReload] = useState(false);
   const codeGenrator = () => {
       const newCode =  Math.floor(100000 + Math.random() * (999999 - 100001 + 1)).toString();
       setCode(newCode);
   };
+  const [approvingLoading, setapprovingLoading] = useState(false);
+
+
 
   console.log("Screen Height:", height);
 
@@ -74,8 +78,10 @@ const VerifyDetails = ({ navigation, route}) => {
             Passcode: code
         }
       }
+      
     
       const PasscodeData = async () => {
+        setcodeReload(false);
         console.log("in PasscodeData function")
       try{
         const passcodeResponse = await fetch(PasscodeUrl, {
@@ -87,15 +93,18 @@ const VerifyDetails = ({ navigation, route}) => {
           }
       });
       const responseData = await passcodeResponse.json();
+      
   
       console.log( "here is the passcode response" + responseData.code)
     
       if(responseData.code === 3002){
         console.log('Post of code was un-sucessfull')
         codeGenrator();
+        setcodeReload(true);
       } else if(responseData.code === 3000){
         console.log('code posted successfully to Zoho.');
         ScreenshotQR();
+        setcodeReload(false);
         
       }
     //   while (responseData.code === 3002){ 
@@ -188,6 +197,7 @@ console.log("in OnApprove function")
         Referrer_Approval: "APPROVED",
         L2_Approval_Status: "APPROVED"
       }
+      setapprovingLoading(true);
       PasscodeData();
 
      
@@ -213,9 +223,18 @@ console.log("in OnApprove function")
         setDeniedDataFetched(false)
         setApproveDataFetched(false)
       }
-      Alert.alert("Visitor Approved")
-      navigation.navigate('Approved')
+     
     }
+    else {
+      Alert.alert("Error: ", response.code)
+    }
+if(response.code === 3000 && !loggedUser.role === "L2"){
+  Alert.alert("Visitor Approved")
+  navigation.navigate('Approved')
+}
+   else if(response.code === 3000 && codeReload === false){ Alert.alert("Visitor Approved")
+    navigation.navigate('Approved')
+   setapprovingLoading(false);}
     else {
       Alert.alert("Error: ", response.code)
     }
@@ -299,6 +318,10 @@ else{ heightStyles = smallScreen;}
 
 
 const ScreenshotQR = async () => {
+if(!codeReload){
+  return;
+
+}
 try{
 console.log('capturing view.......')
 const uri = await captureRef(viewRef, {
@@ -407,8 +430,10 @@ console.error('Error capturing and uploading QR code:', error);
 
 
 useEffect(() => {
-  PasscodeData();
-}, [setCode]);
+  if(codeReload === true){
+    PasscodeData();
+  }
+}, [codeReload]);
 
 
 
@@ -441,7 +466,7 @@ useEffect(() => {
 
   console.log("User in verify details : ", user)
   return (
-    <><SafeAreaView style={{ flex: 1, backgroundColor: "#FFF", zIndex:1 }}>
+    <><SafeAreaView style={{ flex: 1, backgroundColor: "#FFF", zIndex:1}}>
       {/* <View style={styles.header}>
       <View style={styles.headerContainer}>
         <Text style={styles.headertxt}>Visitor details</Text>
@@ -454,13 +479,14 @@ useEffect(() => {
       </View>
     </View> */}
       <ScrollView style={styles.scrollview}>
+      { approvingLoading? <View style={heightStyles.ActivityIndicatorContainer}><Text style={heightStyles.ActivityIndicatorText}>Approving</Text><ActivityIndicator size="large" color="red" style={heightStyles.ActivityIndicator} /></View> : null }
         {user?.Referrer_Approval === "PENDING APPROVAL" ? (
           <View style={[styles.container, { marginTop: 20 }]}>
-            <View style={[styles.left, { width: "50%" }]}>
+         <View style={[styles.left, { width: "50%" }]}>
               <TouchableOpacity style={styles.btnAccept} onPress={onApprove}>
                 <Text style={styles.btntxt}>Approve</Text>
               </TouchableOpacity>
-            </View>
+            </View> 
             <View style={styles.right}>
               <TouchableOpacity style={styles.btnReject} onPress={onReject}>
                 <Text style={styles.btntxt}>Reject</Text>
@@ -652,6 +678,10 @@ useEffect(() => {
 
       </ScrollView>
     </SafeAreaView><View style={[heightStyles.hidden]}>
+             
+              {/* <TouchableOpacity style={styles.btnAccept} onPress={onApprove}>
+                <Text style={styles.btntxt}>Approve</Text>
+              </TouchableOpacity> */}
         <View ref={viewRef} style={[heightStyles.container]}><View style={{ flex: 1 }}>
           <View style={[heightStyles.qrCodeContainer]}>
           <Text style={[heightStyles.title]}>{user.Referrer_App_User_lookup.Name_field}</Text>
@@ -667,7 +697,7 @@ useEffect(() => {
                 <Text style={[heightStyles.dateOfArrivalText]}>{user.Date_of_Visit}</Text>
                 <Text style={[heightStyles.Bottomtext]}>Sri Sathya Sai Grama -</Text>
                 <Text style={[heightStyles.Bottomtext]}>Muddenahalli Rd,</Text>
-                <Text style={[heightStyles.Bottomtext]}> Karnataka 562103,</Text>
+                <Text style={[heightStyles.Bottomtext]}> Karnataka 562101,</Text>
                 <View style={{ flex: 1 }}>
 
                 </View>
@@ -692,6 +722,34 @@ useEffect(() => {
 export default VerifyDetails
 
 const mediumScreen = StyleSheet.create({
+
+
+  ActivityIndicatorContainer:{
+ top:60,
+ backgroundColor:'pink',
+ zIndex:1,
+ borderRadius:40,
+ width:300,
+
+  
+  },
+
+  ActivityIndicator:{
+  top:-10,
+  right:-60,
+  },
+
+ActivityIndicatorText:{
+  bottom:-20,
+  right:-90,
+  fontSize:14,
+  fontWeight:'bold'
+},
+
+
+
+
+
   hidden:{
  opacity:0,
  position:'absolute',
@@ -855,7 +913,32 @@ const mediumScreen = StyleSheet.create({
 
 
 const smallScreen = StyleSheet.create({
-  hidden:{
+
+  ActivityIndicatorContainer:{
+    top:60,
+    backgroundColor:'pink',
+    zIndex:1,
+    borderRadius:40,
+    width:350,
+   
+     
+     },
+   
+     ActivityIndicator:{
+     top:-10,
+     right:-60,
+     },
+   
+   ActivityIndicatorText:{
+     bottom:-20,
+     right:-110,
+     fontSize:17,
+     fontWeight:'bold'
+   },
+   
+
+
+ hidden:{
       opacity:0,
       position:'absolute',
       zIndex:0,
@@ -1042,6 +1125,30 @@ topGradient:{
 
 const normalScreen = StyleSheet.create({
 
+  ActivityIndicatorContainer:{
+    top:60,
+    backgroundColor:'pink',
+    zIndex:1,
+    borderRadius:40,
+    width:350,
+    right:-10,
+   
+     
+     },
+   
+     ActivityIndicator:{
+     top:-10,
+     right:-60,
+     },
+   
+   ActivityIndicatorText:{
+     bottom:-20,
+     right:-100,
+     fontSize:15,
+     fontWeight:'bold'
+   },
+   
+
   hidden:{
       opacity:0,
       position:'absolute',
@@ -1218,6 +1325,7 @@ BottomImage:{
 
 
 const styles = StyleSheet.create({
+  
   header: {
     width: "100%",
     height: "8%",

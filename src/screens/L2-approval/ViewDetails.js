@@ -55,11 +55,14 @@ const ViewDetails = ({ navigation, route }) => {
   const [loading, setLoading] = useState(true);
   const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/${user.ID}/Photo/download`
   const viewRef = useRef();
-  const [code, setCode] = useState('0000');
+  const [code, setCode] = useState('');
+  const [codeReload, setcodeReload] = useState(false);
   const codeGenrator = () => {
       const newCode =  Math.floor(100000 + Math.random() * (999999 - 100001 + 1)).toString();
       setCode(newCode);
   };
+  const [approvingLoading, setapprovingLoading] = useState(false);
+ 
 
 
 
@@ -105,6 +108,8 @@ const ViewDetails = ({ navigation, route }) => {
       }
     
       const PasscodeData = async () => {
+        setcodeReload(false);
+        console.log("in PasscodeData function")
       try{
         const passcodeResponse = await fetch(PasscodeUrl, {
           method: 'POST',
@@ -121,12 +126,17 @@ const ViewDetails = ({ navigation, route }) => {
       if(responseData.code === 3002){
         console.log('Post of code was un-sucessfull')
         codeGenrator();
+        setcodeReload(true);
         console.log("code is:" +code);
       } else if(responseData.code === 3000){
         console.log('code posted successfully to Zoho.');
         ScreenshotQR();
+        setcodeReload(false);
         
       }
+
+      
+  console.log("Code reload is" + codeReload);
   
   
     console.log("Passcode data:" + passcodeResponse);
@@ -177,7 +187,9 @@ const ViewDetails = ({ navigation, route }) => {
 
   const onApprove = async () => {
 
-   PasscodeData();
+    setapprovingLoading(true);
+    PasscodeData();
+
    
     // ScreenshotQR();
 
@@ -203,14 +215,20 @@ const ViewDetails = ({ navigation, route }) => {
         setL2DeniedDataFetched(false)
         setL2ApproveDataFetched(false)
       }
-      Alert.alert("Visitor Approved")
-      navigation.navigate('L2Approved')
+
+ 
+    
     }
     else {
       Alert.alert("Error: ", response.code)
     }
 
+
+     
+
   }
+
+
 
   const onReject = async () => {
 
@@ -351,6 +369,12 @@ Authorization: `Zoho-oauthtoken ${accessToken}`,
 
 if (response.ok) {
   console.log('Image uploaded successfully to Zoho.');
+    console.log('inside function of chainging screens')
+  Alert.alert("Visitor Approved")
+  navigation.navigate('L2Approved')
+  setapprovingLoading(false);
+  
+  
 } else {
   console.log('Failed to upload image to Zoho:', response.status, response.statusText);
 }
@@ -359,12 +383,6 @@ console.error('Error capturing and uploading QR code:', error);
 }
 };
 
-
-
-
-useEffect(() => {
-  PasscodeData();
-}, [setCode]);
 
 
 
@@ -382,22 +400,13 @@ useEffect(() => {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  useEffect(() => {
+    if(codeReload === true){
+      PasscodeData();
+    }
+  }, [codeReload]);
+  
+  
 
 
 
@@ -411,6 +420,7 @@ useEffect(() => {
       </View>
     </View> */}
       <ScrollView style={styles.scrollview}>
+      { approvingLoading? <View style={heightStyles.ActivityIndicatorContainer}><Text style={heightStyles.ActivityIndicatorText}>Approving</Text><ActivityIndicator size="large" color="red" style={heightStyles.ActivityIndicator} /></View>  : null }
         {user?.L2_Approval_Status === "PENDING APPROVAL" ? (
           <View style={[styles.container, { marginTop: 20 }]}>
             <View style={[styles.left, { width: "50%" }]}>
@@ -636,6 +646,41 @@ export default ViewDetails
 
 
 const mediumScreen = StyleSheet.create({
+
+  ActivityIndicatorContainer:{
+    top:60,
+    backgroundColor:'pink',
+    zIndex:1,
+    borderRadius:40,
+    width:300,
+    right:-15,
+   
+     
+     },
+   
+     ActivityIndicator:{
+     top:-10,
+     right:-60,
+     },
+   
+   ActivityIndicatorText:{
+     bottom:-20,
+     right:-90,
+     fontSize:14,
+     fontWeight:'bold'
+   },
+
+
+
+
+
+
+
+
+
+
+
+
   hidden:{
  opacity:0,
  position:'absolute',
@@ -799,7 +844,32 @@ const mediumScreen = StyleSheet.create({
 
 
 const smallScreen = StyleSheet.create({
-  hidden:{
+
+  ActivityIndicatorContainer:{
+    top:60,
+    backgroundColor:'pink',
+    zIndex:1,
+    borderRadius:40,
+    width:350,
+    right:-13,
+   
+     
+     },
+   
+     ActivityIndicator:{
+     top:-10,
+     right:-60,
+     },
+   
+   ActivityIndicatorText:{
+     bottom:-20,
+     right:-110,
+     fontSize:17,
+     fontWeight:'bold'
+   },
+
+
+hidden:{
       opacity:0,
       position:'absolute',
       zIndex:0,
@@ -986,7 +1056,30 @@ topGradient:{
 
 const normalScreen = StyleSheet.create({
 
-  hidden:{
+  ActivityIndicatorContainer:{
+    top:60,
+    backgroundColor:'pink',
+    zIndex:1,
+    borderRadius:40,
+    width:350,
+    right:-25,
+   
+     
+     },
+   
+     ActivityIndicator:{
+     top:-10,
+     right:-60,
+     },
+   
+   ActivityIndicatorText:{
+     bottom:-20,
+     right:-100,
+     fontSize:15,
+     fontWeight:'bold'
+   }, 
+  
+ hidden:{
       opacity:0,
       position:'absolute',
       zIndex:0,
