@@ -232,6 +232,7 @@ const Login = ({navigation}) => {
               style={{
                 width: '100%',
                 height: 340,
+                marginTop: 5
               }}
             />
 
@@ -287,9 +288,7 @@ const Login = ({navigation}) => {
                   )}
                   rules={{
                     required: true,
-                    minLength: 8,
-                    pattern:
-                      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+                    minLength: 6
                   }}
                 />
                 {showPassword === false ? (
@@ -318,13 +317,7 @@ const Login = ({navigation}) => {
               )}
               {errors.password?.type === 'minLength' && (
                 <Text style={styles.textError}>
-                  Password must be 8 characters long
-                </Text>
-              )}
-              {errors.password?.type === 'pattern' && (
-                <Text style={styles.textError}>
-                  Password must contain at least a uppercase,lowercase, number
-                  and a special character
+                  Password must be 6 characters long
                 </Text>
               )}
 
