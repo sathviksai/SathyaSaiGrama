@@ -12,6 +12,7 @@ import 'react-native-get-random-values';
 import { BackgroundImage } from 'react-native-elements/dist/config';
 
 
+
 export const updateRecord = async (reportName, modified_data, token, id) => {
   try {
     const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/${reportName}/${id}`
@@ -53,6 +54,7 @@ const VerifyDetails = ({ navigation, route}) => {
 
   const [photo, setPhoto] = useState();
   const [QrCodephoto, setQrCodephoto] = useState();
+  const [codeUploaded, setcodeUploaded] = useState(false);
   const { getAccessToken, setDeniedDataFetched, setApproveDataFetched, setPendingDataFetched, setEditData, loggedUser, accessToken } = useContext(UserContext)
   const token = accessToken
   setEditData(user);
@@ -180,6 +182,9 @@ const VerifyDetails = ({ navigation, route}) => {
         method: 'GET',
         headers: {
           Authorization: `Zoho-oauthtoken ${token}`,
+          'Cache-Control': 'no-cache',
+          Pragma: 'no-cache',
+          Expires: '0',
         },
       });
 
@@ -206,6 +211,7 @@ const VerifyDetails = ({ navigation, route}) => {
       setQrCodephoto(qrCodeDataUrl);
       setLoading(false);
     };
+    
     fetchImage();
   }, []);
 
@@ -315,9 +321,17 @@ if(response.code === 3000 && !loggedUser.role === "L2"){
 
 
   const onShare = async () => {
+    
     try {
       
-      const path =`${RNFS.DocumentDirectoryPath}/image.jpg`;
+      const path =`${RNFS.DocumentDirectoryPath}/images.jpg`;
+
+
+
+
+
+
+
       const base64string = QrCodephoto.replace( `data:image/jpeg;base64`, '');
       await RNFS.writeFile(path,base64string,'base64');
       
@@ -424,6 +438,7 @@ Authorization: `Zoho-oauthtoken ${accessToken}`,
 if (response1.ok) {
 console.log('code posted successfully to Zoho.');
 console.log("response",response1);
+setcodeUploaded(true);
 } else {
 console.log('Failed to post code to Zoho:', response1.status, response1.statusText, response1.ok);
 
