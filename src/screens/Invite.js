@@ -10,29 +10,27 @@ import {
   Share,
   Alert,
   TouchableWithoutFeedback,
-  ActivityIndicator,
 } from 'react-native';
 import UserContext from '../../context/UserContext';
-import { useContext, useEffect, useState } from 'react';
-import { AuthContext } from '../auth/AuthProvider';
-import { BASE_APP_URL, APP_OWNER_NAME, APP_LINK_NAME, YOURLS_KEY } from '@env';
+import {useContext, useEffect, useState} from 'react';
+import {AuthContext} from '../auth/AuthProvider';
+import {BASE_APP_URL, APP_OWNER_NAME, APP_LINK_NAME, YOURLS_KEY} from '@env';
 import axios from 'axios';
 
 
-const Invite = ({ navigation }) => {
-  const { user } = useContext(AuthContext);
+const Invite = ({navigation}) => {
+  const {user} = useContext(AuthContext);
 
-  const { userEmail, getAccessToken, loggedUser } = useContext(UserContext);
+  const {userEmail, getAccessToken, loggedUser} = useContext(UserContext);
   const L1ID = loggedUser.userId;
   const [selectedOption, setSelectedOption] = useState(null);
   const [modal, setModal] = useState(false);
-  const [loading, setLoading] = useState(false);
 
   //Popup when clicked on Visitor fills the form
   const handleModal = () => {
     setModal(!modal);
   };
-
+  
   // const handleCheckboxChange = option => {
   //   setSelectedOption(selectedOption === option ? null : option);
   // };
@@ -155,19 +153,19 @@ const Invite = ({ navigation }) => {
     }
   };
 
-
+  const [loading, setLoading] = useState(false);
   //================
   //To Share the generated URL
   const onShare = async selected => {
     console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
     try {
       if (selected !== null) {
-        setLoading(true); // Start loading of activity indicator untill all sharing apps appear
+        setLoading(true);
         const res = await generateURL(selected);
         const result = await Share.share({
           message: `Please Fill the form using this Link : ${veryshortUrl}`,
         });
-        setLoading(false); // stop loading after sharing apps appear
+        setLoading(false);
       } else {
         Alert.alert('Select anyone option');
       }
@@ -213,7 +211,7 @@ const Invite = ({ navigation }) => {
             <TouchableOpacity
               style={[styles.register, styles.register1]}
               onPress={handleModal}>
-              <Text style={[styles.registerTitle, { color: '#fff' }]}>
+              <Text style={[styles.registerTitle, {color: '#fff'}]}>
                 Visitor fills the form
               </Text>
             </TouchableOpacity>
@@ -243,7 +241,7 @@ const Invite = ({ navigation }) => {
                         <TouchableOpacity
                           style={[
                             styles.HomeButton,
-                            { backgroundColor: '#B21E2B' },
+                            {backgroundColor: '#B21E2B'},
                           ]}
                           onPress={() => {
                             onShare('Home');
@@ -253,7 +251,7 @@ const Invite = ({ navigation }) => {
                         <TouchableOpacity
                           style={[
                             styles.HomeButton,
-                            { backgroundColor: '#FFBE65' },
+                            {backgroundColor: '#FFBE65'},
                           ]}
                           onPress={() => {
                             onShare('Office');
@@ -263,13 +261,6 @@ const Invite = ({ navigation }) => {
                           </Text>
                         </TouchableOpacity>
                       </View>
-                      {loading && ( // Display ActivityIndicator if loading
-                <ActivityIndicator
-                  size="large"
-                  color="#752A26"
-                  style={styles.loadingContainer}
-                />
-              )}
                     </View>
                   </View>
                 </TouchableWithoutFeedback>
@@ -278,11 +269,11 @@ const Invite = ({ navigation }) => {
             <TouchableOpacity
               style={[styles.register, styles.register2]}
               onPress={() => navigation.navigate('FillByYourSelf')}>
-              <Text style={[styles.registerTitle, { color: '#B21E2B' }]}>
+              <Text style={[styles.registerTitle, {color: '#B21E2B'}]}>
                 Fill it by yourself!
               </Text>
             </TouchableOpacity>
-          </View>
+    </View>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -296,13 +287,6 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     backgroundColor: 'white',
-  },
-  loadingContainer: {
-    ...StyleSheet.absoluteFillObject,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.8)', // Adjust the opacity as needed
-    zIndex: 1,
   },
   welcome: {
     fontFamily: 'Inter',
@@ -330,7 +314,7 @@ const styles = StyleSheet.create({
   text1: {
     margin: 35,
   },
-  text2: { margin: 0 },
+  text2: {margin: 0},
   text3: {
     marginBottom: 8,
   },
@@ -347,7 +331,7 @@ const styles = StyleSheet.create({
     ...Platform.select({
       ios: {
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
+        shadowOffset: {width: 0, height: 4},
         shadowOpacity: 0.25,
         shadowRadius: 5,
       },
