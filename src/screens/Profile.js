@@ -31,17 +31,23 @@ import { useForm, Controller } from 'react-hook-form';
 import { AuthContext } from '../auth/AuthProvider';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import RNRestart from 'react-native-restart';
-import { BASE_APP_URL, APP_LINK_NAME, APP_OWNER_NAME } from "@env"
+import { BASE_APP_URL, APP_LINK_NAME, APP_OWNER_NAME } from '@env';
 
 const Profile = ({ navigation }) => {
-  const { getAccessToken, userEmail, L1ID, deviceToken, loggedUser, accessToken } = useContext(UserContext);
+  const {
+    getAccessToken,
+    userEmail,
+    L1ID,
+    deviceToken,
+    loggedUser,
+    accessToken,
+  } = useContext(UserContext);
   const { user, setUser } = useContext(AuthContext);
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
-  const [profileImageModalVisible, setProfileImageModalVisible] =
-    useState(false);
+  const [profileImageModalVisible, setProfileImageModalVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const [focusedInput, setFocusedInput] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
@@ -80,58 +86,54 @@ const Profile = ({ navigation }) => {
     }
   };
 
-
-
-
-
   const updateDeviceToken = async (modified_data, id) => {
     try {
-      const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/All_App_Users/${id}`
-      console.log(url)
+      const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/All_App_Users/${id}`;
+      console.log(url);
       const response = await fetch(url, {
         method: 'PATCH',
         headers: {
-          Authorization: `Zoho-oauthtoken ${accessToken}`
+          Authorization: `Zoho-oauthtoken ${accessToken}`,
         },
-        body: JSON.stringify(modified_data)
+        body: JSON.stringify(modified_data),
       });
       return await response.json();
-    }
-    catch (err) {
+    } catch (err) {
       if (err.message === 'Network request failed')
-        Alert.alert('Network Error', 'Failed to fetch data. Please check your network connection and try again.');
+        Alert.alert(
+          'Network Error',
+          'Failed to fetch data. Please check your network connection and try again.',
+        );
       else {
-        Alert.alert("Error: ", err)
-        console.log(err)
+        Alert.alert('Error: ', err);
+        console.log(err);
       }
     }
-  }
+  };
 
-  const findDeviceToken = async (id) => {
+  const findDeviceToken = async id => {
     try {
-      const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/All_App_Users/${id}`
-      console.log(url)
+      const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/All_App_Users/${id}`;
+      console.log(url);
       const response = await fetch(url, {
         method: 'GET',
         headers: {
-          Authorization: `Zoho-oauthtoken ${accessToken}`
+          Authorization: `Zoho-oauthtoken ${accessToken}`,
         },
       });
       return await response.json();
-    }
-    catch (err) {
+    } catch (err) {
       if (err.message === 'Network request failed')
-        Alert.alert('Network Error', 'Failed to fetch data. Please check your network connection and try again.');
+        Alert.alert(
+          'Network Error',
+          'Failed to fetch data. Please check your network connection and try again.',
+        );
       else {
-        Alert.alert("Error: ", err)
-        console.log(err)
+        Alert.alert('Error: ', err);
+        console.log(err);
       }
     }
-  }
-
-
-
-
+  };
 
   const onDelete = async userCred => {
     setModalVisible(!modalVisible);
@@ -141,27 +143,29 @@ const Profile = ({ navigation }) => {
 
   const onLogout = () => {
     signOut(auth)
-      .then(async (response) => {
+      .then(async response => {
         console.log('response :', response);
         setUser(null);
 
-        const respon = await findDeviceToken(loggedUser.userId)
-        console.log("response is: ", respon)
-        const replaceToken = deviceToken + "||"
-        let myDeviceToken = respon.data.Device_Tokens.replace(replaceToken, "")
+        const respon = await findDeviceToken(loggedUser.userId);
+        console.log('findDeviceToken response is: ', respon);
+        const replaceToken = deviceToken + '||';
+        let myDeviceToken = respon.data.Device_Tokens.replace(replaceToken, '');
 
-        console.log("local device token is: ", myDeviceToken)
-        console.log("Response device token is : ", respon)
+        console.log('local device token is: ', myDeviceToken);
+        console.log('Response device token is : ', respon);
         const updateData = {
           data: {
-            Device_Tokens: myDeviceToken
-          }
-        }
-        const updateResponse = await updateDeviceToken(updateData, loggedUser.userId)
-        console.log("update device token response: ", updateResponse)
+            Device_Tokens: myDeviceToken,
+          },
+        };
+        const updateResponse = await updateDeviceToken(
+          updateData,
+          loggedUser.userId,
+        );
+        console.log('update device token response: ', updateResponse);
 
-
-        await AsyncStorage.removeItem("existedUser");
+        await AsyncStorage.removeItem('existedUser');
         RNRestart.Restart();
       })
       .catch(error => {
@@ -365,7 +369,6 @@ const Profile = ({ navigation }) => {
               <Image
                 source={require('../assets/sathya.png')}
                 style={styles.propic}
-
               />
               {/* <TouchableOpacity style={styles.edit} onPress={changeProfile}>
                 <Image
@@ -389,7 +392,7 @@ const Profile = ({ navigation }) => {
                 onPress={() => setModalVisible(true)}>
                 <Image
                   source={require('../assets/delete.png')}
-                  style={{width: 20, height: 20}}
+                  style={{ width: 20, height: 20 }}
                 />
               </TouchableOpacity>
             </View>
@@ -629,13 +632,11 @@ const Profile = ({ navigation }) => {
                       flexDirection: 'row',
                     }}>
                     <TouchableOpacity
-                      style={[styles.HomeButton, { backgroundColor: '#B21E2B' }]}
-                    >
+                      style={[styles.HomeButton, { backgroundColor: '#B21E2B' }]}>
                       <Text style={[styles.wewe, styles.wewe1]}>Camera</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
-                      style={[styles.HomeButton, { backgroundColor: '#FFBE65' }]}
-                    >
+                      style={[styles.HomeButton, { backgroundColor: '#FFBE65' }]}>
                       <Text style={[styles.wewe, styles.wewe2]}>Gallery</Text>
                     </TouchableOpacity>
                   </View>
@@ -692,7 +693,7 @@ const styles = StyleSheet.create({
     borderRadius: 85,
     textAlign: 'center',
     borderWidth: 0.2,
-    borderColor: "gray"
+    borderColor: 'gray',
   },
   name: {
     color: '#1F2024',

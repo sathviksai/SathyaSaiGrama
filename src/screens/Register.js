@@ -142,7 +142,7 @@ const Register = ({ navigation }) => {
                     }}
                   />
                 )}
-                rules={{ required: true, minLength: 8, pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/ }}
+                rules={{ required: true, minLength: 6 }}
               />
               {showPassword === false ? (
                 <TouchableOpacity
@@ -168,13 +168,7 @@ const Register = ({ navigation }) => {
             )}
             {errors.password?.type === 'minLength' && (
               <Text style={styles.textError}>
-                Password must be 8 characters long
-              </Text>
-            )}
-            {errors.password?.type === 'pattern' && (
-              <Text style={styles.textError}>
-                Password must contain at least a uppercase,lowercase, number and a
-                special character
+                Password must be 6 characters long
               </Text>
             )}
 
@@ -197,7 +191,7 @@ const Register = ({ navigation }) => {
                     onChangeText={onChange}
                   />
                 )}
-                rules={{ required: true, minLength: 8, pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/, validate: value => value === password || 'Passwords do not match' }}
+                rules={{ required: true, minLength: 6, validate: value => value === password || 'Passwords do not match' }}
               />
               {showConfirmPassword === false ? (
                 <TouchableOpacity
@@ -222,13 +216,7 @@ const Register = ({ navigation }) => {
             )}
             {errors.confirmPassword?.type === 'minLength' && (
               <Text style={styles.textError}>
-                Password must be 8 characters long
-              </Text>
-            )}
-            {errors.confirmPassword?.type === 'pattern' && (
-              <Text style={styles.textError}>
-                Password must contain at least a uppercase,lowercase, number and a
-                special character
+                Password must be 6 characters long
               </Text>
             )}
             {errors.confirmPassword?.type === 'validate' && (
