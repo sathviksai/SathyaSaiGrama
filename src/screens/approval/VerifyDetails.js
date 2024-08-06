@@ -109,6 +109,7 @@ const VerifyDetails = ({navigation, route}) => {
     setCode(newCode);
   };
   const [approvingLoading, setapprovingLoading] = useState(false);
+  const [deniedLoading, setdeniedLoading] = useState(false);
   console.log('Screen Height:', height);
 
   const PasscodeUrl = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/form/Passcode`;
@@ -229,7 +230,9 @@ const VerifyDetails = ({navigation, route}) => {
     } else {
       updateField = {
         Referrer_Approval: 'APPROVED',
+        L2_Approval_Status: 'PENDING APPROVAL',
       };
+      setapprovingLoading(true);
     }
 
     const updateData = {
@@ -259,6 +262,7 @@ const VerifyDetails = ({navigation, route}) => {
     if (response.code === 3000 && !loggedUser.role === 'L2') {
       Alert.alert('Visitor Approved');
       navigation.navigate('Approved');
+      setapprovingLoading(false);
     } else if (response.code === 3000 && codeReload === false) {
       Alert.alert('Visitor Approved');
       navigation.navigate('Approved');
@@ -269,20 +273,18 @@ const VerifyDetails = ({navigation, route}) => {
   };
 
   const onReject = async () => {
+    setdeniedLoading(true);
     let status = user.Referrer_Approval;
 
-    if (loggedUser.role === 'L2') {
+   
       updateField = {
         Referrer_Approval: 'DENIED',
         L2_Approval_Status: 'DENIED',
         Generated_Passcode: null,
         Generated_QR_Code: null,
       };
-    } else {
-      updateField = {
-        Referrer_Approval: 'DENIED',
-      };
-    }
+     
+    
 
     const updateData = {
       data: updateField,
@@ -306,6 +308,7 @@ const VerifyDetails = ({navigation, route}) => {
       }
       Alert.alert('Visitor Rejected');
       navigation.navigate('Denied');
+     setdeniedLoading(false);
     } else {
       Alert.alert('Error: ', response.code);
     }
@@ -480,6 +483,16 @@ const VerifyDetails = ({navigation, route}) => {
           {approvingLoading ? (
             <View style={heightStyles.ActivityIndicatorContainer}>
               <Text style={heightStyles.ActivityIndicatorText}>Approving</Text>
+              <ActivityIndicator
+                size="large"
+                color="red"
+                style={heightStyles.ActivityIndicator}
+              />
+            </View>
+          ) : null}
+          {deniedLoading ? (
+            <View style={heightStyles.ActivityIndicatorContainer}>
+              <Text style={heightStyles.ActivityIndicatorText}>Rejecting</Text>
               <ActivityIndicator
                 size="large"
                 color="red"

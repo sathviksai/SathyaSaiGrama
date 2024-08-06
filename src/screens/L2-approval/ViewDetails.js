@@ -101,6 +101,7 @@ const ViewDetails = ({navigation, route}) => {
     setCode(newCode);
   };
   const [approvingLoading, setapprovingLoading] = useState(false);
+  const [deniedLoading, setdeniedLoading] = useState(false);
 
   const getImage = async () => {
     try {
@@ -217,6 +218,7 @@ const ViewDetails = ({navigation, route}) => {
   };
 
   const onReject = async () => {
+    setdeniedLoading(true);
     let status = user.L2_Approval_Status;
 
     const updateField = {
@@ -249,6 +251,7 @@ const ViewDetails = ({navigation, route}) => {
       }
       Alert.alert('Visitor Rejected');
       navigation.navigate('L2Denied');
+      setdeniedLoading(false);
     } else {
       Alert.alert('Error: ', response.code);
     }
@@ -390,6 +393,16 @@ const ViewDetails = ({navigation, route}) => {
           {approvingLoading ? (
             <View style={heightStyles.ActivityIndicatorContainer}>
               <Text style={heightStyles.ActivityIndicatorText}>Approving</Text>
+              <ActivityIndicator
+                size="large"
+                color="red"
+                style={heightStyles.ActivityIndicator}
+              />
+            </View>
+          ) : null}
+          {deniedLoading ? (
+            <View style={heightStyles.ActivityIndicatorContainer}>
+              <Text style={heightStyles.ActivityIndicatorText}>Rejecting</Text>
               <ActivityIndicator
                 size="large"
                 color="red"
