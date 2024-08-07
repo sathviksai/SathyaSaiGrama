@@ -9,8 +9,10 @@ import {
   View,
   ActivityIndicator,
   Alert,
+  ImageBackground,
+  Dimensions,
 } from 'react-native';
-import React, {useContext, useEffect, useState} from 'react';
+import React, {useContext, useEffect, useState, useRef} from 'react';
 import {BASE_APP_URL, APP_LINK_NAME, APP_OWNER_NAME} from '@env';
 
 import UserContext from '../../../context/UserContext';
@@ -20,8 +22,6 @@ import Share from 'react-native-share';
 import LinearGradient from 'react-native-linear-gradient';
 import QRCode from 'react-native-qrcode-svg';
 import {captureRef} from 'react-native-view-shot';
-import 'react-native-get-random-values';
-import {BackgroundImage} from 'react-native-elements/dist/config';
 
 export const updateRecord = async (reportName, modified_data, token, id) => {
   try {
@@ -49,6 +49,7 @@ export const updateRecord = async (reportName, modified_data, token, id) => {
 };
 
 const VerifyDetails = ({navigation, route}) => {
+  const {height} = Dimensions.get('window');
   const {stringified} = route.params;
   console.log('stringified', stringified);
   let {user} = route.params;
@@ -79,6 +80,8 @@ const VerifyDetails = ({navigation, route}) => {
   }
 
   const [photo, setPhoto] = useState();
+  const [QrCodephoto, setQrCodephoto] = useState();
+  const [codeUploaded, setcodeUploaded] = useState(false);
 
   const {
     getAccessToken,
@@ -95,6 +98,61 @@ const VerifyDetails = ({navigation, route}) => {
   }, []);
   const [loading, setLoading] = useState(true);
   const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/${user.ID}/Photo/download`;
+  const qrCodeurl = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/${user.ID}/Generated_QR_Code/download`;
+  const viewRef = useRef();
+  const [code, setCode] = useState('');
+  const [codeReload, setcodeReload] = useState(false);
+  const codeGenrator = () => {
+    const newCode = Math.floor(
+      100000 + Math.random() * (999999 - 100001 + 1),
+    ).toString();
+    setCode(newCode);
+  };
+  const [approvingLoading, setapprovingLoading] = useState(false);
+  const [deniedLoading, setdeniedLoading] = useState(false);
+  console.log('Screen Height:', height);
+
+  const PasscodeUrl = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/form/Passcode`;
+
+  const payload = {
+    data: {
+      Passcode: code,
+    },
+  };
+
+  const PasscodeData = async () => {
+    setcodeReload(false);
+    console.log('in PasscodeData function');
+    try {
+      const passcodeResponse = await fetch(PasscodeUrl, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+        headers: {
+          Authorization: `Zoho-oauthtoken ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      const responseData = await passcodeResponse.json();
+
+      console.log('here is the passcode response' + responseData.code);
+
+      if (responseData.code === 3002) {
+        console.log('Post of code was un-sucessfull');
+        codeGenrator();
+        setcodeReload(true);
+      } else if (responseData.code === 3000) {
+        console.log('code posted successfully to Zoho.');
+        ScreenshotQR();
+        setcodeReload(false);
+      }
+
+      console.log('Passcode data:' + passcodeResponse);
+    } catch (error) {
+      console.log(error);
+      return false;
+    }
+    return codeExsits;
+  };
 
   const getImage = async () => {
     try {
@@ -119,11 +177,39 @@ const VerifyDetails = ({navigation, route}) => {
       console.error('Error fetching image:', error);
     }
   };
+  const getQrCodeImage = async () => {
+    try {
+      const response = await fetch(qrCodeurl, {
+        method: 'GET',
+        headers: {
+          Authorization: `Zoho-oauthtoken ${accessToken}`,
+          'Cache-Control': 'no-cache',
+          Pragma: 'no-cache',
+          Expires: '0',
+        },
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`HTTP error! status: ${response.status}, ${errorText}`);
+      }
+
+      const buffer = await response.arrayBuffer();
+      const base64Image = encode(buffer); // Use the encode function from base64-arraybuffer
+      const qrCodeDataUrl = `data:image/jpeg;base64,${base64Image}`;
+
+      return qrCodeDataUrl;
+    } catch (error) {
+      console.error('Error fetching image:', error);
+    }
+  };
 
   useEffect(() => {
     const fetchImage = async () => {
       const dataUrl = await getImage();
+      const qrCodeDataUrl = await getQrCodeImage();
       setPhoto(dataUrl);
+      setQrCodephoto(qrCodeDataUrl);
       setLoading(false);
     };
     fetchImage();
@@ -139,10 +225,14 @@ const VerifyDetails = ({navigation, route}) => {
         Referrer_Approval: 'APPROVED',
         L2_Approval_Status: 'APPROVED',
       };
+      setapprovingLoading(true);
+      PasscodeData();
     } else {
       updateField = {
         Referrer_Approval: 'APPROVED',
+        L2_Approval_Status: 'PENDING APPROVAL',
       };
+      setapprovingLoading(true);
     }
 
     const updateData = {
@@ -164,19 +254,37 @@ const VerifyDetails = ({navigation, route}) => {
         setDeniedDataFetched(false);
         setApproveDataFetched(false);
       }
+      // Alert.alert('Visitor Approved');
+      // navigation.navigate('Approved');
+    } else {
+      Alert.alert('Error: ', response.code);
+    }
+    if (response.code === 3000 && !loggedUser.role === 'L2') {
       Alert.alert('Visitor Approved');
       navigation.navigate('Approved');
+      setapprovingLoading(false);
+    } else if (response.code === 3000 && codeReload === false) {
+      Alert.alert('Visitor Approved');
+      navigation.navigate('Approved');
+      setapprovingLoading(false);
     } else {
       Alert.alert('Error: ', response.code);
     }
   };
 
   const onReject = async () => {
+    setdeniedLoading(true);
     let status = user.Referrer_Approval;
 
-    const updateField = {
-      Referrer_Approval: 'DENIED',
-    };
+   
+      updateField = {
+        Referrer_Approval: 'DENIED',
+        L2_Approval_Status: 'DENIED',
+        Generated_Passcode: null,
+        Generated_QR_Code: null,
+      };
+     
+    
 
     const updateData = {
       data: updateField,
@@ -200,6 +308,7 @@ const VerifyDetails = ({navigation, route}) => {
       }
       Alert.alert('Visitor Rejected');
       navigation.navigate('Denied');
+     setdeniedLoading(false);
     } else {
       Alert.alert('Error: ', response.code);
     }
@@ -207,35 +316,49 @@ const VerifyDetails = ({navigation, route}) => {
 
   const onShare = async () => {
     try {
-      const {Generated_QR_Code} = user;
-
       // Define the path to download the image
-      const path = `${RNFS.DocumentDirectoryPath}/image.jpg`;
+      const path = `${RNFS.DocumentDirectoryPath}/images.jpg`;
 
       // Download the image to local storage
-      await RNFS.downloadFile({
-        fromUrl: Generated_QR_Code,
-        toFile: path,
-      }).promise;
+      const base64string = QrCodephoto.replace(`data:image/jpeg;base64`, '');
+      await RNFS.writeFile(path, base64string, 'base64');
+
+      // const { Generated_QR_Code } = user;
+
+      // // Define the path to download the image
+      // const path = `${RNFS.DocumentDirectoryPath}/image.jpg`;
+
+      // // Download the image to local storage
+      // await RNFS.downloadFile({
+      //   from: QrCodephoto,
+      //   toFile: path,
+      // }).promise;
 
       // Share the image
       await Share.open({
-        url: Platform.OS === 'android' ? `file://${path}` : path,
+        // url: Platform.OS === 'android' ? `file://${path}` : path,
+        url: `file://${path}`,
       });
     } catch (error) {
       Alert.alert('Error', error.message);
     }
   };
 
-  // console.log("Screen Height:", height);
+  console.log('Screen Height:', height);
 
-  // let heightStyles;
-  // if(height > 900){
-  //     heightStyles = normalScreen;
-  // } else if(height>750){  heightStyles = mediumScreen;}
-  // else{ heightStyles = smallScreen;}
+  let heightStyles;
+  if (height > 900) {
+    heightStyles = normalScreen;
+  } else if (height > 750) {
+    heightStyles = mediumScreen;
+  } else {
+    heightStyles = smallScreen;
+  }
 
   const ScreenshotQR = async () => {
+    if (!codeReload) {
+      return;
+    }
     try {
       console.log('capturing view.......');
       const uri = await captureRef(viewRef, {
@@ -293,6 +416,7 @@ const VerifyDetails = ({navigation, route}) => {
       if (response1.ok) {
         console.log('code posted successfully to Zoho.');
         console.log('response', response1);
+        setcodeUploaded(true);
       } else {
         console.log(
           'Failed to post code to Zoho:',
@@ -334,11 +458,17 @@ const VerifyDetails = ({navigation, route}) => {
   // useEffect(() => {
   //   codeGenrator();
   // }, []);
+  useEffect(() => {
+    if (codeReload === true) {
+      PasscodeData();
+    }
+  }, [codeReload]);
 
   console.log('User in verify details : ', user);
   return (
-    <SafeAreaView style={{flex: 1, backgroundColor: '#FFF'}}>
-      {/* <View style={styles.header}>
+    <>
+      <SafeAreaView style={{flex: 1, backgroundColor: '#FFF', zIndex: 1}}>
+        {/* <View style={styles.header}>
       <View style={styles.headerContainer}>
         <Text style={styles.headertxt}>Visitor details</Text>
         <TouchableOpacity onPress={() => navigation.navigate("EditVerifydetails", { user: user })} style={{ width: 40, height: 40, padding: 10, marginEnd: 20 }}>
@@ -349,232 +479,399 @@ const VerifyDetails = ({navigation, route}) => {
         </TouchableOpacity>
       </View>
     </View> */}
-      <ScrollView style={styles.scrollview}>
-        {user?.Referrer_Approval === 'PENDING APPROVAL' ? (
-          <View style={[styles.container, {marginTop: 20}]}>
-            <View style={[styles.left, {width: '50%'}]}>
-              <TouchableOpacity style={styles.btnAccept} onPress={onApprove}>
-                <Text style={styles.btntxt}>Approve</Text>
-              </TouchableOpacity>
+        <ScrollView style={styles.scrollview}>
+          {/* {approvingLoading ? (
+            <View style={heightStyles.ApproveActivityIndicatorContainer}>
+              <Text style={[heightStyles.ActivityIndicatorText, {color:'white'}]}>Approving</Text>
+              <ActivityIndicator
+                size="large"
+                color="#006400"
+                style={heightStyles.ActivityIndicator}
+              />
             </View>
-            <View style={styles.right}>
-              <TouchableOpacity style={styles.btnReject} onPress={onReject}>
-                <Text style={styles.btntxt}>Reject</Text>
-              </TouchableOpacity>
+          ) : null}
+          {deniedLoading ? (
+            <View style={heightStyles.RejectActivityIndicatorContainer}>
+              <Text style={heightStyles.ActivityIndicatorText} >Rejecting</Text>
+              <ActivityIndicator
+                size="large"
+                color="red"
+                style={heightStyles.ActivityIndicator}
+              />
             </View>
-          </View>
-        ) : user?.Referrer_Approval === 'APPROVED' ? (
-          <View style={{width: '100%', padding: 10, marginLeft: '30%'}}>
+          ) : null} */}
+          {user?.Referrer_Approval === 'PENDING APPROVAL' ? (
+            
+            <View style={[styles.container, {marginTop: 20}]}>
+              {(approvingLoading || deniedLoading) ? (
+              <View>
+               {approvingLoading ? (
+            <View style={heightStyles.ApproveActivityIndicatorContainer}>
+              <Text style={[heightStyles.ActivityIndicatorText, {color:'white'}]}>Approving</Text>
+              <ActivityIndicator
+                size="large"
+                color="#006400"
+                style={heightStyles.ActivityIndicator}
+              />
+            </View>
+          ) :  null}
+        {deniedLoading ? (
+            <View style={heightStyles.RejectActivityIndicatorContainer}>
+              <Text style={heightStyles.ActivityIndicatorText} >Rejecting</Text>
+              <ActivityIndicator
+                size="large"
+                color="red"
+                style={heightStyles.ActivityIndicator}
+              />
+            </View>
+          ) : null}
+              
+            </View>
+              ): <><View style={[styles.left, { width: '50%' }]}>
+                  <TouchableOpacity style={styles.btnAccept} onPress={onApprove}>
+                    <Text style={styles.btntxt}>Approve</Text>
+                  </TouchableOpacity>
+                </View><View style={styles.right}>
+                    <TouchableOpacity style={styles.btnReject} onPress={onReject}>
+                      <Text style={styles.btntxt}>Reject</Text>
+                    </TouchableOpacity>
+                  </View></>
+            }
+            </View>
+          ) : user?.Referrer_Approval === 'APPROVED' ? (
+            <View>
+            {deniedLoading ? (
+              <View style={heightStyles.RejectActivityIndicatorContainer}>
+                <Text style={heightStyles.ActivityIndicatorText} >Rejecting</Text>
+                <ActivityIndicator
+                  size="large"
+                  color="red"
+                  style={heightStyles.ActivityIndicator}
+                />
+              </View>
+            ) : <View style={{width: '100%', padding: 10, marginLeft: '30%'}}>
             <TouchableOpacity style={[styles.btnReject]} onPress={onReject}>
               <Text style={[styles.btntxt]}>Reject</Text>
             </TouchableOpacity>
+          </View>}
           </View>
-        ) : user?.Referrer_Approval === 'DENIED' ? (
-          <View style={{width: '100%', padding: 10, marginLeft: '15%'}}>
+            
+          ) : user?.Referrer_Approval === 'DENIED' ? (
+           <View>
+            {approvingLoading ? (
+              <View style={heightStyles.ApproveActivityIndicatorContainer}>
+                <Text style={[heightStyles.ActivityIndicatorText, {color:'white'}]}>Approving</Text>
+                <ActivityIndicator
+                  size="large"
+                  color="#006400"
+                  style={heightStyles.ActivityIndicator}
+                />
+              </View>
+            ) : <View style={{width: '100%', padding: 10, marginLeft: '15%'}}>
             <TouchableOpacity style={styles.btnAccept} onPress={onApprove}>
               <Text style={styles.btntxt}>Approve</Text>
             </TouchableOpacity>
+          </View>}
           </View>
-        ) : null}
+           
+          ) : null}
+          {user.Referrer_Approval === 'APPROVED' &&
+          user.L2_Approval_Status == 'APPROVED' &&
+          user.Referrer_App_User_lookup.ID == loggedUser.userId ? (
+            <View style={[styles.container, {marginTop: 20, marginBottom: 20}]}>
+              <View style={styles.left}>
+                <Text style={styles.label}>Generated QR Code</Text>
+              </View>
+              <View
+                style={[
+                  styles.right,
+                  {
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    marginBottom: 20,
+                  },
+                ]}>
+                {loading ? (
+                  <ActivityIndicator size="large" color="#0000ff" />
+                ) : (
+                  QrCodephoto && (
+                    <Image
+                      source={{uri: QrCodephoto}}
+                      style={{width: '98%', height: 200}}
+                      resizeMode="contain"
+                    />
+                  )
+                )}
+                 {loading ? (
+                  null
+                ) : (
+                  <TouchableOpacity
+                  style={[styles.HomeButton, {backgroundColor: 'green'}]}
+                  onPress={() => {
+                    onShare();
+                  }}>
+                  <Text style={[styles.wewe, styles.wewe1]}>Share</Text>
+                </TouchableOpacity>
+                  )
+                }
+              </View>
+            </View>
+          ) : null}
+          <View style={[styles.container, {marginTop: 20}]}>
+            <View style={styles.left}>
+              <Text style={styles.label}>Name</Text>
+            </View>
+            <View style={styles.right}>
+              <Text style={styles.value}>
+                {user.Name_field.zc_display_value}
+              </Text>
+            </View>
+          </View>
+          <View style={[styles.container, {marginTop: 20}]}>
+            <View style={styles.left}>
+              <Text style={styles.label}>Phone</Text>
+            </View>
+            <View style={styles.right}>
+              <Text style={styles.value}>{user.Phone_Number}</Text>
+            </View>
+          </View>
+          <View style={[styles.container, {marginTop: 20}]}>
+            <View style={styles.left}>
+              <Text style={styles.label}>Single or Group Visit</Text>
+            </View>
+            <View style={styles.right}>
+              <Text style={styles.value}>{user.Single_or_Group_Visit}</Text>
+            </View>
+          </View>
+          <View style={[styles.container, {marginTop: 20}]}>
+            <View style={styles.left}>
+              <Text style={styles.label}>Date of Visit</Text>
+            </View>
+            <View style={styles.right}>
+              <Text style={styles.value}>{user.Date_of_Visit}</Text>
+            </View>
+          </View>
+          <View style={[styles.container, {marginTop: 20}]}>
+            <View style={styles.left}>
+              <Text style={styles.label}>Guest Category</Text>
+            </View>
+            <View style={styles.right}>
+              <Text style={styles.value}>{user.Guest_Category}</Text>
+            </View>
+          </View>
+          <View style={[styles.container, {marginTop: 20}]}>
+            <View style={styles.left}>
+              <Text style={styles.label}>Priority</Text>
+            </View>
+            <View style={styles.right}>
+              <Text style={styles.value}>{user.Priority}</Text>
+            </View>
+          </View>
+          <View style={[styles.container, {marginTop: 20}]}>
+            <View style={styles.left}>
+              <Text style={styles.label}>Remarks</Text>
+            </View>
+            <View style={styles.right}>
+              <Text style={styles.value}>{user.Remarks}</Text>
+            </View>
+          </View>
+          <View style={[styles.container, {marginTop: 20}]}>
+            <View style={styles.left}>
+              <Text style={styles.label}>Gender</Text>
+            </View>
+            <View style={styles.right}>
+              <Text style={styles.value}>{user.Gender}</Text>
+            </View>
+          </View>
+          <View style={[styles.container, {marginTop: 20}]}>
+            <View style={styles.left}>
+              <Text style={styles.label}>Photo</Text>
+            </View>
+            <View style={styles.right}>
+              {loading ? (
+                <ActivityIndicator size="large" color="#0000ff" />
+              ) : (
+                photo && (
+                  <Image
+                    source={{uri: photo}}
+                    style={{width: '98%', height: 200}}
+                  />
+                )
+              )}
+            </View>
+          </View>
+          <View style={[styles.container, {marginTop: 20}]}>
+            <View style={styles.left}>
+              <Text style={styles.label}>Referrer</Text>
+            </View>
+            <View style={styles.right}>
+              <Text style={styles.value}>
+                {user.Referrer_App_User_lookup.Name_field} -{' '}
+              </Text>
+              <Text style={styles.value}>
+                {user.Referrer_App_User_lookup.Email}
+              </Text>
+            </View>
+          </View>
+          <View style={[styles.container, {marginTop: 20}]}>
+            <View style={styles.left}>
+              <Text style={styles.label}>Department</Text>
+            </View>
+            <View style={styles.right}>
+              <Text style={styles.value}>{user.Department.Department}</Text>
+            </View>
+          </View>
+          <View style={[styles.container, {marginTop: 20}]}>
+            <View style={styles.left}>
+              <Text style={styles.label}>Number of Men</Text>
+            </View>
+            <View style={styles.right}>
+              <Text style={styles.value}>{user.Number_of_Men}</Text>
+            </View>
+          </View>
+          <View style={[styles.container, {marginTop: 20}]}>
+            <View style={styles.left}>
+              <Text style={styles.label}>Number of Women</Text>
+            </View>
+            <View style={styles.right}>
+              <Text style={styles.value}>{user.Number_of_Women}</Text>
+            </View>
+          </View>
+          <View style={[styles.container, {marginTop: 20}]}>
+            <View style={styles.left}>
+              <Text style={styles.label}>Number of Boys</Text>
+            </View>
+            <View style={styles.right}>
+              <Text style={styles.value}>{user.Number_of_Boys}</Text>
+            </View>
+          </View>
+          <View style={[styles.container, {marginTop: 20}]}>
+            <View style={styles.left}>
+              <Text style={styles.label}>Number of Boys</Text>
+            </View>
+            <View style={styles.right}>
+              <Text style={styles.value}>{user.Number_of_Girls}</Text>
+            </View>
+          </View>
+          <View style={[styles.container, {marginTop: 20}]}>
+            <View style={styles.left}>
+              <Text style={styles.label}>Vehicle Information</Text>
+            </View>
 
-        <View style={[styles.container, {marginTop: 20}]}>
-          <View style={styles.left}>
-            <Text style={styles.label}>Name</Text>
+            <View style={styles.right}>
+              {user?.Vehicle_Information?.length > 0
+                ? user.Vehicle_Information.map((vehicle, index) => (
+                    <Text key={index}>{vehicle.zc_display_value}</Text>
+                  ))
+                : null}
+            </View>
           </View>
-          <View style={styles.right}>
-            <Text style={styles.value}>{user.Name_field.zc_display_value}</Text>
-          </View>
-        </View>
-        <View style={[styles.container, {marginTop: 20}]}>
-          <View style={styles.left}>
-            <Text style={styles.label}>Phone</Text>
-          </View>
-          <View style={styles.right}>
-            <Text style={styles.value}>{user.Phone_Number}</Text>
-          </View>
-        </View>
-        <View style={[styles.container, {marginTop: 20}]}>
-          <View style={styles.left}>
-            <Text style={styles.label}>Single or Group Visit</Text>
-          </View>
-          <View style={styles.right}>
-            <Text style={styles.value}>{user.Single_or_Group_Visit}</Text>
-          </View>
-        </View>
-        <View style={[styles.container, {marginTop: 20}]}>
-          <View style={styles.left}>
-            <Text style={styles.label}>Date of Visit</Text>
-          </View>
-          <View style={styles.right}>
-            <Text style={styles.value}>{user.Date_of_Visit}</Text>
-          </View>
-        </View>
-        <View style={[styles.container, {marginTop: 20}]}>
-          <View style={styles.left}>
-            <Text style={styles.label}>Guest Category</Text>
-          </View>
-          <View style={styles.right}>
-            <Text style={styles.value}>{user.Guest_Category}</Text>
-          </View>
-        </View>
-        <View style={[styles.container, {marginTop: 20}]}>
-          <View style={styles.left}>
-            <Text style={styles.label}>Priority</Text>
-          </View>
-          <View style={styles.right}>
-            <Text style={styles.value}>{user.Priority}</Text>
-          </View>
-        </View>
-        <View style={[styles.container, {marginTop: 20}]}>
-          <View style={styles.left}>
-            <Text style={styles.label}>Remarks</Text>
-          </View>
-          <View style={styles.right}>
-            <Text style={styles.value}>{user.Remarks}</Text>
-          </View>
-        </View>
-        <View style={[styles.container, {marginTop: 20}]}>
-          <View style={styles.left}>
-            <Text style={styles.label}>Gender</Text>
-          </View>
-          <View style={styles.right}>
-            <Text style={styles.value}>{user.Gender}</Text>
-          </View>
-        </View>
-        <View style={[styles.container, {marginTop: 20}]}>
-          <View style={styles.left}>
-            <Text style={styles.label}>Photo</Text>
-          </View>
-          <View style={styles.right}>
-            {loading ? (
-              <ActivityIndicator size="large" color="#0000ff" />
-            ) : (
-              photo && (
-                <Image
-                  source={{uri: photo}}
-                  style={{width: '98%', height: 200}}
-                />
-              )
-            )}
-          </View>
-        </View>
-        <View style={[styles.container, {marginTop: 20}]}>
-          <View style={styles.left}>
-            <Text style={styles.label}>Referrer</Text>
-          </View>
-          <View style={styles.right}>
-            <Text style={styles.value}>
-              {user.Referrer_App_User_lookup.Name_field} -{' '}
-            </Text>
-            <Text style={styles.value}>
-              {user.Referrer_App_User_lookup.Email}
-            </Text>
-          </View>
-        </View>
-        <View style={[styles.container, {marginTop: 20}]}>
-          <View style={styles.left}>
-            <Text style={styles.label}>Department</Text>
-          </View>
-          <View style={styles.right}>
-            <Text style={styles.value}>{user.Department.Department}</Text>
-          </View>
-        </View>
-        <View style={[styles.container, {marginTop: 20}]}>
-          <View style={styles.left}>
-            <Text style={styles.label}>Number of Men</Text>
-          </View>
-          <View style={styles.right}>
-            <Text style={styles.value}>{user.Number_of_Men}</Text>
-          </View>
-        </View>
-        <View style={[styles.container, {marginTop: 20}]}>
-          <View style={styles.left}>
-            <Text style={styles.label}>Number of Women</Text>
-          </View>
-          <View style={styles.right}>
-            <Text style={styles.value}>{user.Number_of_Women}</Text>
-          </View>
-        </View>
-        <View style={[styles.container, {marginTop: 20}]}>
-          <View style={styles.left}>
-            <Text style={styles.label}>Number of Boys</Text>
-          </View>
-          <View style={styles.right}>
-            <Text style={styles.value}>{user.Number_of_Boys}</Text>
-          </View>
-        </View>
-        <View style={[styles.container, {marginTop: 20}]}>
-          <View style={styles.left}>
-            <Text style={styles.label}>Number of Boys</Text>
-          </View>
-          <View style={styles.right}>
-            <Text style={styles.value}>{user.Number_of_Girls}</Text>
-          </View>
-        </View>
-        <View style={[styles.container, {marginTop: 20}]}>
-          <View style={styles.left}>
-            <Text style={styles.label}>Vehicle Information</Text>
-          </View>
-
-          <View style={styles.right}>
-            {user?.Vehicle_Information?.length > 0
-              ? user.Vehicle_Information.map((vehicle, index) => (
-                  <Text key={index}>{vehicle.zc_display_value}</Text>
-                ))
-              : null}
-          </View>
-        </View>
-        <View style={[styles.container, {marginTop: 20, marginBottom: 20}]}>
-          <View style={styles.left}>
-            <Text style={styles.label}>
-              Is the guest being invited to your Home or Office
-            </Text>
-          </View>
-          <View style={styles.right}>
-            <Text style={styles.value}>{user.Home_or_Office}</Text>
-          </View>
-        </View>
-
-        {user.Referrer_Approval === 'APPROVED' &&
-        user.L2_Approval_Status == 'APPROVED' &&
-        user.Referrer_App_User_lookup.ID == loggedUser.userId ? (
           <View style={[styles.container, {marginTop: 20, marginBottom: 20}]}>
             <View style={styles.left}>
-              <Text style={styles.label}>Generated QR Code</Text>
+              <Text style={styles.label}>
+                Is the guest being invited to your Home or Office
+              </Text>
             </View>
-            <View
-              style={[
-                styles.right,
-                {
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  marginBottom: 20,
-                },
-              ]}>
-              <Image
-                source={{
-                  uri: user.Generated_QR_Code,
-                }}
-                style={{height: 200, width: 200}}
-              />
-              <TouchableOpacity
-                style={[styles.HomeButton, {backgroundColor: 'green'}]}
-                onPress={() => {
-                  onShare();
-                }}>
-                <Text style={[styles.wewe, styles.wewe1]}>Share</Text>
-              </TouchableOpacity>
+            <View style={styles.right}>
+              <Text style={styles.value}>{user.Home_or_Office}</Text>
             </View>
           </View>
-        ) : null}
-      </ScrollView>
-    </SafeAreaView>
+        </ScrollView>
+      </SafeAreaView>
+      <View style={[heightStyles.hidden]}>
+        {/* <TouchableOpacity style={styles.btnAccept} onPress={onApprove}>
+                <Text style={styles.btntxt}>Approve</Text>
+              </TouchableOpacity> */}
+        <View ref={viewRef} style={[heightStyles.container]}>
+          <View style={{flex: 1}}>
+            <View style={[heightStyles.qrCodeContainer]}>
+              <Text style={[heightStyles.title]}>
+                {user.Referrer_App_User_lookup.Name_field}
+              </Text>
+              <Text style={[heightStyles.title2]}>has invited you</Text>
+              <Text style={[heightStyles.text]}>
+                Show this QR code or OTP to the guard at the gate
+              </Text>
+              {code ? (
+                <QRCode value={code} size={160} />
+              ) : (
+                <Text>Genrating Qr code....</Text>
+              )}
+              <Text style={[heightStyles.middleText]}>---OR---</Text>
+              <View style={[heightStyles.codeBackdrop]}>
+                <Text style={[heightStyles.code]}>{code}</Text>
+                <View style={[heightStyles.BottomtextContainer]}>
+                  <Text style={[heightStyles.dateOfArrivalText]}>
+                    {user.Date_of_Visit}
+                  </Text>
+                  <Text style={[heightStyles.Bottomtext]}>
+                    Sri Sathya Sai Grama -
+                  </Text>
+                  <Text style={[heightStyles.Bottomtext]}>
+                    Muddenahalli Rd,
+                  </Text>
+                  <Text style={[heightStyles.Bottomtext]}>
+                    {' '}
+                    Karnataka 562101,
+                  </Text>
+                  <View style={{flex: 1}}></View>
+                </View>
+              </View>
+              <View style={{flex: 0.7}}>
+                <ImageBackground
+                  style={[heightStyles.BottomImage]}
+                  source={require('../../../src/assets/ashramQrScreen.jpg')}>
+                  <LinearGradient
+                    colors={['rgba(255,255,255,1)', 'rgba(255,255,255,0)']}
+                    style={[heightStyles.gradient, heightStyles.topGradient]}
+                  />
+                  <LinearGradient
+                    colors={['rgba(255,255,255,0)', 'rgba(255,255,255,1)']}
+                    style={[heightStyles.gradient, heightStyles.bottomGradient]}
+                  />
+                </ImageBackground>
+
+                <ImageBackground
+                  style={[heightStyles.BottomLogoImage]}
+                  source={require('../../../src/assets/SSG_OWOF.png')}></ImageBackground>
+              </View>
+            </View>
+          </View>
+        </View>
+      </View>
+    </>
   );
 };
 
 export default VerifyDetails;
 
 const mediumScreen = StyleSheet.create({
+  ApproveActivityIndicatorContainer: {
+    top: 10,
+    backgroundColor: '#9FE2BF',
+    zIndex: 1,
+    borderRadius: 40,
+    width: 300,
+  },
+
+  RejectActivityIndicatorContainer: {
+    top: 10,
+    backgroundColor: 'pink',
+    zIndex: 1,
+    borderRadius: 40,
+    width: 300,
+  },
+
+  ActivityIndicator: {
+    top: -10,
+    right: -60,
+  },
+  ActivityIndicatorText: {
+    bottom: -20,
+    right: -90,
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
   hidden: {
     opacity: 0,
     position: 'absolute',
@@ -707,6 +1004,35 @@ const mediumScreen = StyleSheet.create({
 });
 
 const smallScreen = StyleSheet.create({
+  ApproveActivityIndicatorContainer: {
+    top: 10,
+    backgroundColor: '#9FE2BF',
+    zIndex: 1,
+    borderRadius: 40,
+    width: 350,
+  },
+
+
+  RejectActivityIndicatorContainer: {
+    top: 10,
+    backgroundColor: 'pink',
+    zIndex: 1,
+    borderRadius: 40,
+    width: 350,
+  },
+
+  ActivityIndicator: {
+    top: -10,
+    right: -60,
+  },
+
+  ActivityIndicatorText: {
+    bottom: -20,
+    right: -110,
+    fontSize: 17,
+    fontWeight: 'bold',
+  },
+
   hidden: {
     opacity: 0,
     position: 'absolute',
@@ -831,6 +1157,38 @@ const smallScreen = StyleSheet.create({
 });
 
 const normalScreen = StyleSheet.create({
+  ApproveActivityIndicatorContainer: {
+    top: 10,
+    backgroundColor: '#9FE2BF',
+    zIndex: 1,
+    borderRadius: 40,
+    width: 350,
+    right: -10,
+  },
+
+
+  RejectActivityIndicatorContainer: {
+    top: 10,
+    backgroundColor: 'pink',
+    zIndex: 1,
+    borderRadius: 40,
+    width: 350,
+    right: -10,
+  },
+
+
+ActivityIndicator: {
+    top: -10,
+    right: -60,
+  },
+
+  ActivityIndicatorText: {
+    bottom: -20,
+    right: -100,
+    fontSize: 15,
+    fontWeight: 'bold',
+  },
+
   hidden: {
     opacity: 0,
     position: 'absolute',
@@ -1045,6 +1403,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     //color: "#752A26"
     color: '#FFF',
+
   },
   HomeButton: {
     height: 30,
