@@ -1,8 +1,6 @@
 import messaging from '@react-native-firebase/messaging';
 import { PermissionsAndroid, Platform } from 'react-native';
 
-PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS);
-
 export async function getDeviceToken() {
   console.log(
     'PermissionsAndroid.RESULTS.granted',
@@ -17,7 +15,6 @@ export async function getDeviceToken() {
       console.log('object');
       const token = await getFCMToken();
       return token
-
     } else {
       console.log('permission denied');
     }

@@ -10,23 +10,27 @@ const ApprovalComponent = ({ navigation, user }) => {
         navigation.navigate("VerifyDetails", { user: user })
     }
 
-    const containerHeight = user.Referrer_Approval === "APPROVED" && loggedUser.role == "L1" ? 110 : 79;
+    const containerHeight = user.Referrer_Approval === "APPROVED" && loggedUser.role == "L1" ? 100 : 70;
     let statusColor;
     let backColor;
     let statusTxtColor
 
-
+    let status;
     if (user.L2_Approval_Status === "APPROVED") {
         statusColor = "#008000"
         statusTxtColor = "#FFF"
+        status = "APPROVED"
     } else if (user.L2_Approval_Status === "PENDING APPROVAL") {
         statusColor = "#FADC3D"
         statusTxtColor = "#B21E2B"
+        status = "PENDING"
     } else if (user.L2_Approval_Status === "DENIED") {
         statusColor = "#FF0000"
         statusTxtColor = "#FFF"
+        status = "DENIED"
     }
 
+    
     if (user.Referrer_Approval === "APPROVED") {
         backColor = "#0080000D"
     } else if (user.Referrer_Approval === "PENDING APPROVAL") {
@@ -47,7 +51,7 @@ const ApprovalComponent = ({ navigation, user }) => {
                         <View style={styles.status}>
                             <Text style={styles.txt}>L2 Approval Status</Text>
                             <View style={[styles.statusview, { backgroundColor: statusColor }]}>
-                                <Text style={{ color: statusTxtColor }}>{user.L2_Approval_Status}</Text>
+                                <Text style={{ color: statusTxtColor }}>{status}</Text>
                             </View >
                         </View>
                     ) : null
@@ -78,7 +82,7 @@ const styles = StyleSheet.create({
         marginTop: 5
     },
     txt2: {
-        marginRight: 20,
+        marginRight: 27,
         marginTop: 5
     },
     nametxt: {
@@ -97,8 +101,9 @@ const styles = StyleSheet.create({
         marginTop: 5
     },
     statusview: {
-        flex: 1,
-        marginLeft: 20,
+        width: "40%",
+        height: "55%",
+        marginLeft: 25,
         marginTop: 6,
         paddingVertical: 5,
         paddingHorizontal: 10,
@@ -107,7 +112,9 @@ const styles = StyleSheet.create({
         alignItems: "center"
     },
     status: {
+        flex: 1,
         flexDirection: "row",
-        paddingRight: 20
+        paddingRight: 20,
+        justifyContent: "space-between"
     }
 })
