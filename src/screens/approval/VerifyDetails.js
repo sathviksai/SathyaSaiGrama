@@ -109,6 +109,7 @@ const VerifyDetails = ({navigation, route}) => {
     setCode(newCode);
   };
   const [approvingLoading, setapprovingLoading] = useState(false);
+  const [deniedLoading, setdeniedLoading] = useState(false);
   console.log('Screen Height:', height);
 
   const PasscodeUrl = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/form/Passcode`;
@@ -229,7 +230,9 @@ const VerifyDetails = ({navigation, route}) => {
     } else {
       updateField = {
         Referrer_Approval: 'APPROVED',
+        L2_Approval_Status: 'PENDING APPROVAL',
       };
+      setapprovingLoading(true);
     }
 
     const updateData = {
@@ -259,6 +262,7 @@ const VerifyDetails = ({navigation, route}) => {
     if (response.code === 3000 && !loggedUser.role === 'L2') {
       Alert.alert('Visitor Approved');
       navigation.navigate('Approved');
+      setapprovingLoading(false);
     } else if (response.code === 3000 && codeReload === false) {
       Alert.alert('Visitor Approved');
       navigation.navigate('Approved');
@@ -269,20 +273,18 @@ const VerifyDetails = ({navigation, route}) => {
   };
 
   const onReject = async () => {
+    setdeniedLoading(true);
     let status = user.Referrer_Approval;
 
-    if (loggedUser.role === 'L2') {
+   
       updateField = {
         Referrer_Approval: 'DENIED',
         L2_Approval_Status: 'DENIED',
         Generated_Passcode: null,
         Generated_QR_Code: null,
       };
-    } else {
-      updateField = {
-        Referrer_Approval: 'DENIED',
-      };
-    }
+     
+    
 
     const updateData = {
       data: updateField,
@@ -306,6 +308,7 @@ const VerifyDetails = ({navigation, route}) => {
       }
       Alert.alert('Visitor Rejected');
       navigation.navigate('Denied');
+     setdeniedLoading(false);
     } else {
       Alert.alert('Error: ', response.code);
     }
@@ -477,9 +480,44 @@ const VerifyDetails = ({navigation, route}) => {
       </View>
     </View> */}
         <ScrollView style={styles.scrollview}>
-          {approvingLoading ? (
-            <View style={heightStyles.ActivityIndicatorContainer}>
-              <Text style={heightStyles.ActivityIndicatorText}>Approving</Text>
+          {/* {approvingLoading ? (
+            <View style={heightStyles.ApproveActivityIndicatorContainer}>
+              <Text style={[heightStyles.ActivityIndicatorText, {color:'white'}]}>Approving</Text>
+              <ActivityIndicator
+                size="large"
+                color="#006400"
+                style={heightStyles.ActivityIndicator}
+              />
+            </View>
+          ) : null}
+          {deniedLoading ? (
+            <View style={heightStyles.RejectActivityIndicatorContainer}>
+              <Text style={heightStyles.ActivityIndicatorText} >Rejecting</Text>
+              <ActivityIndicator
+                size="large"
+                color="red"
+                style={heightStyles.ActivityIndicator}
+              />
+            </View>
+          ) : null} */}
+          {user?.Referrer_Approval === 'PENDING APPROVAL' ? (
+            
+            <View style={[styles.container, {marginTop: 20}]}>
+              {(approvingLoading || deniedLoading) ? (
+              <View>
+               {approvingLoading ? (
+            <View style={heightStyles.ApproveActivityIndicatorContainer}>
+              <Text style={[heightStyles.ActivityIndicatorText, {color:'white'}]}>Approving</Text>
+              <ActivityIndicator
+                size="large"
+                color="#006400"
+                style={heightStyles.ActivityIndicator}
+              />
+            </View>
+          ) :  null}
+        {deniedLoading ? (
+            <View style={heightStyles.RejectActivityIndicatorContainer}>
+              <Text style={heightStyles.ActivityIndicatorText} >Rejecting</Text>
               <ActivityIndicator
                 size="large"
                 color="red"
@@ -487,31 +525,55 @@ const VerifyDetails = ({navigation, route}) => {
               />
             </View>
           ) : null}
-          {user?.Referrer_Approval === 'PENDING APPROVAL' ? (
-            <View style={[styles.container, {marginTop: 20}]}>
-              <View style={[styles.left, {width: '50%'}]}>
-                <TouchableOpacity style={styles.btnAccept} onPress={onApprove}>
-                  <Text style={styles.btntxt}>Approve</Text>
-                </TouchableOpacity>
-              </View>
-              <View style={styles.right}>
-                <TouchableOpacity style={styles.btnReject} onPress={onReject}>
-                  <Text style={styles.btntxt}>Reject</Text>
-                </TouchableOpacity>
-              </View>
+              
+            </View>
+              ): <><View style={[styles.left, { width: '50%' }]}>
+                  <TouchableOpacity style={styles.btnAccept} onPress={onApprove}>
+                    <Text style={styles.btntxt}>Approve</Text>
+                  </TouchableOpacity>
+                </View><View style={styles.right}>
+                    <TouchableOpacity style={styles.btnReject} onPress={onReject}>
+                      <Text style={styles.btntxt}>Reject</Text>
+                    </TouchableOpacity>
+                  </View></>
+            }
             </View>
           ) : user?.Referrer_Approval === 'APPROVED' ? (
-            <View style={{width: '100%', padding: 10, marginLeft: '30%'}}>
-              <TouchableOpacity style={[styles.btnReject]} onPress={onReject}>
-                <Text style={[styles.btntxt]}>Reject</Text>
-              </TouchableOpacity>
-            </View>
+            <View>
+            {deniedLoading ? (
+              <View style={heightStyles.RejectActivityIndicatorContainer}>
+                <Text style={heightStyles.ActivityIndicatorText} >Rejecting</Text>
+                <ActivityIndicator
+                  size="large"
+                  color="red"
+                  style={heightStyles.ActivityIndicator}
+                />
+              </View>
+            ) : <View style={{width: '100%', padding: 10, marginLeft: '30%'}}>
+            <TouchableOpacity style={[styles.btnReject]} onPress={onReject}>
+              <Text style={[styles.btntxt]}>Reject</Text>
+            </TouchableOpacity>
+          </View>}
+          </View>
+            
           ) : user?.Referrer_Approval === 'DENIED' ? (
-            <View style={{width: '100%', padding: 10, marginLeft: '15%'}}>
-              <TouchableOpacity style={styles.btnAccept} onPress={onApprove}>
-                <Text style={styles.btntxt}>Approve</Text>
-              </TouchableOpacity>
-            </View>
+           <View>
+            {approvingLoading ? (
+              <View style={heightStyles.ApproveActivityIndicatorContainer}>
+                <Text style={[heightStyles.ActivityIndicatorText, {color:'white'}]}>Approving</Text>
+                <ActivityIndicator
+                  size="large"
+                  color="#006400"
+                  style={heightStyles.ActivityIndicator}
+                />
+              </View>
+            ) : <View style={{width: '100%', padding: 10, marginLeft: '15%'}}>
+            <TouchableOpacity style={styles.btnAccept} onPress={onApprove}>
+              <Text style={styles.btntxt}>Approve</Text>
+            </TouchableOpacity>
+          </View>}
+          </View>
+           
           ) : null}
           {user.Referrer_Approval === 'APPROVED' &&
           user.L2_Approval_Status == 'APPROVED' &&
@@ -540,13 +602,18 @@ const VerifyDetails = ({navigation, route}) => {
                     />
                   )
                 )}
-                <TouchableOpacity
+                 {loading ? (
+                  null
+                ) : (
+                  <TouchableOpacity
                   style={[styles.HomeButton, {backgroundColor: 'green'}]}
                   onPress={() => {
                     onShare();
                   }}>
                   <Text style={[styles.wewe, styles.wewe1]}>Share</Text>
                 </TouchableOpacity>
+                  )
+                }
               </View>
             </View>
           ) : null}
@@ -779,13 +846,22 @@ const VerifyDetails = ({navigation, route}) => {
 export default VerifyDetails;
 
 const mediumScreen = StyleSheet.create({
-  ActivityIndicatorContainer: {
-    top: 60,
+  ApproveActivityIndicatorContainer: {
+    top: 10,
+    backgroundColor: '#9FE2BF',
+    zIndex: 1,
+    borderRadius: 40,
+    width: 300,
+  },
+
+  RejectActivityIndicatorContainer: {
+    top: 10,
     backgroundColor: 'pink',
     zIndex: 1,
     borderRadius: 40,
     width: 300,
   },
+
   ActivityIndicator: {
     top: -10,
     right: -60,
@@ -928,8 +1004,17 @@ const mediumScreen = StyleSheet.create({
 });
 
 const smallScreen = StyleSheet.create({
-  ActivityIndicatorContainer: {
-    top: 60,
+  ApproveActivityIndicatorContainer: {
+    top: 10,
+    backgroundColor: '#9FE2BF',
+    zIndex: 1,
+    borderRadius: 40,
+    width: 350,
+  },
+
+
+  RejectActivityIndicatorContainer: {
+    top: 10,
     backgroundColor: 'pink',
     zIndex: 1,
     borderRadius: 40,
@@ -1072,8 +1157,18 @@ const smallScreen = StyleSheet.create({
 });
 
 const normalScreen = StyleSheet.create({
-  ActivityIndicatorContainer: {
-    top: 60,
+  ApproveActivityIndicatorContainer: {
+    top: 10,
+    backgroundColor: '#9FE2BF',
+    zIndex: 1,
+    borderRadius: 40,
+    width: 350,
+    right: -10,
+  },
+
+
+  RejectActivityIndicatorContainer: {
+    top: 10,
     backgroundColor: 'pink',
     zIndex: 1,
     borderRadius: 40,
@@ -1081,7 +1176,8 @@ const normalScreen = StyleSheet.create({
     right: -10,
   },
 
-  ActivityIndicator: {
+
+ActivityIndicator: {
     top: -10,
     right: -60,
   },
@@ -1307,6 +1403,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     //color: "#752A26"
     color: '#FFF',
+
   },
   HomeButton: {
     height: 30,

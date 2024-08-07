@@ -101,6 +101,7 @@ const ViewDetails = ({navigation, route}) => {
     setCode(newCode);
   };
   const [approvingLoading, setapprovingLoading] = useState(false);
+  const [deniedLoading, setdeniedLoading] = useState(false);
 
   const getImage = async () => {
     try {
@@ -217,6 +218,7 @@ const ViewDetails = ({navigation, route}) => {
   };
 
   const onReject = async () => {
+    setdeniedLoading(true);
     let status = user.L2_Approval_Status;
 
     const updateField = {
@@ -249,6 +251,7 @@ const ViewDetails = ({navigation, route}) => {
       }
       Alert.alert('Visitor Rejected');
       navigation.navigate('L2Denied');
+      setdeniedLoading(false);
     } else {
       Alert.alert('Error: ', response.code);
     }
@@ -387,7 +390,7 @@ const ViewDetails = ({navigation, route}) => {
       </View>
     </View> */}
         <ScrollView style={styles.scrollview}>
-          {approvingLoading ? (
+          {/* {approvingLoading ? (
             <View style={heightStyles.ActivityIndicatorContainer}>
               <Text style={heightStyles.ActivityIndicatorText}>Approving</Text>
               <ActivityIndicator
@@ -397,9 +400,40 @@ const ViewDetails = ({navigation, route}) => {
               />
             </View>
           ) : null}
+          {deniedLoading ? (
+            <View style={heightStyles.ActivityIndicatorContainer}>
+              <Text style={heightStyles.ActivityIndicatorText}>Rejecting</Text>
+              <ActivityIndicator
+                size="large"
+                color="red"
+                style={heightStyles.ActivityIndicator}
+              />
+            </View>
+          ) : null} */}
           {user?.L2_Approval_Status === 'PENDING APPROVAL' ? (
             <View style={[styles.container, {marginTop: 20}]}>
-              <View style={[styles.left, {width: '50%'}]}>
+               {(approvingLoading || deniedLoading) ? (<View>{approvingLoading ? (
+            <View style={heightStyles.ApproveActivityIndicatorContainer}>
+              <Text style={[heightStyles.ActivityIndicatorText, {color:'white'}]}>Approving</Text>
+              <ActivityIndicator
+                size="large"
+                color="#006400"
+                style={heightStyles.ActivityIndicator}
+              />
+            </View>
+          ) :  null}
+        {deniedLoading ? (
+            <View style={heightStyles.RejectActivityIndicatorContainer}>
+              <Text style={heightStyles.ActivityIndicatorText} >Rejecting</Text>
+              <ActivityIndicator
+                size="large"
+                color="red"
+                style={heightStyles.ActivityIndicator}
+              />
+            </View>
+          ) : null} 
+          </View>) :
+             <><View style={[styles.left, {width: '50%'}]}>
                 <TouchableOpacity style={styles.btnAccept} onPress={onApprove}>
                   <Text style={styles.btntxt}>Approve</Text>
                 </TouchableOpacity>
@@ -408,20 +442,45 @@ const ViewDetails = ({navigation, route}) => {
                 <TouchableOpacity style={styles.btnReject} onPress={onReject}>
                   <Text style={styles.btntxt}>Reject</Text>
                 </TouchableOpacity>
-              </View>
-            </View>
+              </View></> 
+            
+          }</View>
           ) : user?.L2_Approval_Status === 'APPROVED' ? (
-            <View style={{width: '100%', padding: 10, marginLeft: '30%'}}>
-              <TouchableOpacity style={[styles.btnReject]} onPress={onReject}>
-                <Text style={[styles.btntxt]}>Reject</Text>
-              </TouchableOpacity>
-            </View>
+            <View>
+            {deniedLoading ? (
+              <View style={heightStyles.RejectActivityIndicatorContainer}>
+                <Text style={heightStyles.ActivityIndicatorText} >Rejecting</Text>
+                <ActivityIndicator
+                  size="large"
+                  color="red"
+                  style={heightStyles.ActivityIndicator}
+                />
+              </View>
+            ) : <View style={{width: '100%', padding: 10, marginLeft: '30%'}}>
+            <TouchableOpacity style={[styles.btnReject]} onPress={onReject}>
+              <Text style={[styles.btntxt]}>Reject</Text>
+            </TouchableOpacity>
+          </View>}
+          </View>
+            
           ) : user?.L2_Approval_Status === 'DENIED' ? (
-            <View style={{width: '100%', padding: 10, marginLeft: '15%'}}>
-              <TouchableOpacity style={styles.btnAccept} onPress={onApprove}>
-                <Text style={styles.btntxt}>Approve</Text>
-              </TouchableOpacity>
-            </View>
+<View>
+            {approvingLoading ? (
+              <View style={heightStyles.ApproveActivityIndicatorContainer}>
+                <Text style={[heightStyles.ActivityIndicatorText, {color:'white'}]}>Approving</Text>
+                <ActivityIndicator
+                  size="large"
+                  color="#006400"
+                  style={heightStyles.ActivityIndicator}
+                />
+              </View>
+            ) : <View style={{width: '100%', padding: 10, marginLeft: '15%'}}>
+            <TouchableOpacity style={styles.btnAccept} onPress={onApprove}>
+              <Text style={styles.btntxt}>Approve</Text>
+            </TouchableOpacity>
+          </View>}
+          </View>
+
           ) : null}
 
           <View style={[styles.container, {marginTop: 20}]}>
@@ -659,8 +718,16 @@ const ViewDetails = ({navigation, route}) => {
 export default ViewDetails;
 
 const mediumScreen = StyleSheet.create({
-  ActivityIndicatorContainer: {
-    top: 60,
+  ApproveActivityIndicatorContainer: {
+    top: 10,
+    backgroundColor: '#9FE2BF',
+    zIndex: 1,
+    borderRadius: 40,
+    width: 300,
+    right: -15,
+  },
+  RejectActivityIndicatorContainer: {
+    top: 10,
     backgroundColor: 'pink',
     zIndex: 1,
     borderRadius: 40,
@@ -811,8 +878,17 @@ const mediumScreen = StyleSheet.create({
 });
 
 const smallScreen = StyleSheet.create({
-  ActivityIndicatorContainer: {
-    top: 60,
+  ApproveActivityIndicatorContainer: {
+    top: 10,
+    backgroundColor: '#9FE2BF',
+    zIndex: 1,
+    borderRadius: 40,
+    width: 350,
+    right: -13,
+  },
+
+  RejectActivityIndicatorContainer: {
+    top: 10,
     backgroundColor: 'pink',
     zIndex: 1,
     borderRadius: 40,
@@ -955,8 +1031,17 @@ const smallScreen = StyleSheet.create({
 });
 
 const normalScreen = StyleSheet.create({
-  ActivityIndicatorContainer: {
-    top: 60,
+  ApproveActivityIndicatorContainer: {
+    top: 10,
+    backgroundColor: '#9FE2BF',
+    zIndex: 1,
+    borderRadius: 40,
+    width: 350,
+    right: -25,
+  },
+
+  RejectActivityIndicatorContainer: {
+    top: 10,
     backgroundColor: 'pink',
     zIndex: 1,
     borderRadius: 40,
