@@ -3,6 +3,7 @@ import React, { useContext, useEffect, useState } from 'react'
 import { getL2Data } from '../../components/ApiRequest'
 import UserContext from '../../../context/UserContext'
 import L2ApprovalComponent from './L2ApprovalComponent';
+import parseDate from '../../components/ParseDate';
 
 const L2Denied = ({navigation}) => {
 
@@ -16,7 +17,15 @@ const L2Denied = ({navigation}) => {
     setLoading(true)
     console.log("Logged user dept id in L2 Pending: ", loggedUser.deptIds)
     const result = await getL2Data('Approval_to_Visitor_Report', 'Department', loggedUser.deptIds, "Referrer_Approval", "APPROVED", "L2_Approval_Status", "DENIED", "Referrer_App_User_lookup", loggedUser.userId, accessToken);
-    setL2Denieds(result.data)
+    const all_L2denieds = result.data;
+    all_L2denieds.sort((a, b) => {
+      // Parse the date strings into Date objects
+      const dateA = new parseDate(a.Date_of_Visit);
+      const dateB = new parseDate(b.Date_of_Visit);
+      // Compare the Date objects
+      return dateB - dateA;
+    });
+    setL2Denieds(all_L2denieds)
     setLoading(false)
     setL2DeniedDataFetched(true)
   };
@@ -32,7 +41,15 @@ const L2Denied = ({navigation}) => {
   const onRefresh = async () => {
     setRefreshing(true);
     const result = await getL2Data('Approval_to_Visitor_Report', 'Department', loggedUser.deptIds, "Referrer_Approval", "APPROVED", "L2_Approval_Status", "DENIED",  "Referrer_App_User_lookup", loggedUser.userId, accessToken);
-    setL2Denieds(result.data);
+    const all_L2denieds = result.data;
+    all_L2denieds.sort((a, b) => {
+      // Parse the date strings into Date objects
+      const dateA = new parseDate(a.Date_of_Visit);
+      const dateB = new parseDate(b.Date_of_Visit);
+      // Compare the Date objects
+      return dateB - dateA;
+    });
+    setL2Denieds(all_L2denieds)
     setRefreshing(false);
   };
 

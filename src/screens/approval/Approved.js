@@ -3,18 +3,28 @@ import React, { useContext, useEffect, useState } from 'react';
 import ApprovalComponent from './ApprovalComponent';
 import UserContext from '../../../context/UserContext';
 import { getDataWithIntAndString } from '../../components/ApiRequest';
+import parseDate from "../../components/ParseDate"
 
 const Approved = ({ navigation }) => {
   const { L1ID, getAccessToken, approveDataFetched, setApproveDataFetched } = useContext(UserContext);
   const [approveds, setApproveds] = useState([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
- // const [dataFetched, setDataFetched] = useState(false);
+  // const [dataFetched, setDataFetched] = useState(false);
 
   const fetchData = async () => {
     setLoading(true);
     const result = await getDataWithIntAndString('Approval_to_Visitor_Report', 'Referrer_App_User_lookup', L1ID, "Referrer_Approval", "APPROVED", getAccessToken());
-    setApproveds(result.data);
+    // sorting the Approveds data by date
+    const all_approveds = result.data;
+    all_approveds.sort((a, b) => {
+      // Parse the date strings into Date objects
+      const dateA = new parseDate(a.Date_of_Visit);
+      const dateB = new parseDate(b.Date_of_Visit);
+      // Compare the Date objects
+      return dateB - dateA;
+    });
+    setApproveds(all_approveds);
     setLoading(false);
     setApproveDataFetched(true);
   };
@@ -28,7 +38,15 @@ const Approved = ({ navigation }) => {
   const onRefresh = async () => {
     setRefreshing(true);
     const result = await getDataWithIntAndString('Approval_to_Visitor_Report', 'Referrer_App_User_lookup', L1ID, "Referrer_Approval", "APPROVED", getAccessToken());
-    setApproveds(result.data);
+    const all_approveds = result.data;
+    all_approveds.sort((a, b) => {
+      // Parse the date strings into Date objects
+      const dateA = new parseDate(a.Date_of_Visit);
+      const dateB = new parseDate(b.Date_of_Visit);
+      // Compare the Date objects
+      return dateB - dateA;
+    });
+    setApproveds(all_approveds);
     setRefreshing(false);
   };
 
@@ -42,7 +60,7 @@ const Approved = ({ navigation }) => {
         <FlatList
           data={approveds}
           renderItem={({ item }) => (
-            <ApprovalComponent navigation={navigation} key={item.ID} user={item}  />
+            <ApprovalComponent navigation={navigation} key={item.ID} user={item} />
           )}
           keyExtractor={(item) => item.ID.toString()}
           refreshControl={

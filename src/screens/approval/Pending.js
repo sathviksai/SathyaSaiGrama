@@ -3,18 +3,30 @@ import React, { useContext, useEffect, useState } from 'react';
 import ApprovalComponent from './ApprovalComponent';
 import UserContext from '../../../context/UserContext';
 import { getDataWithIntAndString } from '../../components/ApiRequest';
+import parseDate from "../../components/ParseDate"
 
 const Pending = ({ navigation }) => {
   const { L1ID, getAccessToken, pendingDataFetched, setPendingDataFetched } = useContext(UserContext);
   const [Pendings, setPendings] = useState([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+
   //const [dataFetched, setDataFetched] = useState(false); // State to track if data is already fetched
 
   const fetchData = async () => {
     setLoading(true);
     const result = await getDataWithIntAndString('Approval_to_Visitor_Report', 'Referrer_App_User_lookup', L1ID, "Referrer_Approval", "PENDING APPROVAL", getAccessToken());
-    setPendings(result.data);
+    console.log("Pending data are #################", result.data)
+    const all_pendings = result.data;
+    // sorting the pendings data by date
+    all_pendings.sort((a, b) => {
+      // Parse the date strings into Date objects
+      const dateA = new parseDate(a.Date_of_Visit);
+      const dateB = new parseDate(b.Date_of_Visit);
+      // Compare the Date objects
+      return dateB - dateA;
+  });
+    setPendings(all_pendings);
     setLoading(false); 
     setPendingDataFetched(true);
   }; 
@@ -28,7 +40,16 @@ const Pending = ({ navigation }) => {
   const onRefresh = async () => {
     setRefreshing(true);
     const result = await getDataWithIntAndString('Approval_to_Visitor_Report', 'Referrer_App_User_lookup', L1ID, "Referrer_Approval", "PENDING APPROVAL", getAccessToken());
-    setPendings(result.data);
+    const all_pendings = result.data;
+    // sorting the pendings data by date
+    all_pendings.sort((a, b) => {
+      // Parse the date strings into Date objects
+      const dateA = new parseDate(a.Date_of_Visit);
+      const dateB = new parseDate(b.Date_of_Visit);
+      // Compare the Date objects
+      return dateB - dateA;
+  });
+    setPendings(all_pendings);
     setRefreshing(false);
   };
 

@@ -3,6 +3,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import ApprovalComponent from './ApprovalComponent';
 import UserContext from '../../../context/UserContext';
 import { getDataWithIntAndString } from '../../components/ApiRequest';
+import parseDate from "../../components/ParseDate"
 
 const Denied = ({ navigation }) => {
   const { L1ID, getAccessToken, deniedDataFetched, setDeniedDataFetched } = useContext(UserContext);
@@ -14,7 +15,15 @@ const Denied = ({ navigation }) => {
   const fetchData = async () => {
     setLoading(true);
     const result = await getDataWithIntAndString('Approval_to_Visitor_Report', 'Referrer_App_User_lookup', L1ID, "Referrer_Approval", "DENIED", getAccessToken());
-    setDenieds(result.data);
+    const all_denieds = result.data;
+    all_denieds.sort((a, b) => {
+      // Parse the date strings into Date objects
+      const dateA = new parseDate(a.Date_of_Visit);
+      const dateB = new parseDate(b.Date_of_Visit);
+      // Compare the Date objects
+      return dateB - dateA;
+    });
+    setDenieds(all_denieds);
     setLoading(false);
     setDeniedDataFetched(true);
   };
@@ -28,7 +37,15 @@ const Denied = ({ navigation }) => {
   const onRefresh = async () => {
     setRefreshing(true);
     const result = await getDataWithIntAndString('Approval_to_Visitor_Report', 'Referrer_App_User_lookup', L1ID, "Referrer_Approval", "DENIED", getAccessToken());
-    setDenieds(result.data);
+    const all_denieds = result.data;
+    all_denieds.sort((a, b) => {
+      // Parse the date strings into Date objects
+      const dateA = new parseDate(a.Date_of_Visit);
+      const dateB = new parseDate(b.Date_of_Visit);
+      // Compare the Date objects
+      return dateB - dateA;
+    });
+    setDenieds(all_denieds);
     setRefreshing(false);
   };
 
