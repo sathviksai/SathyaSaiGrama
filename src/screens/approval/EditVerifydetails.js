@@ -16,6 +16,7 @@ import moment from 'moment';
 import {updateRecord} from './VerifyDetails';
 import UserContext from '../../../context/UserContext';
 import {Alert} from 'react-native';
+import {BASE_APP_URL, APP_LINK_NAME, APP_OWNER_NAME, } from '@env';
 
 const EditVerifyDetails = ({navigation, route}) => {
   const {user} = route.params;
@@ -105,6 +106,44 @@ const EditVerifyDetails = ({navigation, route}) => {
     today.setDate(today.getDate()),
     'YYYY/MM/DD',
   );
+
+  const updateRecord = async (reportName, modified_data, token, id) => {
+    try {
+      const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/${reportName}/${user.ID}`;
+      console.log(url);
+      const response = await fetch(url, {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Zoho-oauthtoken ${token}`,
+        },
+        body: JSON.stringify(modified_data),
+      });
+      if(response.ok){ 
+        if(user.Referrer_Approval=== 'PENDING APPROVAL'){
+          setTimeout(()=>  Alert.alert('Visitor details changed'), 2000)
+          setTimeout(()=> navigation.navigate('Pending') , 2000); 
+        } else if(user.Referrer_Approval === 'APPROVED'){
+        setTimeout(()=>  Alert.alert('Visitor details changed'), 2000)
+      setTimeout(()=> navigation.navigate('Approved') , 2000); 
+        }
+      }
+      return await response.json();
+
+    }
+    
+     catch (err) {
+      if (err.message === 'Network request failed')
+        Alert.alert(
+          'Network Error',
+          'Failed to fetch data. Please check your network connection and try again.',
+        );
+      else {
+        Alert.alert('Error: ', err);
+        console.log(err);
+      }
+      
+    }
+  };
 
   const onSave = async () => {
     if (!remarks) {

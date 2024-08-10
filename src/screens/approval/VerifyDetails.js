@@ -13,7 +13,7 @@ import {
   Dimensions,
 } from 'react-native';
 import React, {useContext, useEffect, useState, useRef} from 'react';
-import {BASE_APP_URL, APP_LINK_NAME, APP_OWNER_NAME} from '@env';
+import {BASE_APP_URL, APP_LINK_NAME, APP_OWNER_NAME, } from '@env';
 
 import UserContext from '../../../context/UserContext';
 import {encode} from 'base64-arraybuffer';
@@ -25,7 +25,7 @@ import {captureRef} from 'react-native-view-shot';
 
 export const updateRecord = async (reportName, modified_data, token, id) => {
   try {
-    const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/${reportName}/${id}`;
+    const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/${reportName}/${user.ID}`;
     console.log(url);
     const response = await fetch(url, {
       method: 'PATCH',
