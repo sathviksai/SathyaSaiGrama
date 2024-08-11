@@ -152,33 +152,7 @@ const FillByYourSelf = ({navigation}) => {
       }
     }
   };
-  // const postVehicle = async () => {
-  //   const formData = {
-  //     data: {
-  //       Vehicle_Number: vehicleNumber,
-  //       Vehicle_Type: vehicleType,
-  //     },
-  //   };
-  //   try {
-  //     const response = await fetch(
-  //       `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/form/Vehicle_Information`,
-  //       {
-  //         method: 'POST',
-  //         headers: {
-  //           Authorization: `Zoho-oauthtoken ${getAccessToken()}`,
-  //         },
-  //         body: JSON.stringify(formData),
-  //       },
-  //     );
-  //     const res = await response.json();
-  //     console.log('Vehicle Response', res);
-  //     return res;
-  //   } catch (error) {
-  //     Alert.alert('Error', 'Something went wrong');
-  //   }
-  // };
-  //==============================
-  //Post data to Approver_to_visitor table
+
   const posttoL1aprroved = async DepartmentID => {
     // const Vehicle_Info = await postVehicle();
     const formData = {
@@ -241,88 +215,67 @@ const FillByYourSelf = ({navigation}) => {
     return () => clearTimeout(timer);
   }, [value]);
 
-  // const selectImg = async () => {
-  //   try {
-  //     const img = await DocumentPicker.pickSingle({
-  //       type: [DocumentPicker.types.images],
-  //     });
+  const [nameErr, setNameErr] = useState(null);
+  const [dateOfVisitErr, setDateOfVisitErr] = useState(null);
+  const [singleOrGroupErr, setSingleOrGroupErr] = useState(null);
+  const [homeOrOfficeErr, setHomeOrOfficeErr] = useState(null);
+  const [genderErr, setGenderErr] = useState(null);
+  const [phoneErr, setPhoneErr] = useState(null);
 
-  //     setImage(img.name);
-  //     setImageUrl(img.uri);
-  //     return img;
-  //   } catch (err) {
-  //     if (DocumentPicker.isCancel(err)) {
-  //       console.log(err);
-  //     } else {
-  //       console.log(err);
-  //     }
-  //   }
-  // };
-  //==============================================
-  //Below are validations
-  const validateName = () => {
-    if (prefix == ' ') {
-      Alert.alert('Please Select Prefix ');
+  useEffect(()=>{
 
-      return false;
+    const validate = () =>{
+      if(!prefix || prefix===""  || !firstName || firstName===""  || !lastName || lastName==="" ){
+        setNameErr("Prefix, First Name and Last Name is required")
+      }else{
+        setNameErr(null)
+      }
+      if(date==="Select Date" ){
+        setDateOfVisitErr("Date of visit is required is required")
+      }else{
+        setDateOfVisitErr(null)
+      }
+      if(!formattedValue || formattedValue===""  || formattedValue===" "){
+        setPhoneErr("Phone number is required is required")
+      }else{
+        setPhoneErr(null)
+      }
+      if(!selectedSG || selectedSG===""  || selectedSG===" "){
+        setSingleOrGroupErr("Single or Group is required")
+      }else{
+        setSingleOrGroupErr(null)
+      }
+      if(!selectedHO || selectedHO===""  || selectedHO===" "){
+        setHomeOrOfficeErr("Home or Office is required")
+      }else{
+        setHomeOrOfficeErr(null)
+      }
+      if(!selectedGender || selectedGender===""  || selectedGender===" "){
+        setGenderErr("Gender is required")
+        if (selectedGender === 'Male') {
+          setMen('1');
+          setWomen('0');
+        } else if (selectedGender === 'Female') {
+          setWomen('1');
+          setMen('0');
+        }
+      }else{
+        setGenderErr(null)
+      }
     }
-    if (!firstName.trim() || !lastName.trim() || !prefix.trim) {
-      Alert.alert('Please enter prefix, Firstname and LastName');
-      return false;
-    }
-    return true;
-  };
-  const validatePhone = () => {
-    if (formattedValue === '') {
-      Alert.alert('Enter the Phone Number');
-      return false;
-    }
-    return true;
-  };
-  const validateGender = () => {
-    if (selectedGender == '') {
-      Alert.alert('Select Gender');
-      return false;
-    } else if (selectedGender == 'Male') {
-      setMen(1);
-      return true;
-    } else if (selectedGender == 'Female') {
-      setWomen(1);
-      return true;
-    }
-  };
-  const validateSOrG = () => {
-    if (selectedSG == '') {
-      Alert.alert('Select Single or Group Visit');
-      return false;
-    } else if (selectedSG == 'Single') {
-      return validateGender() && validateTotalPeople();
-    } else if (selectedSG == 'Group') {
-      return validateTotalPeople();
-    }
-    return true;
-  };
 
-  const validateHO = () => {
-    if (selectedHO == '') {
-      Alert.alert('Select Home or Office Visit');
-      return false;
-    }
-    return true;
-  };
-  const validateTotalPeople = () => {
-    if (men + women + boys + girls > 0) {
-      return true;
-    }
-    return false;
-  };
+    validate();
+
+  }, [prefix, firstName, lastName, date, formattedValue, selectedGender, selectedHO, selectedSG]);
+  
 
   const validateForm = () => {
-    if (validateName() && validatePhone() && validateSOrG() && validateHO()) {
+    if(!genderErr && !homeOrOfficeErr && !singleOrGroupErr && !dateOfVisitErr && !nameErr && !phoneErr){
+      console.log("Every thing is right")
       return true;
-    } else {
-      return false;
     }
+    console.log("Some thing is missing")
+    return false;
   };
 
   const handleSubmit = async () => {
@@ -373,8 +326,14 @@ const FillByYourSelf = ({navigation}) => {
     setIsVehicle(false);
     setIsFocus(false);
     setFocus(false);
+    setNameErr(null)
+    setDateOfVisitErr(null)
+    setPhoneErr(null)
+    setSingleOrGroupErr(null)
+    setHomeOrOfficeErr(null)
+    setGenderErr(null)
+    setPhoneErr(null)
   };
-  console.log(guestCategory);
   return isSubmitted ? (
     <SentForApproval />
   ) : (
@@ -415,14 +374,15 @@ const FillByYourSelf = ({navigation}) => {
               <TextInput
                 style={[styles.dropdown, {width: '32%', color: '#71727A'}]}
                 value={firstName}
-                onChangeText={setFirstName}
+                onChangeText={(txt)=>setFirstName(txt)}
                 selectionColor={'#B21E2B'}
               />
+              
 
               <TextInput
                 style={[styles.dropdown, {width: '30%', color: '#71727A'}]}
                 value={lastName}
-                onChangeText={setLastName}
+                onChangeText={(txt)=>setLastName(txt)}
                 selectionColor={'#B21E2B'}
               />
             </View>
@@ -438,6 +398,9 @@ const FillByYourSelf = ({navigation}) => {
               <Text style={styles.bottomtext}>Last Name</Text>
             </View>
           </View>
+            {nameErr && (
+              <Text style={styles.errorText}>{nameErr}</Text>
+            )}
           <View style={styles.namecontainer}>
             <Text style={styles.label}>
               Phone <Text style={{color: 'red'}}>*</Text>
@@ -469,6 +432,9 @@ const FillByYourSelf = ({navigation}) => {
             {value.length != 0 || value.length == 10 ? (
               <Text style={styles.errorText}>{phoneError}</Text>
             ) : null}
+            {phoneErr && (
+              <Text style={styles.errorText}>{phoneErr}</Text>
+            )}
           </View>
           <View style={styles.namecontainer}>
             <Text style={styles.label}>
@@ -484,6 +450,9 @@ const FillByYourSelf = ({navigation}) => {
                 editable={false}
               />
             </TouchableOpacity>
+            {dateOfVisitErr && (
+              <Text style={styles.errorText}>{dateOfVisitErr}</Text>
+            )}
             <Modal
               animationType="slide"
               transparent={true}
@@ -530,6 +499,9 @@ const FillByYourSelf = ({navigation}) => {
                 );
               })}
             </View>
+            {singleOrGroupErr && (
+              <Text style={styles.errorText}>{singleOrGroupErr}</Text>
+            )}
           </View>
           <View style={styles.namecontainer}>
             <Text style={styles.label}>
@@ -553,6 +525,9 @@ const FillByYourSelf = ({navigation}) => {
                 );
               })}
             </View>
+            {homeOrOfficeErr && (
+              <Text style={styles.errorText}>{homeOrOfficeErr}</Text>
+            )}
           </View>
           <View style={styles.namecontainer}>
             <Text style={styles.label}>
@@ -575,6 +550,9 @@ const FillByYourSelf = ({navigation}) => {
                 );
               })}
             </View>
+            {genderErr && (
+              <Text style={styles.errorText}>{genderErr}</Text>
+            )}
 
             <View style={styles.namecontainer}>
               <Text style={styles.label}>Guest Category</Text>
@@ -626,59 +604,6 @@ const FillByYourSelf = ({navigation}) => {
                 }}
               />
             </View>
-            {/* <View style={[styles.namecontainer, {marginBottom: 0}]}>
-              <Text style={styles.label}>Vehicle Information</Text>
-            </View>
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'center',
-                marginTop: 0,
-                gap: 17,
-              }}>
-              <View>
-                <Text
-                  style={[styles.label, {marginBottom: 10, fontWeight: 400}]}>
-                  Vehicle Type
-                </Text>
-                <Dropdown
-                  style={[
-                    styles.dropdown,
-                    {width: 150, color: '#71727a', marginTop: 0},
-                  ]}
-                  placeholderStyle={styles.placeholderStyle}
-                  selectedTextStyle={styles.selectedTextStyle}
-                  inputSearchStyle={styles.inputSearchStyle}
-                  iconStyle={styles.iconStyle}
-                  data={vehicleTypeValues}
-                  search
-                  searchPlaceholder="Search..."
-                  maxHeight={200}
-                  labelField="label"
-                  valueField="value"
-                  placeholder={!focus ? 'Select' : '...'}
-                  value={vehicleType}
-                  onFocus={() => setIsVehicle(true)}
-                  onBlur={() => setIsVehicle(false)}
-                  onChange={item => {
-                    setVehicleType(item.value);
-                    setIsVehicle(false);
-                  }}
-                />
-              </View>
-              <View>
-                <Text
-                  style={[styles.label, {marginBottom: 10, fontWeight: 400}]}>
-                  Vehicle Number
-                </Text>
-                <TextInput
-                  style={[styles.dropdown, {width: 150, color: '#71727A'}]}
-                  value={vehicleNumber}
-                  onChangeText={setVehicleNumber}
-                  selectionColor={'#B21E2B'}
-                />
-              </View>
-            </View> */}
           </View>
           {selectedSG === 'Group' ? (
             <View>
