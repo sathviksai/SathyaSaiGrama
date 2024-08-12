@@ -8,6 +8,8 @@ import {
   TouchableOpacity,
   View,
   TouchableWithoutFeedback,
+  Dimensions,
+  ActivityIndicator,
 } from 'react-native';
 import React, {useState, useContext} from 'react';
 import DatePicker, {getFormatedDate} from 'react-native-modern-datepicker';
@@ -19,6 +21,15 @@ import {Alert} from 'react-native';
 import {BASE_APP_URL, APP_LINK_NAME, APP_OWNER_NAME, } from '@env';
 
 const EditVerifyDetails = ({navigation, route}) => {
+  const {height} = Dimensions.get('window');
+  let heightStyles;
+  if (height > 900) {
+    heightStyles = normalScreen;
+  } else if (height > 750) {
+    heightStyles = mediumScreen;
+  } else {
+    heightStyles = smallScreen;
+  }
   const {user} = route.params;
   if (typeof user === 'string') {
     console.log('inside if stringified');
@@ -59,6 +70,7 @@ const EditVerifyDetails = ({navigation, route}) => {
   const [girls, setGirls] = useState(user.Number_of_Girls);
   const [remarks, setRemarks] = useState(user.Remarks);
   const [selectedGender, setSelectedGender] = useState(user.Gender);
+  const [updateLoading, setUpdateLoading] = useState(false);
 
   const [showModal, setShowModal] = useState(false);
   const gender = ['Male', 'Female'];
@@ -108,6 +120,7 @@ const EditVerifyDetails = ({navigation, route}) => {
   );
 
   const updateRecord = async (reportName, modified_data, token, id) => {
+    setUpdateLoading(true);
     try {
       const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/${reportName}/${user.ID}`;
       console.log(url);
@@ -121,14 +134,14 @@ const EditVerifyDetails = ({navigation, route}) => {
       if(response.ok){ 
         if(user.Referrer_Approval=== 'PENDING APPROVAL'){
           setTimeout(()=>  Alert.alert('Visitor details changed'), 2000)
-          setTimeout(()=> navigation.navigate('Pending') , 2000); 
+          setTimeout(()=> navigation.navigate('Pending'), 2000); 
         } else if(user.Referrer_Approval === 'APPROVED'){
         setTimeout(()=>  Alert.alert('Visitor details changed'), 2000)
-      setTimeout(()=> navigation.navigate('Approved') , 2000); 
+      setTimeout(()=> navigation.navigate('Approved'), 2000); 
         }
       }
       return await response.json();
-
+      
     }
     
      catch (err) {
@@ -141,7 +154,7 @@ const EditVerifyDetails = ({navigation, route}) => {
         Alert.alert('Error: ', err);
         console.log(err);
       }
-      
+      setUpdateLoading(false)
     }
   };
 
@@ -439,14 +452,23 @@ const EditVerifyDetails = ({navigation, route}) => {
             onChangeText={txt => setRemarks(txt)}
           />
         </View>
-
+        {updateLoading ? (
+        <View style={heightStyles.UpdatingActivityIndicatorContainer}>
+              <Text style={[heightStyles.ActivityIndicatorText, {color:'white'}]}>Updating</Text>
+              <ActivityIndicator
+                size="large"
+                color="pink"
+                style={heightStyles.ActivityIndicator}
+              />
+            </View> ) :null}
         <View style={styles.btnRoot}>
-          <TouchableOpacity style={styles.save} onPress={onSave}>
+        {!updateLoading ? (  <TouchableOpacity style={styles.save} onPress={onSave}>
             <View style={styles.btn}>
               <Text style={styles.btnsave}>Update</Text>
             </View>
-          </TouchableOpacity>
-        </View>
+          </TouchableOpacity>):null}
+        </View> 
+
       </ScrollView>
     </SafeAreaView>
   );
@@ -599,4 +621,78 @@ const styles = StyleSheet.create({
     borderRadius: 11,
     backgroundColor: '#b21e2b',
   },
+});
+
+const mediumScreen = StyleSheet.create({
+  UpdatingActivityIndicatorContainer: {
+    top: 35,
+    backgroundColor: '#b21e2b',
+    zIndex: 1,
+    borderRadius: 40,
+    width: 300,
+    right: -30,
+    elevation: 5,
+  },
+
+  ActivityIndicator: {
+    top: -10,
+    right: -60,
+  },
+  ActivityIndicatorText: {
+    bottom: -20,
+    right: -90,
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+});
+
+const smallScreen = StyleSheet.create({
+  UpdatingActivityIndicatorContainer: {
+    top: 35,
+    backgroundColor: '#b21e2b',
+    zIndex: 1,
+    borderRadius: 40,
+    right: -30,
+    width: 350,
+    elevation: 5,
+  },
+
+  ActivityIndicator: {
+    top: -10,
+    right: -60,
+  },
+
+  ActivityIndicatorText: {
+    bottom: -20,
+    right: -110,
+    fontSize: 17,
+    fontWeight: 'bold',
+  },
+
+});
+
+const normalScreen = StyleSheet.create({
+  UpdatingActivityIndicatorContainer: {
+    top: 35,
+    backgroundColor: '#b21e2b',
+    zIndex: 1,
+    borderRadius: 40,
+    width: 350,
+    right: -42,
+    elevation: 5,
+  },
+
+
+ActivityIndicator: {
+    top: -10,
+    right: -60,
+  },
+
+  ActivityIndicatorText: {
+    bottom: -20,
+    right: -100,
+    fontSize: 15,
+    fontWeight: 'bold',
+  },
+
 });
