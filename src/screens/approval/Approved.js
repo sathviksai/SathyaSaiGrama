@@ -1,5 +1,6 @@
 import { StyleSheet, ActivityIndicator, View, FlatList, RefreshControl } from 'react-native';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState, useCallback} from 'react';
+import { useFocusEffect, } from '@react-navigation/native';
 import ApprovalComponent from './ApprovalComponent';
 import UserContext from '../../../context/UserContext';
 import { getDataWithIntAndString } from '../../components/ApiRequest';
@@ -13,6 +14,7 @@ const Approved = ({ navigation }) => {
   // const [dataFetched, setDataFetched] = useState(false);
 
   const fetchData = async () => {
+
     setLoading(true);
     const result = await getDataWithIntAndString('Approval_to_Visitor_Report', 'Referrer_App_User_lookup', L1ID, "Referrer_Approval", "APPROVED", getAccessToken());
     // sorting the Approveds data by date
@@ -49,6 +51,14 @@ const Approved = ({ navigation }) => {
     setApproveds(all_approveds);
     setRefreshing(false);
   };
+
+
+
+
+  useFocusEffect(useCallback(() => {
+    onRefresh();
+  }, [Approved]));
+
 
   return (
     <View style={{ flex: 1, paddingTop: 10, backgroundColor: "#FFFF" }}>

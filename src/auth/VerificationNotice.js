@@ -1,5 +1,5 @@
 import React, { useEffect, useContext, useState } from 'react';
-import { View, Text, Button, StyleSheet, Alert, TouchableOpacity, Image } from 'react-native';
+import { View, Text, Button, StyleSheet, Alert, TouchableOpacity, Image, Linking } from 'react-native';
 import { auth } from './firebaseConfig';
 import { sendEmailVerification } from 'firebase/auth';
 import UserContext from '../../context/UserContext';
@@ -7,7 +7,7 @@ import { getDataWithInt } from '../components/ApiRequest';
 import { AuthContext } from './AuthProvider';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BASE_APP_URL, APP_LINK_NAME, APP_OWNER_NAME } from "@env"
-
+import {openInbox} from 'react-native-email-link'
 const VerificationNotice = ({ route, navigation }) => {
 
   const { id } = route.params
@@ -204,7 +204,7 @@ const VerificationNotice = ({ route, navigation }) => {
       </Text>
       <TouchableOpacity
         style={[styles.register, styles.register1]}
-        onPress={() => navigation.navigate('FillByYourSelf')}>
+        onPress={openInbox}>
         <Text style={[styles.registerTitle, {color: 'white'}]}>
           Open Email App
         </Text>
