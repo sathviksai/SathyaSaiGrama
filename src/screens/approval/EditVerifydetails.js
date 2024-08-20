@@ -19,6 +19,9 @@ import {updateRecord} from './VerifyDetails';
 import UserContext from '../../../context/UserContext';
 import {Alert} from 'react-native';
 import {BASE_APP_URL, APP_LINK_NAME, APP_OWNER_NAME, } from '@env';
+import Dialog from 'react-native-dialog';
+import { set } from 'react-hook-form';
+
 
 const EditVerifyDetails = ({navigation, route}) => {
   const {height} = Dimensions.get('window');
@@ -54,6 +57,13 @@ const EditVerifyDetails = ({navigation, route}) => {
     console.log('user in stringified', user);
   }
 
+
+
+  if(user. L2_Approval_Status === 'APPROVED'){
+    // Alert.alert('Can not edit details once Visitor is L2 approved', 'Please fill another form', [{style:styles.errorText}]);
+    navigation.navigate('VerifyDetails', {user: user, triggerDialog: true});
+  }
+
   const [date, setDate] = useState(user.Date_of_Visit);
   const [phone, setPhone] = useState(user.Phone_Number);
   const [isSingleFocus, setIsSingleFocus] = useState(false);
@@ -71,6 +81,7 @@ const EditVerifyDetails = ({navigation, route}) => {
   const [remarks, setRemarks] = useState(user.Remarks);
   const [selectedGender, setSelectedGender] = useState(user.Gender);
   const [updateLoading, setUpdateLoading] = useState(false);
+  const [DialogVisible, setDialogVisible] = useState(false);
 
   const [showModal, setShowModal] = useState(false);
   const gender = ['Male', 'Female'];
@@ -131,7 +142,10 @@ const EditVerifyDetails = ({navigation, route}) => {
         },
         body: JSON.stringify(modified_data),
       });
-      if(response.ok){ 
+     
+      const responseData = await response.json();
+    
+      if( responseData.code === 3000){ 
         if(user.Referrer_Approval=== 'PENDING APPROVAL'){
           setTimeout(()=>  Alert.alert('Visitor details changed'), 2000)
           setTimeout(()=> navigation.navigate('Pending'), 2000); 
@@ -139,11 +153,19 @@ const EditVerifyDetails = ({navigation, route}) => {
         setTimeout(()=>  Alert.alert('Visitor details changed'), 2000)
       setTimeout(()=> navigation.navigate('Approved'), 2000); 
         }
+        else if(user.Referrer_Approval === 'DENIED'){
+          setTimeout(()=>  Alert.alert('Visitor details changed'), 2000)
+          setTimeout(()=> navigation.navigate('Denied'), 2000); 
+        }
       }
-      return await response.json();
+     else if(responseData.code === 3001){
+    //  Alert.alert('Can not edit details once Visitor is L2 approved', 'Please fill another form');
+      setDialogVisible(true);
+  return responseData;
       
     }
-    
+  
+  }
      catch (err) {
       if (err.message === 'Network request failed')
         Alert.alert(
@@ -156,6 +178,7 @@ const EditVerifyDetails = ({navigation, route}) => {
       }
       setUpdateLoading(false)
     }
+    
   };
 
   const onSave = async () => {
@@ -223,6 +246,16 @@ const EditVerifyDetails = ({navigation, route}) => {
   const onCancel = () => {
     navigation.navigate('VerifyDetails', {user: user});
   };
+
+  const onPressOk = () => {
+    setDialogVisible(false);
+    if(user.Referrer_Approval=== 'PENDING APPROVAL'){
+      navigation.navigate('Pending')
+    } else if(user.Referrer_Approval === 'APPROVED'){
+      navigation.navigate('Approved')
+    }
+      }
+  
 
   console.log('User in verify details : ', user);
   return (
@@ -470,7 +503,14 @@ const EditVerifyDetails = ({navigation, route}) => {
         </View> 
 
       </ScrollView>
+      <Dialog.Container visible={DialogVisible} contentStyle={styles.detailsNotEditableDialogue}>
+      <Dialog.Title style={styles.detailsNotEditableTitle}>Visitor just got / is L2 approved</Dialog.Title>
+      <Dialog.Description>Please fill another form for new details</Dialog.Description>
+      <Dialog.Button label="Ok" onPress={onPressOk} />
+      
+      </Dialog.Container>
     </SafeAreaView>
+    
   );
 };
 
@@ -621,6 +661,20 @@ const styles = StyleSheet.create({
     borderRadius: 11,
     backgroundColor: '#b21e2b',
   },
+
+
+  detailsNotEditableDialogue:{
+    borderRadius: 30,
+    backgroundColor: 'pink',
+  
+    },
+  
+    detailsNotEditableTitle:{
+   
+    fontWeight:'bold',
+  
+    }
+  
 });
 
 const mediumScreen = StyleSheet.create({

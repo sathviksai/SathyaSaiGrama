@@ -1,5 +1,6 @@
 import { StyleSheet, ActivityIndicator, View, FlatList, RefreshControl } from 'react-native';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState, useCallback} from 'react';
+import { useFocusEffect, } from '@react-navigation/native';
 import ApprovalComponent from './ApprovalComponent';
 import UserContext from '../../../context/UserContext';
 import { getDataWithIntAndString } from '../../components/ApiRequest';
@@ -48,6 +49,11 @@ const Denied = ({ navigation }) => {
     setDenieds(all_denieds);
     setRefreshing(false);
   };
+
+  useFocusEffect(useCallback(() => {
+    onRefresh();
+  }, [Denied]));
+
 
   return (
     <View style={{ flex: 1, paddingTop: 10, backgroundColor: "#FFFF" }}>
