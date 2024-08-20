@@ -52,10 +52,7 @@ const Approved = ({ navigation }) => {
     setRefreshing(false);
   };
 
-  useEffect(() => {
-  onRefresh();
 
-  }, [Approved]);
 
 
   useFocusEffect(useCallback(() => {
