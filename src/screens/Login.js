@@ -376,7 +376,7 @@ const Login = ({navigation}) => {
               </View>
             </KeyboardAvoidingView>
           </ScrollView><Dialog.Container visible={DialogVisible}>
-              <Dialog.Title>Error in account details:</Dialog.Title>
+              <Dialog.Title>Unable to find user</Dialog.Title>
               <Dialog.Description>Please check your email or password and try again. Otherwise please register.</Dialog.Description>
               <Dialog.Button label="Register" onPress={onPressRegister} />
               <Dialog.Button label="Cancel" onPress={onPressOk} />

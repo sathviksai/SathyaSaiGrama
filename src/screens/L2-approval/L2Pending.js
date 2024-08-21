@@ -1,9 +1,10 @@
 import { StyleSheet, ActivityIndicator, View, FlatList, RefreshControl } from 'react-native';
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState, useCallback } from 'react'
 import { getL2Data } from '../../components/ApiRequest'
 import UserContext from '../../../context/UserContext'
 import L2ApprovalComponent from './L2ApprovalComponent';
 import parseDate from '../../components/ParseDate';
+import { useFocusEffect, } from '@react-navigation/native';
 
 const L2Pending = ({ navigation }) => {
 
@@ -53,6 +54,13 @@ const L2Pending = ({ navigation }) => {
     setL2Pendings(all_L2pendings)
     setRefreshing(false);
   };
+
+
+
+  useFocusEffect(useCallback(() => {
+    onRefresh();
+  }, [L2Pending]));
+
 
   return (
     <View style={{ flex: 1, paddingTop: 10 }}>
