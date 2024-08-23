@@ -1,43 +1,70 @@
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert, KeyboardAvoidingView, ActivityIndicator, ScrollView, Image } from 'react-native';
-import React, { useContext } from 'react'
-import { useState } from 'react';
-import { useForm, Controller } from 'react-hook-form';
-import { auth } from '../auth/firebaseConfig';
-import { createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth'
-import { getDataWithString } from '../components/ApiRequest';
+import {
+  View,
+  Text,
+  TextInput,
+  StyleSheet,
+  TouchableOpacity,
+  Alert,
+  KeyboardAvoidingView,
+  ActivityIndicator,
+  ScrollView,
+  Image,
+} from 'react-native';
+import React, {useContext} from 'react';
+import {useState} from 'react';
+import {useForm, Controller} from 'react-hook-form';
+import {auth} from '../auth/firebaseConfig';
+import {
+  createUserWithEmailAndPassword,
+  sendEmailVerification,
+} from 'firebase/auth';
+import {getDataWithString} from '../components/ApiRequest';
 import UserContext from '../../context/UserContext';
 
-
-const Register = ({ navigation }) => {
-
+const Register = ({navigation}) => {
   const [loading, setLoading] = useState(false);
-  const { control, handleSubmit, formState: { errors } } = useForm()
-  const [password, setPassword] = useState()
-  const { accessToken } = useContext(UserContext)
+  const {
+    control,
+    handleSubmit,
+    formState: {errors},
+  } = useForm();
+  const [password, setPassword] = useState();
+  const {accessToken} = useContext(UserContext);
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [focusedInput, setFocusedInput] = useState(null);
 
-
-  const handleRegForm = async (userCred) => {
+  const handleRegForm = async userCred => {
     setLoading(true);
-    console.log(userCred.email)
-    const res = await getDataWithString('All_App_Users', 'Email', userCred.email, accessToken);
-    console.log("response object returned ", res)
+    console.log(userCred.email);
+    const res = await getDataWithString(
+      'All_App_Users',
+      'Email',
+      userCred.email.toLowerCase().trim(),
+      accessToken,
+    );
+    console.log('response object returned ', res);
 
     if (res.data && res.data.length > 0) {
-      //authentication       
+      //authentication
       try {
-        await createUserWithEmailAndPassword(auth, userCred.email, userCred.password);
-        sendEmailVerification(auth.currentUser)
+        await createUserWithEmailAndPassword(
+          auth,
+          userCred.email.toLowerCase().trim(),
+          userCred.password,
+        );
+        sendEmailVerification(auth.currentUser);
         setLoading(false);
-        console.log("Id in register: ", res.data[0])
-        navigation.navigate('VerificationNotice', { id: res.data[0].ID })
+        console.log('Id in register: ', res.data[0]);
+        navigation.navigate('VerificationNotice', {id: res.data[0].ID});
       } catch (error) {
         setLoading(false);
         if (error.message === 'Network request failed')
-          Alert.alert('Network Error', 'Failed to fetch data. Please check your network connection and try again.');
+          Alert.alert(
+            'Network Error',
+            'Failed to fetch data. Please check your network connection and try again.',
+          );
         else if (error.code === 'auth/email-already-in-use') {
           Alert.alert('That email address is already in use!');
         } else if (error.code === 'auth/invalid-email') {
@@ -49,15 +76,19 @@ const Register = ({ navigation }) => {
       }
     } else {
       setLoading(false);
-      Alert.alert("data not exist")
-      console.log(("false"))
+      Alert.alert('data not exist');
+      console.log('false');
     }
-  }
+  };
 
   return (
     <>
       {loading ? (
-        <ActivityIndicator size="large" color="#752A26" style={styles.loadingContainer} />
+        <ActivityIndicator
+          size="large"
+          color="#752A26"
+          style={styles.loadingContainer}
+        />
       ) : (
         <ScrollView
           behavior="padding"
@@ -65,7 +96,9 @@ const Register = ({ navigation }) => {
           style={styles.container}>
           <View style={styles.head}>
             <Text style={styles.signup}>Sign up</Text>
-            <Text style={styles.subsignup}>Create an account to get started</Text>
+            <Text style={styles.subsignup}>
+              Create an account to get started
+            </Text>
             <Text style={styles.label}>Name</Text>
             <View
               style={[
@@ -75,7 +108,7 @@ const Register = ({ navigation }) => {
               <Controller
                 name="name"
                 control={control}
-                render={({ field: { onChange, value } }) => (
+                render={({field: {onChange, value}}) => (
                   <TextInput
                     placeholder="Name"
                     value={value}
@@ -84,7 +117,7 @@ const Register = ({ navigation }) => {
                     onChangeText={onChange}
                   />
                 )}
-                rules={{ required: true }}
+                rules={{required: true}}
               />
             </View>
             {errors.email?.type === 'required' && (
@@ -100,7 +133,7 @@ const Register = ({ navigation }) => {
               <Controller
                 name="email"
                 control={control}
-                render={({ field: { onChange, value } }) => (
+                render={({field: {onChange, value}}) => (
                   <TextInput
                     placeholder="Email Address"
                     value={value}
@@ -109,7 +142,7 @@ const Register = ({ navigation }) => {
                     onChangeText={onChange}
                   />
                 )}
-                rules={{ required: true, pattern: /^\S+@\S+$/i }}
+                rules={{required: true, pattern: /^\S+@\S+$/i}}
               />
             </View>
             {errors.email?.type === 'required' && (
@@ -128,7 +161,7 @@ const Register = ({ navigation }) => {
               <Controller
                 name="password"
                 control={control}
-                render={({ field: { onChange, value } }) => (
+                render={({field: {onChange, value}}) => (
                   <TextInput
                     placeholder="Password"
                     style={styles.inputBox}
@@ -142,7 +175,7 @@ const Register = ({ navigation }) => {
                     }}
                   />
                 )}
-                rules={{ required: true, minLength: 6 }}
+                rules={{required: true, minLength: 6}}
               />
               {showPassword === false ? (
                 <TouchableOpacity
@@ -151,14 +184,15 @@ const Register = ({ navigation }) => {
                   }}>
                   <Image
                     source={require('../assets/eyestrike.png')}
-                    style={{ width: 16, height: 16 }}
+                    style={{width: 16, height: 16}}
                   />
                 </TouchableOpacity>
               ) : (
-                <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                <TouchableOpacity
+                  onPress={() => setShowPassword(!showPassword)}>
                   <Image
                     source={require('../assets/eye.png')}
-                    style={{ width: 16, height: 16 }}
+                    style={{width: 16, height: 16}}
                   />
                 </TouchableOpacity>
               )}
@@ -180,7 +214,7 @@ const Register = ({ navigation }) => {
               <Controller
                 name="confirmPassword"
                 control={control}
-                render={({ field: { onChange, value } }) => (
+                render={({field: {onChange, value}}) => (
                   <TextInput
                     placeholder="Confirm Password"
                     style={styles.inputBox}
@@ -191,14 +225,19 @@ const Register = ({ navigation }) => {
                     onChangeText={onChange}
                   />
                 )}
-                rules={{ required: true, minLength: 6, validate: value => value === password || 'Passwords do not match' }}
+                rules={{
+                  required: true,
+                  minLength: 6,
+                  validate: value =>
+                    value === password || 'Passwords do not match',
+                }}
               />
               {showConfirmPassword === false ? (
                 <TouchableOpacity
                   onPress={() => setShowConfirmPassword(!showConfirmPassword)}>
                   <Image
                     source={require('../assets/eyestrike.png')}
-                    style={{ width: 16, height: 16 }}
+                    style={{width: 16, height: 16}}
                   />
                 </TouchableOpacity>
               ) : (
@@ -206,7 +245,7 @@ const Register = ({ navigation }) => {
                   onPress={() => setShowConfirmPassword(!showConfirmPassword)}>
                   <Image
                     source={require('../assets/eye.png')}
-                    style={{ width: 16, height: 16 }}
+                    style={{width: 16, height: 16}}
                   />
                 </TouchableOpacity>
               )}
@@ -226,10 +265,10 @@ const Register = ({ navigation }) => {
             <Controller
               control={control}
               name="terms"
-              rules={{ required: true }}
-              render={({ field: { onChange, value } }) => (
+              rules={{required: true}}
+              render={({field: {onChange, value}}) => (
                 <TouchableOpacity
-                  style={{ justifyContent: 'flex-start' }}
+                  style={{justifyContent: 'flex-start'}}
                   onPress={() => onChange(!value)}>
                   <View style={styles.condition}>
                     <View
@@ -241,12 +280,12 @@ const Register = ({ navigation }) => {
                     </View>
                     <Text style={styles.conditionText}>
                       I've read and agree with the
-                      <Text style={{ color: '#B21E2B', fontWeight: '600' }}>
+                      <Text style={{color: '#B21E2B', fontWeight: '600'}}>
                         {' '}
                         Terms and Conditions
                       </Text>{' '}
                       and the{' '}
-                      <Text style={{ color: '#B21E2B', fontWeight: '600' }}>
+                      <Text style={{color: '#B21E2B', fontWeight: '600'}}>
                         Privacy Policy
                       </Text>
                       .
@@ -303,16 +342,13 @@ const Register = ({ navigation }) => {
               </TouchableOpacity>
             </View>
           </View>
-
         </ScrollView>
-
       )}
     </>
-  )
+  );
+};
 
-}
-
-export default Register
+export default Register;
 
 const styles = StyleSheet.create({
   container: {
