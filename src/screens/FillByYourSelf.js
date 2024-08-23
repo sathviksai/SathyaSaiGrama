@@ -306,6 +306,47 @@ const FillByYourSelf = ({ navigation }) => {
 
 
 
+  // const validate = async () => {
+  //   if (!prefix || prefix === "" || !firstName || firstName === "" || !lastName || lastName === "") {
+  //     setNameErr("Prefix, First Name and Last Name is required")
+  //   } else {
+  //     setNameErr(null)
+  //   }
+  //   if (date === "Select Date") {
+  //     setDateOfVisitErr("Date of visit is required is required")
+  //   } else {
+  //     setDateOfVisitErr(null)
+  //   }
+  //   if (!formattedValue || formattedValue === "" || formattedValue === " ") {
+  //     setPhoneErr("Phone number is required is required")
+  //   } else {
+  //     setPhoneErr(null)
+  //   }
+  //   if (!selectedSG || selectedSG === "" || selectedSG === " ") {
+  //     setSingleOrGroupErr("Single or Group is required")
+  //   } else {
+  //     setSingleOrGroupErr(null)
+  //   }
+  //   if (!selectedHO || selectedHO === "" || selectedHO === " ") {
+  //     setHomeOrOfficeErr("Home or Office is required")
+  //   } else {
+  //     setHomeOrOfficeErr(null)
+  //   }
+  //   if (!selectedGender || selectedGender === "" || selectedGender === " ") {
+  //     setGenderErr("Gender is required")
+  //     if (selectedGender === 'Male') {
+  //       setMen('1');
+  //       setWomen('0');
+  //     } else if (selectedGender === 'Female') {
+  //       setWomen('1');
+  //       setMen('0');
+  //     }
+  //   } else {
+  //     setGenderErr(null)
+  //   }
+  // }
+
+
   const handleSubmit = async () => {
     console.log("##########vehicles are: ", vehicles)
     setSubmitFlag(true)
