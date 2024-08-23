@@ -130,6 +130,20 @@ const ApprovalStack = ({navigation}) => {
         options={{
           title: 'Visitor details',
           headerTintColor: '#B21E2B',
+          headerLeft: () => (
+            <TouchableOpacity
+              onPress={() => navigation.navigate('ApprovalTab')}>
+              <Image
+                source={require('../../src/assets/arrow_left_alt.png')} // Your icon URL here
+                style={{
+                  width: 30,
+                  height: 30,
+                  marginRight: 15,
+                  tintColor: '#B21E2B',
+                }} // Adjust style as needed
+              />
+            </TouchableOpacity>
+          ),
           headerRight: () => (
             <TouchableOpacity
               onPress={() =>
@@ -169,7 +183,7 @@ const AppApproveStack = () => {
   );
 };
 
-const L2ApprovalStack = () => {
+const L2ApprovalStack = ({navigation}) => {
   const {loggedUser, accessToken, setUserType, userType, userEmail} =
     useContext(UserContext);
   const {setUser} = useContext(AuthContext);
@@ -260,7 +274,24 @@ const L2ApprovalStack = () => {
       <ApproveStack.Screen
         name="ViewDetails"
         component={ViewDetails}
-        options={{title: 'Visitor details', headerTintColor: '#B21E2B'}}
+        options={{
+          title: 'Visitor details',
+          headerTintColor: '#B21E2B',
+          headerLeft: () => (
+            <TouchableOpacity
+              onPress={() => navigation.navigate('L2ApprovalTab')}>
+              <Image
+                source={require('../../src/assets/arrow_left_alt.png')} // Your icon URL here
+                style={{
+                  width: 30,
+                  height: 30,
+                  marginRight: 15,
+                  tintColor: '#B21E2B',
+                }} // Adjust style as needed
+              />
+            </TouchableOpacity>
+          ),
+        }}
       />
     </ApproveStack.Navigator>
   );
