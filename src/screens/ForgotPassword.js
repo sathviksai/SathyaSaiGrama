@@ -25,7 +25,7 @@ const ForgotPassword = ({navigation}) => {
   const handleForgotPassword = async ({email}) => {
     try {
       // Attempt to send password reset email
-      await sendPasswordResetEmail(auth, email);
+      await sendPasswordResetEmail(auth, email.toLowerCase().trim());
       Alert.alert(
         'Success',
         'A password reset email has been sent (if the email exists). Please log back in after resetting your password.',
