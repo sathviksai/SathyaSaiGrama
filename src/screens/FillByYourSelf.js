@@ -1,4 +1,4 @@
-import React, {useState, useContext, useRef, useEffect} from 'react';
+import React, { useState, useContext, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -9,20 +9,23 @@ import {
   TouchableOpacity,
   ScrollView,
   LogBox,
+  TouchableWithoutFeedback,
+  Image,
 } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
 import DatePicker from 'react-native-modern-datepicker';
-import {getToday, getFormatedDate} from 'react-native-modern-datepicker';
-import PhoneInput, {isValidNumber} from 'react-native-phone-number-input';
+import { getToday, getFormatedDate } from 'react-native-modern-datepicker';
+import PhoneInput, { isValidNumber } from 'react-native-phone-number-input';
 import UserContext from '../../context/UserContext';
-import {Dropdown} from 'react-native-element-dropdown';
-import {BASE_APP_URL, APP_LINK_NAME, APP_OWNER_NAME} from '@env';
+import { Dropdown } from 'react-native-element-dropdown';
+import { BASE_APP_URL, APP_LINK_NAME, APP_OWNER_NAME } from '@env';
 import moment from 'moment';
-import {SafeAreaView} from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import SentForApproval from './SentForApproval';
 
 LogBox.ignoreLogs(['Warnings...']);
 LogBox.ignoreAllLogs();
-const FillByYourSelf = ({navigation}) => {
+const FillByYourSelf = ({ navigation }) => {
   const [prefix, setPrefix] = useState(' ');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -38,7 +41,7 @@ const FillByYourSelf = ({navigation}) => {
   const [countryCode, setCountryCode] = useState('');
   const [formattedValue, setFormattedValue] = useState('');
   const [disabled, setDisabled] = useState(false);
-  const [phoneError, setPhoneError] = useState(true);
+  const [phoneError, setPhoneError] = useState(null);
   const [image, setImage] = useState('Upload Image');
   // const [imageurl, setImageUrl] = useState('');
   // const [RES_ID, setRES_ID] = useState('');
@@ -49,15 +52,17 @@ const FillByYourSelf = ({navigation}) => {
   const [vehicleType, setVehicleType] = useState('');
   const [isVehicle, setIsVehicle] = useState(false);
   const [vehicleNumber, setVehicleNumber] = useState('');
-//just so that the othe code gets commited can delete after
+  //just so that the othe code gets commited can delete after
   const phoneInput = useRef(null);
+
+  const [vehicles, setVehicles] = useState([]);
 
   const handleChange = text => {
     return (
       phoneInput.current?.isValidNumber(value) && phoneInput.current !== null
     );
   };
-  const {getAccessToken, loggedUser} = useContext(UserContext);
+  const { getAccessToken, loggedUser } = useContext(UserContext);
   const [date, setDate] = useState('Select Date');
   const [showModal, setShowModal] = useState(false);
   const L1ID = loggedUser.userId;
@@ -79,50 +84,51 @@ const FillByYourSelf = ({navigation}) => {
     );
     setDate(formatteddate);
     setShowModal(!showModal); //Date Picker
+    setDateOfVisitErr(null);
   };
 
   const prefixValues = [
-    {label: 'Mr.', value: 'Mr.'},
-    {label: 'Mrs.', value: 'Mrs.'},
-    {label: 'Ms.', value: 'Ms.'},
-    {label: 'Dr.', value: 'Dr.'},
-    {label: 'Prof.', value: 'Peof.'},
-    {label: 'Rtn.', value: 'Rtn.'},
-    {label: 'Sri', value: 'Sri.'},
-    {label: 'Smt.', value: 'Smt.'},
+    { label: 'Mr.', value: 'Mr.' },
+    { label: 'Mrs.', value: 'Mrs.' },
+    { label: 'Ms.', value: 'Ms.' },
+    { label: 'Dr.', value: 'Dr.' },
+    { label: 'Prof.', value: 'Peof.' },
+    { label: 'Rtn.', value: 'Rtn.' },
+    { label: 'Sri', value: 'Sri.' },
+    { label: 'Smt.', value: 'Smt.' },
   ];
   const guestCategoryValues = [
-    {label: 'Govt Officials', value: 'Govt Officials'},
-    {label: 'Politician', value: 'Politician'},
-    {label: 'Corporate', value: 'Corporate'},
-    {label: 'Press', value: 'Press'},
-    {label: 'Parent', value: 'Parent'},
-    {label: 'Devotee', value: 'Devotee'},
-    {label: 'Other', value: 'Other'},
+    { label: 'Govt Officials', value: 'Govt Officials' },
+    { label: 'Politician', value: 'Politician' },
+    { label: 'Corporate', value: 'Corporate' },
+    { label: 'Press', value: 'Press' },
+    { label: 'Parent', value: 'Parent' },
+    { label: 'Devotee', value: 'Devotee' },
+    { label: 'Other', value: 'Other' },
   ];
   const priorityValues = [
-    {label: 'P1', value: 'P1'},
-    {label: 'P2', value: 'P2'},
-    {label: 'P3', value: 'P3'},
+    { label: 'P1', value: 'P1' },
+    { label: 'P2', value: 'P2' },
+    { label: 'P3', value: 'P3' },
   ];
   const vehicleTypeValues = [
-    {label: '2-wheeler', value: '2-wheeler'},
-    {label: 'Car', value: 'Car'},
-    {label: 'Bus', value: 'Bus'},
-    {label: 'Taxi', value: 'Taxi'},
-    {label: 'School Bus', value: 'School Bus'},
-    {label: 'Police Van', value: 'Police Van'},
-    {label: 'Ambulence', value: 'Ambulence'},
-    {label: 'Van', value: 'Van'},
-    {label: 'Auto', value: 'Auto'},
-    {label: 'Truck', value: 'Truck'},
-    {label: 'Tractor', value: 'Tractor'},
-    {label: 'Cement Mixer', value: 'Cement Mixer'},
-    {label: 'Fire Engine', value: 'Fire Engine'},
-    {label: 'Transport Van', value: 'Transport Van'},
-    {label: 'Bulldozer', value: 'Bulldozer'},
-    {label: 'Roller Machine', value: 'Roller Machine'},
-    {label: 'Other', value: 'Other'},
+    { label: '2-wheeler', value: '2-wheeler' },
+    { label: 'Car', value: 'Car' },
+    { label: 'Bus', value: 'Bus' },
+    { label: 'Taxi', value: 'Taxi' },
+    { label: 'School Bus', value: 'School Bus' },
+    { label: 'Police Van', value: 'Police Van' },
+    { label: 'Ambulence', value: 'Ambulence' },
+    { label: 'Van', value: 'Van' },
+    { label: 'Auto', value: 'Auto' },
+    { label: 'Truck', value: 'Truck' },
+    { label: 'Tractor', value: 'Tractor' },
+    { label: 'Cement Mixer', value: 'Cement Mixer' },
+    { label: 'Fire Engine', value: 'Fire Engine' },
+    { label: 'Transport Van', value: 'Transport Van' },
+    { label: 'Bulldozer', value: 'Bulldozer' },
+    { label: 'Roller Machine', value: 'Roller Machine' },
+    { label: 'Other', value: 'Other' },
   ];
 
   //To get employee record
@@ -152,33 +158,7 @@ const FillByYourSelf = ({navigation}) => {
       }
     }
   };
-  // const postVehicle = async () => {
-  //   const formData = {
-  //     data: {
-  //       Vehicle_Number: vehicleNumber,
-  //       Vehicle_Type: vehicleType,
-  //     },
-  //   };
-  //   try {
-  //     const response = await fetch(
-  //       `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/form/Vehicle_Information`,
-  //       {
-  //         method: 'POST',
-  //         headers: {
-  //           Authorization: `Zoho-oauthtoken ${getAccessToken()}`,
-  //         },
-  //         body: JSON.stringify(formData),
-  //       },
-  //     );
-  //     const res = await response.json();
-  //     console.log('Vehicle Response', res);
-  //     return res;
-  //   } catch (error) {
-  //     Alert.alert('Error', 'Something went wrong');
-  //   }
-  // };
-  //==============================
-  //Post data to Approver_to_visitor table
+
   const posttoL1aprroved = async DepartmentID => {
     // const Vehicle_Info = await postVehicle();
     const formData = {
@@ -204,7 +184,7 @@ const FillByYourSelf = ({navigation}) => {
         Number_of_Women: women,
         Number_of_Girls: girls,
         Home_or_Office: selectedHO,
-        // Vehicle_Information: [Vehicle_Info.data.ID],
+        Vehicle_Information: vehicles,
       },
     };
 
@@ -230,7 +210,7 @@ const FillByYourSelf = ({navigation}) => {
   useEffect(() => {
     const timer = setTimeout(() => {
       if (/^\+91\d{10}$/.test(formattedValue)) {
-        setPhoneError('');
+        setPhoneError(null);
       } else {
         setPhoneError(
           'Phone number must be 10 digits and it must not contain non-numeric character',
@@ -241,91 +221,135 @@ const FillByYourSelf = ({navigation}) => {
     return () => clearTimeout(timer);
   }, [value]);
 
-  // const selectImg = async () => {
-  //   try {
-  //     const img = await DocumentPicker.pickSingle({
-  //       type: [DocumentPicker.types.images],
-  //     });
 
-  //     setImage(img.name);
-  //     setImageUrl(img.uri);
-  //     return img;
-  //   } catch (err) {
-  //     if (DocumentPicker.isCancel(err)) {
-  //       console.log(err);
-  //     } else {
-  //       console.log(err);
-  //     }
-  //   }
-  // };
-  //==============================================
-  //Below are validations
-  const validateName = () => {
-    if (prefix == ' ') {
-      Alert.alert('Please Select Prefix ');
-
-      return false;
-    }
-    if (!firstName.trim() || !lastName.trim() || !prefix.trim) {
-      Alert.alert('Please enter prefix, Firstname and LastName');
-      return false;
-    }
-    return true;
-  };
-  const validatePhone = () => {
-    if (formattedValue === '') {
-      Alert.alert('Enter the Phone Number');
-      return false;
-    }
-    return true;
-  };
-  const validateGender = () => {
-    if (selectedGender == '') {
-      Alert.alert('Select Gender');
-      return false;
-    } else if (selectedGender == 'Male') {
-      setMen(1);
-      return true;
-    } else if (selectedGender == 'Female') {
-      setWomen(1);
-      return true;
-    }
-  };
-  const validateSOrG = () => {
-    if (selectedSG == '') {
-      Alert.alert('Select Single or Group Visit');
-      return false;
-    } else if (selectedSG == 'Single') {
-      return validateGender() && validateTotalPeople();
-    } else if (selectedSG == 'Group') {
-      return validateTotalPeople();
-    }
-    return true;
+  const handleAddVehicle = () => {
+    setVehicles([...vehicles, { Vehicle_Type: '', Vehicle_Number: '' }]);
   };
 
-  const validateHO = () => {
-    if (selectedHO == '') {
-      Alert.alert('Select Home or Office Visit');
-      return false;
-    }
-    return true;
+  const handleRemoveVehicle = (index) => {
+    const updatedVehicles = vehicles.filter((_, i) => i !== index);
+    setVehicles(updatedVehicles);
   };
-  const validateTotalPeople = () => {
-    if (men + women + boys + girls > 0) {
-      return true;
-    }
-    return false;
+
+  const handleTextChange = (index, field, value) => {
+    const updatedVehicles = vehicles.map((vehicle, i) =>
+      i === index ? { ...vehicle, [field]: value } : vehicle
+    );
+    setVehicles(updatedVehicles);
   };
+
+
+
+  const [nameErr, setNameErr] = useState(null);
+  const [dateOfVisitErr, setDateOfVisitErr] = useState(null);
+  const [singleOrGroupErr, setSingleOrGroupErr] = useState(null);
+  const [homeOrOfficeErr, setHomeOrOfficeErr] = useState(null);
+  const [genderErr, setGenderErr] = useState(null);
+  const [phoneErr, setPhoneErr] = useState(null);
+
+  
+  const [submitFlag, setSubmitFlag] = useState(false);
 
   const validateForm = () => {
-    if (validateName() && validatePhone() && validateSOrG() && validateHO()) {
-      return true;
+    let valid = true;
+    if (!prefix || !firstName || !lastName) {
+      setNameErr("Prefix, First Name and Last Name are required");
+      valid = false;
     } else {
-      return false;
+      setNameErr(null);
     }
+
+    if (date === "Select Date") {
+      setDateOfVisitErr("Date of visit is required");
+      valid = false;
+    } else {
+      setDateOfVisitErr(null);
+    }
+
+    if (!formattedValue) {
+      setPhoneErr("Phone number is required");
+      valid = false;
+    } else {
+      setPhoneErr(null);
+    }
+
+    if (!selectedSG) {
+      setSingleOrGroupErr("Single or Group is required");
+      valid = false;
+    } else {
+      setSingleOrGroupErr(null);
+    }
+
+    if (!selectedHO) {
+      setHomeOrOfficeErr("Home or Office is required");
+      valid = false;
+    } else {
+      setHomeOrOfficeErr(null);
+    }
+
+    if (!selectedGender) {
+      setGenderErr("Gender is required");
+      if (selectedGender === "Male") {
+        setMen("1");
+        setWomen("0");
+      } else if (selectedGender === "Female") {
+        setWomen("1");
+        setMen("0");
+      }
+      valid = false;
+    } else {
+      setGenderErr(null);
+    }
+
+    return valid;
   };
 
+
+
+  // const validate = async () => {
+  //   if (!prefix || prefix === "" || !firstName || firstName === "" || !lastName || lastName === "") {
+  //     setNameErr("Prefix, First Name and Last Name is required")
+  //   } else {
+  //     setNameErr(null)
+  //   }
+  //   if (date === "Select Date") {
+  //     setDateOfVisitErr("Date of visit is required is required")
+  //   } else {
+  //     setDateOfVisitErr(null)
+  //   }
+  //   if (!formattedValue || formattedValue === "" || formattedValue === " ") {
+  //     setPhoneErr("Phone number is required is required")
+  //   } else {
+  //     setPhoneErr(null)
+  //   }
+  //   if (!selectedSG || selectedSG === "" || selectedSG === " ") {
+  //     setSingleOrGroupErr("Single or Group is required")
+  //   } else {
+  //     setSingleOrGroupErr(null)
+  //   }
+  //   if (!selectedHO || selectedHO === "" || selectedHO === " ") {
+  //     setHomeOrOfficeErr("Home or Office is required")
+  //   } else {
+  //     setHomeOrOfficeErr(null)
+  //   }
+  //   if (!selectedGender || selectedGender === "" || selectedGender === " ") {
+  //     setGenderErr("Gender is required")
+  //     if (selectedGender === 'Male') {
+  //       setMen('1');
+  //       setWomen('0');
+  //     } else if (selectedGender === 'Female') {
+  //       setWomen('1');
+  //       setMen('0');
+  //     }
+  //   } else {
+  //     setGenderErr(null)
+  //   }
+  // }
+
+
   const handleSubmit = async () => {
+    console.log("##########vehicles are: ", vehicles)
+    setSubmitFlag(true)
     if (validateForm()) {
       setIsSubmitted(true);
       let office_id;
@@ -364,7 +388,7 @@ const FillByYourSelf = ({navigation}) => {
     setLastName('');
     setFirstName('');
     setValue('');
-    phoneInput.current.setState({number: ''});
+    phoneInput.current.setState({ number: '' });
     setImage('Upload Image');
     setGuestCategory('');
     setPriority('');
@@ -373,17 +397,25 @@ const FillByYourSelf = ({navigation}) => {
     setIsVehicle(false);
     setIsFocus(false);
     setFocus(false);
+    setNameErr(null)
+    setDateOfVisitErr(null)
+    setPhoneErr(null)
+    setSingleOrGroupErr(null)
+    setHomeOrOfficeErr(null)
+    setGenderErr(null)
+    setPhoneErr(null)
   };
-  console.log(guestCategory);
+
+
   return isSubmitted ? (
     <SentForApproval />
   ) : (
     <SafeAreaView style={styles.container}>
-      <ScrollView style={{paddingStart: 8}}>
+      <ScrollView style={{ paddingStart: 8 }}>
         <View>
           <View style={styles.namecontainer}>
-            <Text style={[styles.label, {marginTop: 20}]}>
-              Name <Text style={{color: 'red'}}>*</Text>
+            <Text style={[styles.label, { marginTop: 20 }]}>
+              Name <Text style={{ color: 'red' }}>*</Text>
             </Text>
             <View
               style={{
@@ -392,7 +424,7 @@ const FillByYourSelf = ({navigation}) => {
                 justifyContent: 'space-between',
               }}>
               <Dropdown
-                style={[styles.dropdown, {width: '25%'}]}
+                style={[styles.dropdown, { width: '25%' }]}
                 placeholderStyle={styles.placeholderStyle}
                 selectedTextStyle={styles.selectedTextStyle}
                 inputSearchStyle={styles.inputSearchStyle}
@@ -407,22 +439,36 @@ const FillByYourSelf = ({navigation}) => {
                 onFocus={() => setIsFocus(true)}
                 onBlur={() => setIsFocus(false)}
                 onChange={item => {
+                  if (submitFlag) {
+                    validateForm();
+                  }
                   setPrefix(item.value);
                   setIsFocus(false);
                 }}
               />
 
               <TextInput
-                style={[styles.dropdown, {width: '32%', color: '#71727A'}]}
+                style={[styles.dropdown, { width: '32%', color: '#71727A' }]}
                 value={firstName}
-                onChangeText={setFirstName}
+                onChangeText={(txt) => {
+                  setFirstName(txt);
+                  if (submitFlag) {
+                    validateForm();
+                  }
+                }}
                 selectionColor={'#B21E2B'}
               />
 
+
               <TextInput
-                style={[styles.dropdown, {width: '30%', color: '#71727A'}]}
+                style={[styles.dropdown, { width: '30%', color: '#71727A' }]}
                 value={lastName}
-                onChangeText={setLastName}
+                onChangeText={(txt) => {
+                  setLastName(txt);
+                  if (submitFlag) {
+                    validateForm();
+                  }
+                }}
                 selectionColor={'#B21E2B'}
               />
             </View>
@@ -431,16 +477,19 @@ const FillByYourSelf = ({navigation}) => {
                 flex: 1,
                 flexDirection: 'row',
               }}>
-              <Text style={[styles.bottomtext, {marginRight: 75}]}>Prefix</Text>
-              <Text style={[styles.bottomtext, {marginRight: 72}]}>
+              <Text style={[styles.bottomtext, { marginRight: 75 }]}>Prefix</Text>
+              <Text style={[styles.bottomtext, { marginRight: 72 }]}>
                 First Name
               </Text>
               <Text style={styles.bottomtext}>Last Name</Text>
             </View>
           </View>
+          {nameErr && (
+            <Text style={styles.errorText}>{nameErr}</Text>
+          )}
           <View style={styles.namecontainer}>
             <Text style={styles.label}>
-              Phone <Text style={{color: 'red'}}>*</Text>
+              Phone <Text style={{ color: 'red' }}>*</Text>
             </Text>
 
             <PhoneInput
@@ -455,63 +504,74 @@ const FillByYourSelf = ({navigation}) => {
               onChangeText={text => {
                 handleChange();
                 setValue(text);
-                setPhoneError(true);
+                if (submitFlag) {
+                  validateForm();
+                }
+                setPhoneError(null);
               }}
               onChangeFormattedText={text => {
                 setFormattedValue(text);
                 setCountryCode(phoneInput.current?.getCountryCode());
               }}
-              countryPickerProps={{withAlphaFilter: true}}
+              countryPickerProps={{ withAlphaFilter: true }}
               disabled={disabled}
               withDarkTheme
               withShadow
             />
-            {value.length != 0 || value.length == 10 ? (
+            {(value.length != 0 || value.length == 10) && (
               <Text style={styles.errorText}>{phoneError}</Text>
-            ) : null}
+            )}
+            {phoneErr && (
+              <Text style={styles.errorText}>{phoneErr}</Text>
+            )}
           </View>
           <View style={styles.namecontainer}>
             <Text style={styles.label}>
-              Date of Visit <Text style={{color: 'red'}}>*</Text>
+              Date of Visit <Text style={{ color: 'red' }}>*</Text>
             </Text>
             <TouchableOpacity onPress={() => setShowModal(true)}>
               <TextInput
                 style={[
                   styles.phoneInputContainer,
-                  {paddingLeft: 12, color: '#71727A'},
+                  { paddingLeft: 12, color: '#71727A' },
                 ]}
                 value={date}
                 editable={false}
               />
             </TouchableOpacity>
+            {dateOfVisitErr && (
+              <Text style={styles.errorText}>{dateOfVisitErr}</Text>
+            )}
             <Modal
               animationType="slide"
               transparent={true}
               visible={showModal}
               onRequestClose={() => setShowModal(false)}>
-              <View style={styles.centeredView}>
-                <View style={styles.modalView}>
-                  <DatePicker
-                    mode="calendar"
-                    minimumDate={startDate}
-                    onSelectedChange={handleDateChange}
-                    options={{
-                      backgroundColor: 'white',
-                      textHeaderColor: '#B21E2b',
-                      textDefaultColor: '#333',
-                      selectedTextColor: 'white',
-                      mainColor: 'white',
-                      textSecondaryColor: 'black',
-                      borderColor: '#B21E2B',
-                    }}
-                  />
+              <TouchableWithoutFeedback onPress={() => setShowModal(false)}>
+                <View style={styles.centeredView}>
+                  <View style={styles.modalView}>
+                    <DatePicker
+                      mode="calendar"
+                      minimumDate={startDate}
+                      onSelectedChange={handleDateChange}
+                      options={{
+                        backgroundColor: 'white',
+                        textHeaderColor: '#B21E2b',
+                        textDefaultColor: '#333',
+                        selectedTextColor: 'white',
+                        mainColor: 'white',
+                        textSecondaryColor: 'black',
+                        borderColor: '#B21E2B',
+                      }}
+                    />
+                  </View>
                 </View>
-              </View>
+              </TouchableWithoutFeedback>
             </Modal>
           </View>
           <View style={styles.namecontainer}>
             <Text style={styles.label}>
-              Single or Group Visit <Text style={{color: 'red'}}>*</Text>
+              Single or Group Visit <Text style={{ color: 'red' }}>*</Text>
             </Text>
             <View style={styles.radioButtonContainer}>
               {singleorgroup.map(optionss => {
@@ -519,22 +579,28 @@ const FillByYourSelf = ({navigation}) => {
                   <TouchableOpacity
                     key={optionss}
                     style={styles.singleOptionContainer}
-                    onPress={() => setSelectedSG(optionss)}>
+                    onPress={() => {
+                      setSelectedSG(optionss);
+                      setSingleOrGroupErr(null);
+                    }}>
                     <View style={styles.outerCircle}>
                       {selectedSG === optionss ? (
                         <View style={styles.innerCircle} />
                       ) : null}
                     </View>
-                    <Text style={{marginLeft: 10}}>{optionss}</Text>
+                    <Text style={{ marginLeft: 10 }}>{optionss}</Text>
                   </TouchableOpacity>
                 );
               })}
             </View>
+            {singleOrGroupErr && (
+              <Text style={styles.errorText}>{singleOrGroupErr}</Text>
+            )}
           </View>
           <View style={styles.namecontainer}>
             <Text style={styles.label}>
               Is the Guest being invited to Home or Office
-              <Text style={{color: 'red'}}> *</Text>
+              <Text style={{ color: 'red' }}> *</Text>
             </Text>
             <View style={styles.radioButtonContainer}>
               {homeoroffice.map(option => {
@@ -542,21 +608,27 @@ const FillByYourSelf = ({navigation}) => {
                   <TouchableOpacity
                     key={option}
                     style={styles.singleOptionContainer}
-                    onPress={() => setSelectedHO(option)}>
+                    onPress={() => {
+                      setSelectedHO(option)
+                      setHomeOrOfficeErr(null);
+                    }}>
                     <View style={styles.outerCircle}>
                       {selectedHO === option ? (
                         <View style={styles.innerCircle} />
                       ) : null}
                     </View>
-                    <Text style={{marginLeft: 10}}>{option}</Text>
+                    <Text style={{ marginLeft: 10 }}>{option}</Text>
                   </TouchableOpacity>
                 );
               })}
             </View>
+            {homeOrOfficeErr && (
+              <Text style={styles.errorText}>{homeOrOfficeErr}</Text>
+            )}
           </View>
           <View style={styles.namecontainer}>
             <Text style={styles.label}>
-              Select Gender <Text style={{color: 'red'}}>*</Text>
+              Select Gender <Text style={{ color: 'red' }}>*</Text>
             </Text>
             <View style={styles.radioButtonContainer}>
               {options.map(option => {
@@ -564,24 +636,30 @@ const FillByYourSelf = ({navigation}) => {
                   <TouchableOpacity
                     key={option}
                     style={styles.singleOptionContainer}
-                    onPress={() => setSelectedGender(option)}>
+                    onPress={() => {
+                      setSelectedGender(option)
+                      setGenderErr(null)
+                    }}>
                     <View style={styles.outerCircle}>
                       {selectedGender === option ? (
                         <View style={styles.innerCircle} />
                       ) : null}
                     </View>
-                    <Text style={{marginLeft: 10}}>{option}</Text>
+                    <Text style={{ marginLeft: 10 }}>{option}</Text>
                   </TouchableOpacity>
                 );
               })}
             </View>
+            {genderErr && (
+              <Text style={styles.errorText}>{genderErr}</Text>
+            )}
 
             <View style={styles.namecontainer}>
               <Text style={styles.label}>Guest Category</Text>
               <Dropdown
                 style={[
                   styles.dropdown,
-                  {width: '95%', paddingLeft: 12, color: '#71727a'},
+                  { width: '95%', paddingLeft: 12, color: '#71727a' },
                 ]}
                 placeholderStyle={styles.placeholderStyle}
                 selectedTextStyle={styles.selectedTextStyle}
@@ -606,7 +684,7 @@ const FillByYourSelf = ({navigation}) => {
               <Dropdown
                 style={[
                   styles.dropdown,
-                  {width: '95%', paddingLeft: 12, color: '#71727a'},
+                  { width: '95%', paddingLeft: 12, color: '#71727a' },
                 ]}
                 placeholderStyle={styles.placeholderStyle}
                 selectedTextStyle={styles.selectedTextStyle}
@@ -626,68 +704,65 @@ const FillByYourSelf = ({navigation}) => {
                 }}
               />
             </View>
-            {/* <View style={[styles.namecontainer, {marginBottom: 0}]}>
+
+            <View style={styles.namecontainer}>
               <Text style={styles.label}>Vehicle Information</Text>
+              <View style={styles.vehicle}>
+                <Text>Vehicle type</Text>
+                <Text>Vehicle Number</Text>
+              </View>
+              {vehicles.map((vehicle, index) => (
+                <View key={index} style={styles.newvehicle}>
+                  <Picker
+                    selectedValue={vehicle.Vehicle_Type}
+                    style={styles.picker}
+                    onValueChange={(value) => handleTextChange(index, 'Vehicle_Type', value)}>
+                    <Picker.Item label="Select" value="" />
+                    <Picker.Item label="2-Wheeler" value="2-Wheeler" />
+                    <Picker.Item label="Car" value="Car" />
+                    <Picker.Item label="Bus" value="Bus" />
+                    <Picker.Item label="Taxi" value="Taxi" />
+                    <Picker.Item label="School Bus" value="School Bus" />
+                    <Picker.Item label="Police Van" value="Police Van" />
+                    <Picker.Item label="Van" value="Van" />
+                    <Picker.Item label="Auto" value="Auto" />
+                    <Picker.Item label="Ambulance" value="Ambulancer" />
+                    <Picker.Item label="Truck" value="Truck" />
+                    <Picker.Item label="Tractor" value="Tractor" />
+                    <Picker.Item label="Cement Mixer" value="Cement Mixer" />
+                    <Picker.Item label="Fire Engine" value="Fire Engine" />
+                    <Picker.Item label="Transport Van" value="Transport Van" />
+                    <Picker.Item label="Bulldozer" value="Bulldozer" />
+                    <Picker.Item label="Roller Machine" value="Roller Machine" />
+                    {/* Add more vehicle types as needed */}
+                  </Picker>
+                  <TextInput
+                  style={styles.vehicleinput}
+                    value={vehicle.Vehicle_Number}
+                    onChangeText={(text) => handleTextChange(index, 'Vehicle_Number', text)}
+                  />
+                  <TouchableOpacity onPress={() => handleRemoveVehicle(index)}>
+                    <Image source={require('../assets/delete.png')} style={styles.removeButton}/>
+                  </TouchableOpacity>
+                </View>
+              ))}
+              <TouchableOpacity style={styles.addvehicle} onPress={handleAddVehicle}>
+                <Image
+                  source={require('../assets/add.png')}
+                  style={{ width: 15, height: 15 }}
+                />
+                <Text style={{ color: "black", fontSize: 15 }}>Add New</Text>
+              </TouchableOpacity>
             </View>
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'center',
-                marginTop: 0,
-                gap: 17,
-              }}>
-              <View>
-                <Text
-                  style={[styles.label, {marginBottom: 10, fontWeight: 400}]}>
-                  Vehicle Type
-                </Text>
-                <Dropdown
-                  style={[
-                    styles.dropdown,
-                    {width: 150, color: '#71727a', marginTop: 0},
-                  ]}
-                  placeholderStyle={styles.placeholderStyle}
-                  selectedTextStyle={styles.selectedTextStyle}
-                  inputSearchStyle={styles.inputSearchStyle}
-                  iconStyle={styles.iconStyle}
-                  data={vehicleTypeValues}
-                  search
-                  searchPlaceholder="Search..."
-                  maxHeight={200}
-                  labelField="label"
-                  valueField="value"
-                  placeholder={!focus ? 'Select' : '...'}
-                  value={vehicleType}
-                  onFocus={() => setIsVehicle(true)}
-                  onBlur={() => setIsVehicle(false)}
-                  onChange={item => {
-                    setVehicleType(item.value);
-                    setIsVehicle(false);
-                  }}
-                />
-              </View>
-              <View>
-                <Text
-                  style={[styles.label, {marginBottom: 10, fontWeight: 400}]}>
-                  Vehicle Number
-                </Text>
-                <TextInput
-                  style={[styles.dropdown, {width: 150, color: '#71727A'}]}
-                  value={vehicleNumber}
-                  onChangeText={setVehicleNumber}
-                  selectionColor={'#B21E2B'}
-                />
-              </View>
-            </View> */}
           </View>
           {selectedSG === 'Group' ? (
             <View>
               <View style={styles.namecontainer}>
                 <Text style={styles.label}>
-                  Number of Men <Text style={{color: 'red'}}>*</Text>
+                  Number of Men <Text style={{ color: 'red' }}>*</Text>
                 </Text>
                 <TextInput
-                  style={[styles.phoneInputContainer, {paddingLeft: 15}]}
+                  style={[styles.phoneInputContainer, { paddingLeft: 15 }]}
                   keyboardType="numeric"
                   value={men}
                   onChangeText={setMen}
@@ -697,10 +772,10 @@ const FillByYourSelf = ({navigation}) => {
 
               <View style={styles.namecontainer}>
                 <Text style={styles.label}>
-                  Number of Women <Text style={{color: 'red'}}>*</Text>
+                  Number of Women <Text style={{ color: 'red' }}>*</Text>
                 </Text>
                 <TextInput
-                  style={[styles.phoneInputContainer, {paddingLeft: 15}]}
+                  style={[styles.phoneInputContainer, { paddingLeft: 15 }]}
                   keyboardType="numeric"
                   value={women}
                   onChangeText={setWomen}
@@ -709,10 +784,10 @@ const FillByYourSelf = ({navigation}) => {
               </View>
               <View style={styles.namecontainer}>
                 <Text style={styles.label}>
-                  Number of Boys <Text style={{color: 'red'}}>*</Text>
+                  Number of Boys <Text style={{ color: 'red' }}>*</Text>
                 </Text>
                 <TextInput
-                  style={[styles.phoneInputContainer, {paddingLeft: 15}]}
+                  style={[styles.phoneInputContainer, { paddingLeft: 15 }]}
                   keyboardType="numeric"
                   value={boys}
                   onChangeText={setBoys}
@@ -721,10 +796,10 @@ const FillByYourSelf = ({navigation}) => {
               </View>
               <View style={styles.namecontainer}>
                 <Text style={styles.label}>
-                  Number of Girls <Text style={{color: 'red'}}>*</Text>
+                  Number of Girls <Text style={{ color: 'red' }}>*</Text>
                 </Text>
                 <TextInput
-                  style={[styles.phoneInputContainer, {paddingLeft: 15}]}
+                  style={[styles.phoneInputContainer, { paddingLeft: 15 }]}
                   keyboardType="numeric"
                   value={girls}
                   onChangeText={setGirls}
@@ -756,6 +831,50 @@ const styles = StyleSheet.create({
     flexShrink: 0,
     justifyContent: 'center',
     paddingLeft: 12,
+  },
+  vehicle: {
+    flex: 1,
+    flexDirection: "row",
+    justifyContent: "space-around",
+    alignItems: "center",
+    backgroundColor: "lightgrey",
+    marginHorizontal: 15,
+    height: 30,
+    borderRadius: 10
+  },
+  addvehicle: {
+    flex: 1,
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: 5,
+    marginTop: 10
+  },
+  newvehicle: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 5,
+    padding: 10,
+    borderRadius: 10,
+    borderColor: "#B21E2B",
+    borderWidth: 1,
+    height: 50,
+    marginHorizontal: 20
+  },
+  picker: {
+    flex: 2,
+    height: 40,
+  },
+  vehicleinput:{
+    flex: 1,
+    height: 40,
+  },
+
+  removeButton: {
+    color: 'red',
+    fontWeight: 'bold',
+    marginLeft: 10,
+    width: 20,
+    height: 20
   },
   header: {
     fontFamily: 'Inter',
