@@ -795,7 +795,7 @@ return () => {
             <View style={styles.right}>
               {user?.Vehicle_Information?.length > 0
                 ? user.Vehicle_Information.map((vehicle, index) => (
-                    <Text key={index}>{vehicle.zc_display_value}</Text>
+                    <Text key={index} style={styles.value}>{vehicle.zc_display_value}</Text>
                   ))
                 : null}
             </View>

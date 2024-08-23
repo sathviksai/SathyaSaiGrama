@@ -55,6 +55,8 @@ const FillByYourSelf = ({ navigation }) => {
   //just so that the othe code gets commited can delete after
   const phoneInput = useRef(null);
 
+  const [vehicles, setVehicles] = useState([]);
+
   const handleChange = text => {
     return (
       phoneInput.current?.isValidNumber(value) && phoneInput.current !== null
@@ -182,7 +184,7 @@ const FillByYourSelf = ({ navigation }) => {
         Number_of_Women: women,
         Number_of_Girls: girls,
         Home_or_Office: selectedHO,
-        // Vehicle_Information: [Vehicle_Info.data.ID],
+        Vehicle_Information: vehicles,
       },
     };
 
@@ -219,6 +221,25 @@ const FillByYourSelf = ({ navigation }) => {
     return () => clearTimeout(timer);
   }, [value]);
 
+
+  const handleAddVehicle = () => {
+    setVehicles([...vehicles, { Vehicle_Type: '', Vehicle_Number: '' }]);
+  };
+
+  const handleRemoveVehicle = (index) => {
+    const updatedVehicles = vehicles.filter((_, i) => i !== index);
+    setVehicles(updatedVehicles);
+  };
+
+  const handleTextChange = (index, field, value) => {
+    const updatedVehicles = vehicles.map((vehicle, i) =>
+      i === index ? { ...vehicle, [field]: value } : vehicle
+    );
+    setVehicles(updatedVehicles);
+  };
+
+
+
   const [nameErr, setNameErr] = useState(null);
   const [dateOfVisitErr, setDateOfVisitErr] = useState(null);
   const [singleOrGroupErr, setSingleOrGroupErr] = useState(null);
@@ -226,51 +247,7 @@ const FillByYourSelf = ({ navigation }) => {
   const [genderErr, setGenderErr] = useState(null);
   const [phoneErr, setPhoneErr] = useState(null);
 
-  // useEffect(()=>{
-
-  //   const validate = () =>{
-  //     if(!prefix || prefix===""  || !firstName || firstName===""  || !lastName || lastName==="" ){
-  //       setNameErr("Prefix, First Name and Last Name is required")
-  //     }else{
-  //       setNameErr(null)
-  //     }
-  //     if(date==="Select Date" ){
-  //       setDateOfVisitErr("Date of visit is required is required")
-  //     }else{
-  //       setDateOfVisitErr(null)
-  //     }
-  //     if(!formattedValue || formattedValue===""  || formattedValue===" "){
-  //       setPhoneErr("Phone number is required is required")
-  //     }else{
-  //       setPhoneErr(null)
-  //     }
-  //     if(!selectedSG || selectedSG===""  || selectedSG===" "){
-  //       setSingleOrGroupErr("Single or Group is required")
-  //     }else{
-  //       setSingleOrGroupErr(null)
-  //     }
-  //     if(!selectedHO || selectedHO===""  || selectedHO===" "){
-  //       setHomeOrOfficeErr("Home or Office is required")
-  //     }else{
-  //       setHomeOrOfficeErr(null)
-  //     }
-  //     if(!selectedGender || selectedGender===""  || selectedGender===" "){
-  //       setGenderErr("Gender is required")
-  //       if (selectedGender === 'Male') {
-  //         setMen('1');
-  //         setWomen('0');
-  //       } else if (selectedGender === 'Female') {
-  //         setWomen('1');
-  //         setMen('0');
-  //       }
-  //     }else{
-  //       setGenderErr(null)
-  //     }
-  //   }
-
-  //   validate();
-
-  // }, [prefix, firstName, lastName, date, formattedValue, selectedGender, selectedHO, selectedSG]);
+  
   const [submitFlag, setSubmitFlag] = useState(false);
 
   const validateForm = () => {
@@ -370,16 +347,8 @@ const FillByYourSelf = ({ navigation }) => {
   }
 
 
-  // const validateForm = () => {
-  //   if(!genderErr && !homeOrOfficeErr && !singleOrGroupErr && !dateOfVisitErr && !nameErr && !phoneErr){
-  //     console.log("Every thing is right")
-  //     return true;
-  //   }
-  //   console.log("Some thing is missing")
-  //   return false;
-  // };
-
   const handleSubmit = async () => {
+    console.log("##########vehicles are: ", vehicles)
     setSubmitFlag(true)
     if (validateForm()) {
       setIsSubmitted(true);
@@ -437,23 +406,6 @@ const FillByYourSelf = ({ navigation }) => {
     setPhoneErr(null)
   };
 
-  const [vehicles, setVehicles] = useState([]);
-
-  const handleAddVehicle = () => {
-    setVehicles([...vehicles, { type: '', number: '' }]);
-  };
-
-  const handleRemoveVehicle = (index) => {
-    const updatedVehicles = vehicles.filter((_, i) => i !== index);
-    setVehicles(updatedVehicles);
-  };
-
-  const handleTextChange = (index, field, value) => {
-    const updatedVehicles = vehicles.map((vehicle, i) =>
-      i === index ? { ...vehicle, [field]: value } : vehicle
-    );
-    setVehicles(updatedVehicles);
-  };
 
   return isSubmitted ? (
     <SentForApproval />
@@ -752,22 +704,7 @@ const FillByYourSelf = ({ navigation }) => {
                 }}
               />
             </View>
-            {/* <View style={styles.namecontainer}>
-              <Text style={styles.label}>Vehicle Information</Text>
-              <View style={styles.vehicle}>
-                <Text>Vehicle type</Text>
-                <Text>Vehicle Number</Text>
-              </View>
-              <View>
-                <TouchableOpacity style={styles.addvehicle}>
-                   <Image
-                     source={require('../assets/add.png')}
-                     style={{fontSize: 15}}
-                    />
-                  <Text style={{color: "black", fontSize: 15}}>Add New</Text>
-                </TouchableOpacity>
-              </View>
-            </View> */}
+
             <View style={styles.namecontainer}>
               <Text style={styles.label}>Vehicle Information</Text>
               <View style={styles.vehicle}>
@@ -777,19 +714,32 @@ const FillByYourSelf = ({ navigation }) => {
               {vehicles.map((vehicle, index) => (
                 <View key={index} style={styles.newvehicle}>
                   <Picker
-                    selectedValue={vehicle.type}
+                    selectedValue={vehicle.Vehicle_Type}
                     style={styles.picker}
-                    onValueChange={(value) => handleTextChange(index, 'type', value)}>
+                    onValueChange={(value) => handleTextChange(index, 'Vehicle_Type', value)}>
                     <Picker.Item label="Select" value="" />
-                    <Picker.Item label="Ambulance" value="ambulance" />
-                    <Picker.Item label="Fire Truck" value="fire-truck" />
-                    <Picker.Item label="Police Car" value="police-car" />
+                    <Picker.Item label="2-Wheeler" value="2-Wheeler" />
+                    <Picker.Item label="Car" value="Car" />
+                    <Picker.Item label="Bus" value="Bus" />
+                    <Picker.Item label="Taxi" value="Taxi" />
+                    <Picker.Item label="School Bus" value="School Bus" />
+                    <Picker.Item label="Police Van" value="Police Van" />
+                    <Picker.Item label="Van" value="Van" />
+                    <Picker.Item label="Auto" value="Auto" />
+                    <Picker.Item label="Ambulance" value="Ambulancer" />
+                    <Picker.Item label="Truck" value="Truck" />
+                    <Picker.Item label="Tractor" value="Tractor" />
+                    <Picker.Item label="Cement Mixer" value="Cement Mixer" />
+                    <Picker.Item label="Fire Engine" value="Fire Engine" />
+                    <Picker.Item label="Transport Van" value="Transport Van" />
+                    <Picker.Item label="Bulldozer" value="Bulldozer" />
+                    <Picker.Item label="Roller Machine" value="Roller Machine" />
                     {/* Add more vehicle types as needed */}
                   </Picker>
                   <TextInput
                   style={styles.vehicleinput}
-                    value={vehicle.number}
-                    onChangeText={(text) => handleTextChange(index, 'number', text)}
+                    value={vehicle.Vehicle_Number}
+                    onChangeText={(text) => handleTextChange(index, 'Vehicle_Number', text)}
                   />
                   <TouchableOpacity onPress={() => handleRemoveVehicle(index)}>
                     <Image source={require('../assets/delete.png')} style={styles.removeButton}/>
@@ -919,12 +869,6 @@ const styles = StyleSheet.create({
     height: 40,
   },
 
-  // addvehicle: {
-  //   flexDirection: "row",
-  //   alignItems: "center",
-  //   justifyContent: "center",
-  //   marginTop: 15,
-  // },
   removeButton: {
     color: 'red',
     fontWeight: 'bold',
