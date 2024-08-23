@@ -411,7 +411,7 @@ const Profile = ({ navigation }) => {
               </View>
             </TouchableOpacity>
 
-            <TouchableOpacity
+            {/* <TouchableOpacity
               style={styles.buttonSection}
               onPress={() => navigation.navigate('Notifications')}>
               <View style={styles.buttonArea}>
@@ -421,7 +421,7 @@ const Profile = ({ navigation }) => {
                   style={styles.img}
                 />
               </View>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
 
             <TouchableOpacity
               style={styles.buttonSection}

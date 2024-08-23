@@ -183,7 +183,6 @@ const ViewDetails = ({navigation, route}) => {
 
   const onApprove = async () => {
     setapprovingLoading(true);
-    PasscodeData();
     const status = user.L2_Approval_Status;
 
     const updateField = {
@@ -210,10 +209,11 @@ const ViewDetails = ({navigation, route}) => {
         setL2DeniedDataFetched(false);
         setL2ApproveDataFetched(false);
       }
+      PasscodeData();
       // Alert.alert('Visitor Approved');
       // navigation.navigate('L2Approved');
     } else {
-      Alert.alert('Error: ', response.code);
+      Alert.alert('Error in approving: ', response.code);
     }
   };
 

@@ -12,8 +12,8 @@ import {
   ImageBackground,
   Dimensions,
 } from 'react-native';
-import React, {useContext, useEffect, useState, useRef} from 'react';
-import {BASE_APP_URL, APP_LINK_NAME, APP_OWNER_NAME} from '@env';
+import React, {useContext, useEffect, useState, useRef, useCallback} from 'react';
+import {BASE_APP_URL, APP_LINK_NAME, APP_OWNER_NAME, } from '@env';
 
 import UserContext from '../../../context/UserContext';
 import {encode} from 'base64-arraybuffer';
@@ -22,6 +22,8 @@ import Share from 'react-native-share';
 import LinearGradient from 'react-native-linear-gradient';
 import QRCode from 'react-native-qrcode-svg';
 import {captureRef} from 'react-native-view-shot';
+import Dialog from 'react-native-dialog';
+import { useFocusEffect } from '@react-navigation/native';
 
 export const updateRecord = async (reportName, modified_data, token, id) => {
   try {
@@ -53,7 +55,6 @@ const VerifyDetails = ({navigation, route}) => {
   const {stringified} = route.params;
   console.log('stringified', stringified);
   let {user} = route.params;
-
   // console.log('user outside stringified', user);
 
   if (stringified) {
@@ -82,7 +83,7 @@ const VerifyDetails = ({navigation, route}) => {
   const [photo, setPhoto] = useState();
   const [QrCodephoto, setQrCodephoto] = useState();
   const [codeUploaded, setcodeUploaded] = useState(false);
-
+  const [DialogVisible, setDialogVisible] = useState(false);
   const {
     getAccessToken,
     setDeniedDataFetched,
@@ -92,6 +93,10 @@ const VerifyDetails = ({navigation, route}) => {
     loggedUser,
     accessToken,
   } = useContext(UserContext);
+
+  const onPressOk = () => {
+    setDialogVisible(false);
+  }
 
   useEffect(() => {
     setEditData(user);
@@ -276,13 +281,28 @@ const VerifyDetails = ({navigation, route}) => {
     setdeniedLoading(true);
     let status = user.Referrer_Approval;
 
-   
+    let updateField;
+
+    if (loggedUser.role === 'L2') {
       updateField = {
-        Referrer_Approval: 'DENIED',
         L2_Approval_Status: 'DENIED',
+        Referrer_Approval: 'DENIED',
         Generated_Passcode: null,
         Generated_QR_Code: null,
       };
+    } else{
+      updateField = {
+        Referrer_Approval: 'DENIED',
+        Generated_Passcode: null,
+        Generated_QR_Code: null,
+      };
+
+     
+    }
+
+
+
+      
      
     
 
@@ -310,7 +330,7 @@ const VerifyDetails = ({navigation, route}) => {
       navigation.navigate('Denied');
      setdeniedLoading(false);
     } else {
-      Alert.alert('Error: ', response.code);
+      Alert.alert('Error in rejecting: ', response.code);
     }
   };
 
@@ -463,6 +483,20 @@ const VerifyDetails = ({navigation, route}) => {
       PasscodeData();
     }
   }, [codeReload]);
+
+useFocusEffect(
+useCallback(() => {
+  const {triggerDialog} = route.params || {};
+  if(triggerDialog){
+    setDialogVisible(true);
+  }
+
+return () => {
+  setDialogVisible(false); };
+
+}, [route.params])
+);
+ 
 
   console.log('User in verify details : ', user);
   return (
@@ -839,6 +873,13 @@ const VerifyDetails = ({navigation, route}) => {
           </View>
         </View>
       </View>
+
+      <Dialog.Container visible={DialogVisible} contentStyle={styles.detailsNotEditableDialogue}>
+      <Dialog.Title style={styles.detailsNotEditableTitle}>Can not edit details once Visitor is L2 approved</Dialog.Title>
+      <Dialog.Description>Please fill another form</Dialog.Description>
+      <Dialog.Button label="Ok" onPress={onPressOk} />
+      
+      </Dialog.Container>
     </>
   );
 };
@@ -1428,4 +1469,21 @@ const styles = StyleSheet.create({
   wewe2: {
     color: '#B21E2B',
   },
+
+  detailsNotEditableDialogue:{
+  borderRadius: 30,
+  backgroundColor: 'pink',
+
+  },
+
+  detailsNotEditableTitle:{
+ 
+  fontWeight:'bold',
+
+  }
+
+
+
+
+
 });

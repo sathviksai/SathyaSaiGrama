@@ -3,6 +3,7 @@ import UserContext from './context/UserContext';
 import { useContext, useEffect, useState } from 'react';
 import { Appearance, AppearanceProvider } from 'react-native';
 import { DefaultTheme, Provider as PaperProvider } from 'react-native-paper';
+import NetInfo from "@react-native-community/netinfo";
 
 import {
   DATABASE_ID,
@@ -15,6 +16,7 @@ import { AuthContext, AuthProvider } from './src/auth/AuthProvider';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import SplashScreen from './src/screens/SplashScreen';
 import { getDeviceToken } from './src/utils/notificationService';
+import NoNetworkScreen from './src/screens/NoNetworkScreen';
 
 const lightTheme = {
   ...DefaultTheme,
@@ -27,7 +29,19 @@ const lightTheme = {
 };
 
 const App = () => {
+  const [isNetworkAvailable, setIsNetworkAvailable] = useState(true);
   const { user } = useContext(AuthContext);
+useEffect(() => {
+  const unsubscribe = NetInfo.addEventListener(state => {
+    setIsNetworkAvailable(state.isConnected);
+  });
+
+  return () => {
+    unsubscribe();
+
+  }; 
+
+},[]);
 
   const {
     setAccessToken,
@@ -105,12 +119,13 @@ const App = () => {
 
   return (
       <PaperProvider theme={lightTheme}>
-        {loading ? (
+       {!isNetworkAvailable ? (<NoNetworkScreen />) :  ( loading ? (
           // <ActivityIndicator size="large" color="#752A26" style={styles.loadingContainer}/>
           <SplashScreen />
         ) : (
           <BaseRoute />
-        )}
+        ))}  
+
       </PaperProvider>
   );
 };

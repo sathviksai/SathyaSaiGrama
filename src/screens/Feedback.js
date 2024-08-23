@@ -21,7 +21,7 @@ const Feedback = ({navigation}) => {
     formState: {errors},
   } = useForm();
 
-  const {getAccessToken} = useContext(UserContext);
+  const {getAccessToken, userEmail} = useContext(UserContext);
 
   //   const posting = async() => {
   //       try {
@@ -46,10 +46,12 @@ const Feedback = ({navigation}) => {
   //   };
   const handleSubmitFeedback = async formRes => {
     // const res=await posting();
+
     const formData = {
       data: {
         Pick_a_subject_and_provide_your_feedback: formRes.subject,
         Your_feedback: formRes.feedback,
+        User_Email: userEmail,
       },
     };
     console.log(getAccessToken());
