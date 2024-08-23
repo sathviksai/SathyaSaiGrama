@@ -1,4 +1,4 @@
-import { StyleSheet, ActivityIndicator, View, FlatList, RefreshControl } from 'react-native';
+import { StyleSheet, ActivityIndicator, View, FlatList, RefreshControl, Text } from 'react-native';
 import React, { useContext, useEffect, useState, useCallback} from 'react';
 import { useFocusEffect, } from '@react-navigation/native';
 import ApprovalComponent from './ApprovalComponent';
@@ -17,6 +17,11 @@ const Denied = ({ navigation }) => {
     setLoading(true);
     const result = await getDataWithIntAndString('Approval_to_Visitor_Report', 'Referrer_App_User_lookup', L1ID, "Referrer_Approval", "DENIED", getAccessToken());
     const all_denieds = result.data;
+    if (result.data=== undefined){
+      setDenieds(null);
+      setDeniedDataFetched(false);
+      setLoading(false);}
+      else{
     all_denieds.sort((a, b) => {
       // Parse the date strings into Date objects
       const dateA = new parseDate(a.Date_of_Visit);
@@ -26,7 +31,7 @@ const Denied = ({ navigation }) => {
     });
     setDenieds(all_denieds);
     setLoading(false);
-    setDeniedDataFetched(true);
+    setDeniedDataFetched(true);}
   };
 
   useEffect(() => {
@@ -39,6 +44,13 @@ const Denied = ({ navigation }) => {
     setRefreshing(true);
     const result = await getDataWithIntAndString('Approval_to_Visitor_Report', 'Referrer_App_User_lookup', L1ID, "Referrer_Approval", "DENIED", getAccessToken());
     const all_denieds = result.data;
+    if (result.data=== undefined){
+      setDenieds(null);
+      setRefreshing(false);
+      setLoading(false);
+    
+  
+    } else{
     all_denieds.sort((a, b) => {
       // Parse the date strings into Date objects
       const dateA = new parseDate(a.Date_of_Visit);
@@ -48,7 +60,7 @@ const Denied = ({ navigation }) => {
     });
     setDenieds(all_denieds);
     setRefreshing(false);
-  };
+  }};
 
   useFocusEffect(useCallback(() => {
     onRefresh();
@@ -56,7 +68,7 @@ const Denied = ({ navigation }) => {
 
 
   return (
-    <View style={{ flex: 1, paddingTop: 10, backgroundColor: "#FFFF" }}>
+   <><View style={{ flex: 1, paddingTop: 10, backgroundColor: "#FFFF" }}>
       {loading ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#0000ff" />
@@ -73,7 +85,8 @@ const Denied = ({ navigation }) => {
           }
         />
       )}
-    </View>
+    </View> 
+    {denieds === null  && !loading && <View style={styles.noDeniedTextView}><Text style={{flex:10}}>No Denied visitors</Text></View>}</>
   );
 };
 
@@ -85,4 +98,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  noDeniedTextView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: "#FFFF",
+  }
 });

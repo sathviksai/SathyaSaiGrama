@@ -1,4 +1,4 @@
-import { StyleSheet, ActivityIndicator, View, FlatList, RefreshControl } from 'react-native';
+import { StyleSheet, ActivityIndicator, View, FlatList, RefreshControl, Text } from 'react-native';
 import React, { useContext, useEffect, useState } from 'react'
 import { getL2Data } from '../../components/ApiRequest'
 import UserContext from '../../../context/UserContext'
@@ -17,6 +17,10 @@ const L2Approved = ({navigation}) => {
     console.log("Logged user dept id in L2 Approveds: ", loggedUser.deptIds)
     const result = await getL2Data('Approval_to_Visitor_Report', 'Department', loggedUser.deptIds, "Referrer_Approval", "APPROVED", "L2_Approval_Status", "APPROVED", "Referrer_App_User_lookup", loggedUser.userId,  accessToken);
     const all_L2approveds = result.data;
+    if (result.data=== undefined){
+      setL2Approveds(null);
+      setL2ApproveDataFetched(false);
+      setLoading(false);} else{
     all_L2approveds.sort((a, b) => {
       // Parse the date strings into Date objects
       const dateA = new parseDate(a.Date_of_Visit);
@@ -27,7 +31,9 @@ const L2Approved = ({navigation}) => {
     setL2Approveds(all_L2approveds)
     setLoading(false)
     setL2ApproveDataFetched(true)
-  };
+  }
+  
+};
 
   useEffect(() => {
 
@@ -41,6 +47,13 @@ const L2Approved = ({navigation}) => {
     setRefreshing(true);
     const result = await getL2Data('Approval_to_Visitor_Report', 'Department', loggedUser.deptIds, "Referrer_Approval", "APPROVED", "L2_Approval_Status", "APPROVED", "Referrer_App_User_lookup", loggedUser.userId, accessToken);
     const all_L2approveds = result.data;
+    if (result.data=== undefined){
+      setL2Approveds(null);
+      setRefreshing(false);
+      setLoading(false);
+    
+  
+    } else{
     all_L2approveds.sort((a, b) => {
       // Parse the date strings into Date objects
       const dateA = new parseDate(a.Date_of_Visit);
@@ -50,10 +63,11 @@ const L2Approved = ({navigation}) => {
     });
     setL2Approveds(all_L2approveds)
     setRefreshing(false);
-  };
+  } 
+};
 
   return (
-<View style={{ flex: 1, paddingTop: 10 }}>
+<><View style={{ flex: 1, paddingTop: 10 }}>
       {loading ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#0000ff" />
@@ -71,6 +85,7 @@ const L2Approved = ({navigation}) => {
         />
       )}
     </View>
+    {L2Approveds === null  && !loading && <View style={styles.noL2ApprovedTextView}><Text style={{flex:10}}>No L2 Approved visitors</Text></View>}</>
   )
 }
 
@@ -82,4 +97,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  noL2ApprovedTextView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  }
 });
