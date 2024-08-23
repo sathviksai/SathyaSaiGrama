@@ -156,13 +156,6 @@ const BaseRoute = () => {
           routes: [{name: 'L2ApprovalTab'}, {name: 'ViewDetails'}],
         });
       }
-      // if (!isFocused || state?.routes.length === 1) {
-      //   // If app is launched via deep link, add HomeScreen before DetailsScreen
-      //   navigationRef.current?.reset({
-      //     index: 1,
-      //     routes: [{ name: 'HomeScreen' }, { name: 'DetailsScreen' }],
-      //   });
-      // }
     };
 
     getUrl();
@@ -236,7 +229,6 @@ const BaseRoute = () => {
               component={VerificationNotice}
             />
             <Stack.Screen name="ApprovalTab" component={ApprovalTab} />
-            <Stack.Screen name="L2ApprovalTab" component={L2ApprovalTab} />
             <Stack.Screen name="FooterTab" component={FooterTab} />
           </>
         )}
