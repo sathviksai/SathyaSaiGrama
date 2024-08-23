@@ -140,27 +140,6 @@ const BaseRoute = () => {
 
   const Stack = createNativeStackNavigator();
 
-  useEffect(() => {
-    // Get the deep link used to open the app
-    const getUrl = async () => {
-      const initialUrl = await Linking.getInitialURL();
-
-      if (initialUrl === null) {
-        return;
-      }
-
-      if (initialUrl.includes('ViewDetails')) {
-        Alert.alert(initialUrl);
-        RootNavigation.current?.reset({
-          index: 1,
-          routes: [{name: 'L2ApprovalTab'}, {name: 'ViewDetails'}],
-        });
-      }
-    };
-
-    getUrl();
-  }, []);
-
   //To get Apprwrite token
   const getAppWriteToken = async () => {
     try {
@@ -229,6 +208,7 @@ const BaseRoute = () => {
               component={VerificationNotice}
             />
             <Stack.Screen name="ApprovalTab" component={ApprovalTab} />
+            <Stack.Screen name="L2ApprovalTab" component={L2ApprovalTab} />
             <Stack.Screen name="FooterTab" component={FooterTab} />
           </>
         )}
