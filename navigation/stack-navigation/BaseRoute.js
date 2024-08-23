@@ -5,12 +5,14 @@ import Register from '../../src/screens/Register';
 import ForgotPassword from '../../src/screens/ForgotPassword';
 import {AuthContext} from '../../src/auth/AuthProvider';
 import ApprovalTab from '../../src/screens/approval/ApprovalTab';
+import L2ApprovalTab from '../../src/screens/L2-approval/L2ApprovalTab';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {NavigationContainer} from '@react-navigation/native';
 import FooterTab from '../tab-navigation/FooterTab';
 import UserContext from '../../context/UserContext';
 import VerificationNotice from '../../src/auth/VerificationNotice';
 import messaging from '@react-native-firebase/messaging';
+import * as RootNavigation from './RootNavigation';
 import {
   DATABASE_ID,
   COLLECTION_ID,
@@ -138,6 +140,27 @@ const BaseRoute = () => {
 
   const Stack = createNativeStackNavigator();
 
+  useEffect(() => {
+    // Get the deep link used to open the app
+    const getUrl = async () => {
+      const initialUrl = await Linking.getInitialURL();
+
+      if (initialUrl === null) {
+        return;
+      }
+
+      if (initialUrl.includes('ViewDetails')) {
+        Alert.alert(initialUrl);
+        RootNavigation.current?.reset({
+          index: 1,
+          routes: [{name: 'L2ApprovalTab'}, {name: 'ViewDetails'}],
+        });
+      }
+    };
+
+    getUrl();
+  }, []);
+
   //To get Apprwrite token
   const getAppWriteToken = async () => {
     try {
@@ -189,7 +212,10 @@ const BaseRoute = () => {
     //   {loading ? (
     //     <ActivityIndicator size="large" color="#752A26" style={styles.loadingContainer} />
     //   ) : (
-    <NavigationContainer linking={linking} fallback={<Text>Loading...</Text>}>
+    <NavigationContainer
+      linking={linking}
+      fallback={<Text>Loading...</Text>}
+      ref={RootNavigation.navigationRef}>
       <Stack.Navigator screenOptions={{headerShown: false}}>
         {loggedUser ? (
           <Stack.Screen name="FooterTab" component={FooterTab} />

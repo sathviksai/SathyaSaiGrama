@@ -8,10 +8,10 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import {useForm, Controller} from 'react-hook-form';
 import {auth} from '../auth/firebaseConfig';
-import {openInbox} from 'react-native-email-link'
+import {openInbox} from 'react-native-email-link';
 import {sendPasswordResetEmail} from 'firebase/auth';
 
 const ForgotPassword = ({navigation}) => {
@@ -21,7 +21,7 @@ const ForgotPassword = ({navigation}) => {
     formState: {errors},
   } = useForm();
 
-  const[ emailSent, setemailSent]  = useState(false);
+  const [emailSent, setemailSent] = useState(false);
   const handleForgotPassword = async ({email}) => {
     try {
       // Attempt to send password reset email
@@ -30,7 +30,7 @@ const ForgotPassword = ({navigation}) => {
         'Success',
         'A password reset email has been sent (if the email exists). Please log back in after resetting your password.',
       ),
-      setemailSent(true); // Updated message
+        setemailSent(true); // Updated message
     } catch (error) {
       // Handle password reset errors
       console.error('Password Reset Error:', error);
@@ -56,99 +56,36 @@ const ForgotPassword = ({navigation}) => {
       behavior="padding"
       keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 80}
       style={styles.container}>
-      {!emailSent ? (<View style={styles.main}>
-        <Text style={styles.forgot}>Enter Email Address</Text>
-        <Controller
-          name="email"
-          control={control}
-          defaultValue=""
-          render={({field: {onChange, value}}) => (
-            <TextInput
-              placeholder="Email for Password Reset"
-              style={styles.inputBox}
-              value={value}
-              onChangeText={onChange}
-            />
+      {!emailSent ? (
+        <View style={styles.main}>
+          <Text style={styles.forgot}>Enter Email Address</Text>
+          <Controller
+            name="email"
+            control={control}
+            defaultValue=""
+            render={({field: {onChange, value}}) => (
+              <TextInput
+                placeholder="Email for Password Reset"
+                style={styles.inputBox}
+                value={value}
+                onChangeText={onChange}
+              />
+            )}
+            rules={{required: true, pattern: /^\S+@\S+$/i}}
+          />
+          {errors.email?.type === 'required' && (
+            <Text style={styles.textError}>Email is required</Text>
           )}
-          rules={{required: true, pattern: /^\S+@\S+$/i}}
-        />
-        {errors.email?.type === 'required' && (
-          <Text style={styles.textError}>Email is required</Text>
-        )}
-        {errors.email?.type === 'pattern' && (
-          <Text style={styles.textError}>Enter a valid email</Text>
-        )}
+          {errors.email?.type === 'pattern' && (
+            <Text style={styles.textError}>Enter a valid email</Text>
+          )}
 
-        <TouchableOpacity
-          onPress={handleSubmit(handleForgotPassword)}
-          style={styles.register}>
-          <Text style={styles.registerTitle}>Send</Text>
-        </TouchableOpacity>
-<View style={styles.redirect}>
-          <Text
-            style={{
-              color: '#71727A',
-
-              fontFamily: 'Inter',
-              fontSize: 12,
-              fontWeight: 400,
-              lineHeight: 16,
-              marginRight: 5,
-            }}>
-            Back to
-          </Text>
-          <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-            <Text
-              style={{
-                color: '#B21E2B',
-
-                fontFamily: 'Inter',
-                fontSize: 12,
-                fontWeight: 600,
-                lineHeight: 16,
-              }}>
-              Login
-            </Text>
+          <TouchableOpacity
+            onPress={handleSubmit(handleForgotPassword)}
+            style={styles.register}>
+            <Text style={styles.registerTitle}>Send</Text>
           </TouchableOpacity>
-        </View>
-        <View style={[styles.redirect, {marginTop: '5%'}]}>
-          <Text
-            style={{
-              color: '#71727A',
-
-              fontFamily: 'Inter',
-              fontSize: 12,
-              fontWeight: 400,
-              lineHeight: 16,
-              marginRight: 5,
-            }}>
-            Do not have an account?
-          </Text>
-          <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-            <Text
-              style={{
-                color: '#B21E2B',
-
-                fontFamily: 'Inter',
-                fontSize: 12,
-                fontWeight: 600,
-                lineHeight: 16,
-              }}>
-              Register
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </View>) :
-
-
-     
-      <><TouchableOpacity
-          style={[styles.register, styles.register1,{alignSelf:'center'}]}
-          onPress={() => { openInbox(); } }>
-          <Text style={[styles.registerTitle, { color: 'white' }]}>
-            Open Email App
-          </Text>
-        </TouchableOpacity><View style={[styles.redirect, {alignSelf:'center'}]}>
+          <View style={styles.redirect}>
             <Text
               style={{
                 color: '#71727A',
@@ -161,7 +98,7 @@ const ForgotPassword = ({navigation}) => {
               }}>
               Back to
             </Text>
-            <TouchableOpacity onPress={() => {navigation.navigate('Login'), setemailSent(false);}}>
+            <TouchableOpacity onPress={() => navigation.navigate('Login')}>
               <Text
                 style={{
                   color: '#B21E2B',
@@ -174,7 +111,8 @@ const ForgotPassword = ({navigation}) => {
                 Login
               </Text>
             </TouchableOpacity>
-          </View><View style={[styles.redirect, { marginTop: '5%' }, {alignSelf:'center'}]}>
+          </View>
+          <View style={[styles.redirect, {marginTop: '5%'}]}>
             <Text
               style={{
                 color: '#71727A',
@@ -200,20 +138,80 @@ const ForgotPassword = ({navigation}) => {
                 Register
               </Text>
             </TouchableOpacity>
-          </View></> }
+          </View>
+        </View>
+      ) : (
+        <>
+          <TouchableOpacity
+            style={[styles.register, styles.register1, {alignSelf: 'center'}]}
+            onPress={() => {
+              openInbox();
+            }}>
+            <Text style={[styles.registerTitle, {color: 'white'}]}>
+              Open Email App
+            </Text>
+          </TouchableOpacity>
+          <View style={[styles.redirect, {alignSelf: 'center'}]}>
+            <Text
+              style={{
+                color: '#71727A',
 
+                fontFamily: 'Inter',
+                fontSize: 12,
+                fontWeight: 400,
+                lineHeight: 16,
+                marginRight: 5,
+              }}>
+              Back to
+            </Text>
+            <TouchableOpacity
+              onPress={() => {
+                navigation.navigate('Login'), setemailSent(false);
+              }}>
+              <Text
+                style={{
+                  color: '#B21E2B',
 
+                  fontFamily: 'Inter',
+                  fontSize: 12,
+                  fontWeight: 600,
+                  lineHeight: 16,
+                }}>
+                Login
+              </Text>
+            </TouchableOpacity>
+          </View>
+          <View
+            style={[styles.redirect, {marginTop: '5%'}, {alignSelf: 'center'}]}>
+            <Text
+              style={{
+                color: '#71727A',
 
+                fontFamily: 'Inter',
+                fontSize: 12,
+                fontWeight: 400,
+                lineHeight: 16,
+                marginRight: 5,
+              }}>
+              Do not have an account?
+            </Text>
+            <TouchableOpacity onPress={() => navigation.navigate('Register')}>
+              <Text
+                style={{
+                  color: '#B21E2B',
 
-
-
-
-
+                  fontFamily: 'Inter',
+                  fontSize: 12,
+                  fontWeight: 600,
+                  lineHeight: 16,
+                }}>
+                Register
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </>
+      )}
     </KeyboardAvoidingView>
- 
-
-
-
   );
 };
 
