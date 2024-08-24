@@ -73,7 +73,7 @@ const Denied = ({ navigation }) => {
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#0000ff" />
         </View>
-      ) : (
+      ) : (  ( refreshing ?  (<View style={styles.refreshingTextView}><Text style={styles.refreshingText} >Refreshing data.....</Text></View>):(
         <FlatList
           data={denieds}
           renderItem={({ item }) => (
@@ -83,10 +83,10 @@ const Denied = ({ navigation }) => {
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
-        />
-      )}
+        />)
+      ))}
     </View> 
-    {denieds === null  && !loading && <View style={styles.noDeniedTextView}><Text style={{flex:10}}>No Denied visitors</Text></View>}</>
+    { !refreshing && denieds === null  && !loading && <View style={styles.noDeniedTextView}><Text style={{flex:10}}>No Denied visitors</Text></View>}</>
   );
 };
 
@@ -103,5 +103,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: "#FFFF",
-  }
+  },
+  refreshingTextView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  refreshingText: {
+    flex:10,
+    fontSize: 20, 
+  },
 });

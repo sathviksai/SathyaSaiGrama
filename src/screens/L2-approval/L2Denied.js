@@ -78,7 +78,7 @@ const L2Denied = ({navigation}) => {
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#0000ff" />
         </View>
-      ) : (
+      ) : ( ( refreshing ?  (<View style={styles.refreshingTextView}><Text style={styles.refreshingText} >Refreshing data.....</Text></View>):(
         <FlatList
           data={L2Denieds}
           renderItem={({ item }) => (
@@ -89,9 +89,9 @@ const L2Denied = ({navigation}) => {
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
         />
-      )}
+      )))}
     </View>
-     {L2Denieds === null  && !loading && <View style={styles.noL2DeniedTextView}><Text style={{flex:10}}>No L2 Denied visitors</Text></View>}</>
+     { !refreshing && L2Denieds === null  && !loading && <View style={styles.noL2DeniedTextView}><Text style={{flex:10}}>No L2 Denied visitors</Text></View>}</>
   )
 }
 
@@ -107,5 +107,14 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-  }
+  },
+  refreshingTextView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  refreshingText: {
+    flex:10,
+    fontSize: 20, 
+  },
 });

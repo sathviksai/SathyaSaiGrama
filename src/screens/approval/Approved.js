@@ -80,7 +80,7 @@ const Approved = ({ navigation }) => {
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#0000ff" />
         </View>
-      ) : (
+      ) : ( ( refreshing ?  (<View style={styles.refreshingTextView}><Text style={styles.refreshingText} >Refreshing data.....</Text></View>):(
         <FlatList
           data={approveds}
           renderItem={({ item }) => (
@@ -91,9 +91,9 @@ const Approved = ({ navigation }) => {
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
         />
-      )}
+      )))}
     </View>
-    {approveds === null  && !loading && <View style={styles.noApprovedTextView}><Text style={{flex:10}}>No Approved visitors</Text></View>}</>
+    {!refreshing && approveds === null  && !loading && <View style={styles.noApprovedTextView}><Text style={{flex:10}}>No Approved visitors</Text></View>}</>
   );
 };
 

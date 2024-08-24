@@ -84,7 +84,7 @@ else{
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#0000ff" />
         </View>
-      ) : (
+      ) : ( ( refreshing ?  (<View style={styles.refreshingTextView}><Text style={styles.refreshingText} >Refreshing data.....</Text></View>):(
         <FlatList
           data={Pendings}
           renderItem={({ item }) => (
@@ -95,9 +95,9 @@ else{
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
         />
-      )}
+      )))}
     </View>
-      {Pendings === null  && !loading && <View style={styles.noPendingTextView}><Text style={{flex:10}}>No Pending visitors</Text></View>}</>
+      {!refreshing && Pendings === null  && !loading && <View style={styles.noPendingTextView}><Text style={{flex:10}}>No Pending visitors</Text></View>}</>
   );
 };
 
@@ -114,6 +114,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: "#FFFF",
-  }
+  },
+  refreshingTextView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  refreshingText: {
+    flex:10,
+    fontSize: 20, 
+  },
 
 });

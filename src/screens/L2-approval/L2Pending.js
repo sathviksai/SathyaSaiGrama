@@ -82,7 +82,7 @@ const L2Pending = ({ navigation }) => {
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#0000ff" />
         </View>
-      ) : (
+      ) : ( ( refreshing ?  (<View style={styles.refreshingTextView}><Text style={styles.refreshingText} >Refreshing data.....</Text></View>):(
         <FlatList
           data={L2Pendings}
           renderItem={({ item }) => (
@@ -93,9 +93,9 @@ const L2Pending = ({ navigation }) => {
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
         />
-      )}
+      )))}
     </View>
-     {L2Pendings === null  && !loading && <View style={styles.noL2PendingTextView}><Text style={{flex:10}}>No L2 Pending visitors</Text></View>}</>
+     {!refreshing && L2Pendings === null  && !loading && <View style={styles.noL2PendingTextView}><Text style={{flex:10}}>No L2 Pending visitors</Text></View>}</>
   )
 }
 
@@ -111,5 +111,14 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-  }
+  },
+  refreshingTextView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  refreshingText: {
+    flex:10,
+    fontSize: 20, 
+  },
 });
