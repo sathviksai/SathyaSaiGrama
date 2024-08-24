@@ -1,4 +1,4 @@
-import { StyleSheet, ActivityIndicator, View, FlatList, RefreshControl } from 'react-native';
+import { StyleSheet, ActivityIndicator, View, FlatList, RefreshControl,Text } from 'react-native';
 import React, { useContext, useEffect, useState, useCallback } from 'react'
 import { getL2Data } from '../../components/ApiRequest'
 import UserContext from '../../../context/UserContext'
@@ -18,6 +18,11 @@ const L2Pending = ({ navigation }) => {
     console.log("Logged user dept id in L2 Pending: ", loggedUser.deptIds)
     const result = await getL2Data('Approval_to_Visitor_Report', 'Department', loggedUser.deptIds, "Referrer_Approval", "APPROVED", "L2_Approval_Status", "PENDING APPROVAL", "Referrer_App_User_lookup", loggedUser.userId, accessToken);
     const all_L2pendings = result.data;
+    if (result.data=== undefined){
+      setL2Pendings(null);
+      setL2PendingDataFetched(false);
+      setLoading(false);}
+      else{
     // sorting the pendings data by date
     all_L2pendings.sort((a, b) => {
       // Parse the date strings into Date objects
@@ -29,6 +34,7 @@ const L2Pending = ({ navigation }) => {
     setL2Pendings(all_L2pendings)
     setLoading(false)
     setL2PendingDataFetched(true)
+  }
   };
 
   useEffect(() => {
@@ -43,6 +49,13 @@ const L2Pending = ({ navigation }) => {
     setRefreshing(true);
     const result = await getL2Data('Approval_to_Visitor_Report', 'Department', loggedUser.deptIds, "Referrer_Approval", "APPROVED", "L2_Approval_Status", "PENDING APPROVAL", "Referrer_App_User_lookup", loggedUser.userId, accessToken);
     const all_L2pendings = result.data;
+    if (result.data=== undefined){
+      setL2Pendings(null);
+      setRefreshing(false);
+      setLoading(false);
+    
+  
+    } else{
     // sorting the pendings data by date
     all_L2pendings.sort((a, b) => {
       // Parse the date strings into Date objects
@@ -53,6 +66,7 @@ const L2Pending = ({ navigation }) => {
     });
     setL2Pendings(all_L2pendings)
     setRefreshing(false);
+  }
   };
 
 
@@ -63,12 +77,12 @@ const L2Pending = ({ navigation }) => {
 
 
   return (
-    <View style={{ flex: 1, paddingTop: 10 }}>
+   <><View style={{ flex: 1, paddingTop: 10 }}>
       {loading ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#0000ff" />
         </View>
-      ) : (
+      ) : ( ( refreshing ?  (<View style={styles.refreshingTextView}><Text style={styles.refreshingText} >Refreshing data.....</Text></View>):(
         <FlatList
           data={L2Pendings}
           renderItem={({ item }) => (
@@ -79,8 +93,9 @@ const L2Pending = ({ navigation }) => {
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
         />
-      )}
+      )))}
     </View>
+     {!refreshing && L2Pendings === null  && !loading && <View style={styles.noL2PendingTextView}><Text style={{flex:10}}>No L2 Pending visitors</Text></View>}</>
   )
 }
 
@@ -91,5 +106,19 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  noL2PendingTextView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  refreshingTextView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  refreshingText: {
+    flex:10,
+    fontSize: 20, 
   },
 });

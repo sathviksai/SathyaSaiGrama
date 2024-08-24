@@ -1,4 +1,4 @@
-import { StyleSheet, ActivityIndicator, View, FlatList, RefreshControl } from 'react-native';
+import { StyleSheet, ActivityIndicator, View, FlatList, RefreshControl, Text } from 'react-native';
 import React, { useContext, useEffect, useState, useCallback} from 'react';
 import { useFocusEffect, } from '@react-navigation/native';
 import ApprovalComponent from './ApprovalComponent';
@@ -19,6 +19,10 @@ const Approved = ({ navigation }) => {
     const result = await getDataWithIntAndString('Approval_to_Visitor_Report', 'Referrer_App_User_lookup', L1ID, "Referrer_Approval", "APPROVED", getAccessToken());
     // sorting the Approveds data by date
     const all_approveds = result.data;
+    if (result.data=== undefined){
+      setApproveds(null);
+      setApproveDataFetched(false);
+      setLoading(false);} else{
     all_approveds.sort((a, b) => {
       // Parse the date strings into Date objects
       const dateA = new parseDate(a.Date_of_Visit);
@@ -29,6 +33,7 @@ const Approved = ({ navigation }) => {
     setApproveds(all_approveds);
     setLoading(false);
     setApproveDataFetched(true);
+  }
   };
 
   useEffect(() => {
@@ -41,6 +46,14 @@ const Approved = ({ navigation }) => {
     setRefreshing(true);
     const result = await getDataWithIntAndString('Approval_to_Visitor_Report', 'Referrer_App_User_lookup', L1ID, "Referrer_Approval", "APPROVED", getAccessToken());
     const all_approveds = result.data;
+    if (result.data=== undefined){
+      setApproveds(null);
+      setRefreshing(false);
+      setLoading(false);
+    
+  
+    } 
+    else{
     all_approveds.sort((a, b) => {
       // Parse the date strings into Date objects
       const dateA = new parseDate(a.Date_of_Visit);
@@ -50,6 +63,7 @@ const Approved = ({ navigation }) => {
     });
     setApproveds(all_approveds);
     setRefreshing(false);
+  }
   };
 
 
@@ -61,12 +75,12 @@ const Approved = ({ navigation }) => {
 
 
   return (
-    <View style={{ flex: 1, paddingTop: 10, backgroundColor: "#FFFF" }}>
+   <><View style={{ flex: 1, paddingTop: 10, backgroundColor: "#FFFF" }}>
       {loading ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#0000ff" />
         </View>
-      ) : (
+      ) : ( ( refreshing ?  (<View style={styles.refreshingTextView}><Text style={styles.refreshingText} >Refreshing data.....</Text></View>):(
         <FlatList
           data={approveds}
           renderItem={({ item }) => (
@@ -77,8 +91,9 @@ const Approved = ({ navigation }) => {
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
         />
-      )}
+      )))}
     </View>
+    {!refreshing && approveds === null  && !loading && <View style={styles.noApprovedTextView}><Text style={{flex:10}}>No Approved visitors</Text></View>}</>
   );
 };
 
@@ -90,4 +105,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  noApprovedTextView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: "#FFFF",
+  }
 });
