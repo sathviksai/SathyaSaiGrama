@@ -13,16 +13,15 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import UserContext from '../../context/UserContext';
-import { useContext, useEffect, useState } from 'react';
-import { AuthContext } from '../auth/AuthProvider';
-import { BASE_APP_URL, APP_OWNER_NAME, APP_LINK_NAME, YOURLS_KEY } from '@env';
+import {useContext, useEffect, useState} from 'react';
+import {AuthContext} from '../auth/AuthProvider';
+import {BASE_APP_URL, APP_OWNER_NAME, APP_LINK_NAME, YOURLS_KEY} from '@env';
 import axios from 'axios';
 
+const Invite = ({navigation}) => {
+  const {user} = useContext(AuthContext);
 
-const Invite = ({ navigation }) => {
-  const { user } = useContext(AuthContext);
-
-  const { userEmail, getAccessToken, loggedUser } = useContext(UserContext);
+  const {userEmail, getAccessToken, loggedUser} = useContext(UserContext);
   const L1ID = loggedUser.userId;
   const [selectedOption, setSelectedOption] = useState(null);
   const [modal, setModal] = useState(false);
@@ -155,11 +154,10 @@ const Invite = ({ navigation }) => {
     }
   };
 
-
   //================
   //To Share the generated URL
   const onShare = async selected => {
-    console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+    console.log('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@');
     try {
       if (selected !== null) {
         setLoading(true); // Start loading of activity indicator untill all sharing apps appear
@@ -183,8 +181,13 @@ const Invite = ({ navigation }) => {
         <View style={styles.container}>
           <Text style={styles.welcome}>Invite</Text>
 
-          <View>
-            <Image
+          <View
+            style={{
+              marginTop: 100,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+            {/* <Image
               style={{
                 alignSelf: 'center',
                 height: 211,
@@ -195,7 +198,7 @@ const Invite = ({ navigation }) => {
                 marginLeft: 78,
               }}
               source={require('../../src/assets/welcomeimage.png')}
-            />
+            /> */}
             <View>
               <Text style={[styles.text1, styles.text]}>
                 A visitor information form needs to be filled to invite a
@@ -213,7 +216,7 @@ const Invite = ({ navigation }) => {
             <TouchableOpacity
               style={[styles.register, styles.register1]}
               onPress={handleModal}>
-              <Text style={[styles.registerTitle, { color: '#fff' }]}>
+              <Text style={[styles.registerTitle, {color: '#fff'}]}>
                 Visitor fills the form
               </Text>
             </TouchableOpacity>
@@ -243,7 +246,7 @@ const Invite = ({ navigation }) => {
                         <TouchableOpacity
                           style={[
                             styles.HomeButton,
-                            { backgroundColor: '#B21E2B' },
+                            {backgroundColor: '#B21E2B'},
                           ]}
                           onPress={() => {
                             onShare('Home');
@@ -253,7 +256,7 @@ const Invite = ({ navigation }) => {
                         <TouchableOpacity
                           style={[
                             styles.HomeButton,
-                            { backgroundColor: '#FFBE65' },
+                            {backgroundColor: '#FFBE65'},
                           ]}
                           onPress={() => {
                             onShare('Office');
@@ -264,12 +267,12 @@ const Invite = ({ navigation }) => {
                         </TouchableOpacity>
                       </View>
                       {loading && ( // Display ActivityIndicator if loading
-                <ActivityIndicator
-                  size="large"
-                  color="#752A26"
-                  style={styles.loadingContainer}
-                />
-              )}
+                        <ActivityIndicator
+                          size="large"
+                          color="#752A26"
+                          style={styles.loadingContainer}
+                        />
+                      )}
                     </View>
                   </View>
                 </TouchableWithoutFeedback>
@@ -278,7 +281,7 @@ const Invite = ({ navigation }) => {
             <TouchableOpacity
               style={[styles.register, styles.register2]}
               onPress={() => navigation.navigate('FillByYourSelf')}>
-              <Text style={[styles.registerTitle, { color: '#B21E2B' }]}>
+              <Text style={[styles.registerTitle, {color: '#B21E2B'}]}>
                 Fill it by yourself!
               </Text>
             </TouchableOpacity>
@@ -330,7 +333,7 @@ const styles = StyleSheet.create({
   text1: {
     margin: 35,
   },
-  text2: { margin: 0 },
+  text2: {margin: 0},
   text3: {
     marginBottom: 8,
   },
@@ -347,7 +350,7 @@ const styles = StyleSheet.create({
     ...Platform.select({
       ios: {
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
+        shadowOffset: {width: 0, height: 4},
         shadowOpacity: 0.25,
         shadowRadius: 5,
       },

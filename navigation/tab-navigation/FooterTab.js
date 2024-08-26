@@ -75,9 +75,18 @@ function InviteStackScreen() {
 
 function ProfileStackScreen() {
   return (
-    <ProfileStack.Navigator screenOptions={{headerShown: false}}>
+    <ProfileStack.Navigator
+      screenOptions={{
+        headerShown: true,
+        headerTitleAlign: 'center',
+        headerTitleStyle: {fontSize: 16, fontWeight: 'bold'},
+      }}>
       <ProfileStack.Screen name="Profile" component={Profile} />
-      <ProfileStack.Screen name="MyProfile" component={MyProfile} />
+      <ProfileStack.Screen
+        name="MyProfile"
+        component={MyProfile}
+        options={{headerTitle: 'My Profile'}}
+      />
       <ProfileStack.Screen name="Notifications" component={Notifications} />
       <ProfileStack.Screen name="Settings" component={Settings} />
       <ProfileStack.Screen name="Edit" component={Edit} />
@@ -103,7 +112,7 @@ const ApprovalStack = ({navigation}) => {
           header: () => (
             <View
               style={{
-                height: 56,
+                height: 62,
                 padding: 19.5,
                 justifyContent: 'center',
                 alignItems: 'center',

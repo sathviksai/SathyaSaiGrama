@@ -32,9 +32,9 @@ const MyProfile = ({route, navigation}) => {
 
   return (
     <ScrollView style={styles.container}>
-      <View style={styles.myprofile}>
+      {/* <View style={styles.myprofile}>
         <Text style={styles.myprofileTitle}>My Profile</Text>
-      </View>
+      </View> */}
       <View style={styles.main}>
         <View style={styles.head}>
           <Text style={styles.title}>Personal Info</Text>
