@@ -15,13 +15,15 @@ import {
 import { Picker } from '@react-native-picker/picker';
 import DatePicker from 'react-native-modern-datepicker';
 import { getToday, getFormatedDate } from 'react-native-modern-datepicker';
-import PhoneInput, { isValidNumber } from 'react-native-phone-number-input';
+import PhoneInput from 'react-native-phone-number-input';
+import { parsePhoneNumberFromString } from 'libphonenumber-js';
 import UserContext from '../../context/UserContext';
 import { Dropdown } from 'react-native-element-dropdown';
 import { BASE_APP_URL, APP_LINK_NAME, APP_OWNER_NAME } from '@env';
 import moment from 'moment';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import SentForApproval from './SentForApproval';
+
 
 LogBox.ignoreLogs(['Warnings...']);
 LogBox.ignoreAllLogs();
@@ -38,10 +40,9 @@ const FillByYourSelf = ({ navigation }) => {
   const [selectedSG, setSelectedSG] = useState('');
   const [selectedHO, setSelectedHO] = useState('');
   const [value, setValue] = useState('');
-  const [countryCode, setCountryCode] = useState('');
   const [formattedValue, setFormattedValue] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [disabled, setDisabled] = useState(false);
-  const [phoneError, setPhoneError] = useState(null);
   const [image, setImage] = useState('Upload Image');
   // const [imageurl, setImageUrl] = useState('');
   // const [RES_ID, setRES_ID] = useState('');
@@ -206,20 +207,8 @@ const FillByYourSelf = ({ navigation }) => {
       Alert.alert('Error', 'Something went wrong');
     }
   };
-  //Validate Phone Number
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (/^\+91\d{10}$/.test(formattedValue)) {
-        setPhoneError(null);
-      } else {
-        setPhoneError(
-          'Phone number must be 10 digits and it must not contain non-numeric character',
-        );
-      }
-    }, 1000);
 
-    return () => clearTimeout(timer);
-  }, [value]);
+
 
 
   const handleAddVehicle = () => {
@@ -246,9 +235,32 @@ const FillByYourSelf = ({ navigation }) => {
   const [homeOrOfficeErr, setHomeOrOfficeErr] = useState(null);
   const [genderErr, setGenderErr] = useState(null);
   const [phoneErr, setPhoneErr] = useState(null);
-
-  
+  const [phoneValidErr, setPhoneValidErr] = useState(null)
   const [submitFlag, setSubmitFlag] = useState(false);
+
+
+  const validatePhoneNumber = () => {
+    if (!formattedValue) {
+      setPhoneErr("Phone number is required");
+      setPhoneValidErr(null);
+    } else {
+      setPhoneErr(null);
+      const parsedPhoneNumber = parsePhoneNumberFromString(formattedValue);
+      if (!parsedPhoneNumber || !parsedPhoneNumber.isValid()) {
+        setPhoneValidErr("Invalid phone number");
+      } else {
+        setPhoneValidErr(null);
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (submitFlag) {
+      validatePhoneNumber();
+    }
+  }, [formattedValue]);
+
+
 
   const validateForm = () => {
     let valid = true;
@@ -271,6 +283,13 @@ const FillByYourSelf = ({ navigation }) => {
       valid = false;
     } else {
       setPhoneErr(null);
+      const parsedPhoneNumber = parsePhoneNumberFromString(formattedValue);
+      if (!parsedPhoneNumber || !parsedPhoneNumber.isValid()) {
+        setPhoneValidErr("Invalid phone number");
+        valid = false;
+      } else {
+        setPhoneValidErr(null);
+      }
     }
 
     if (!selectedSG) {
@@ -303,48 +322,6 @@ const FillByYourSelf = ({ navigation }) => {
 
     return valid;
   };
-
-
-
-  // const validate = async () => {
-  //   if (!prefix || prefix === "" || !firstName || firstName === "" || !lastName || lastName === "") {
-  //     setNameErr("Prefix, First Name and Last Name is required")
-  //   } else {
-  //     setNameErr(null)
-  //   }
-  //   if (date === "Select Date") {
-  //     setDateOfVisitErr("Date of visit is required is required")
-  //   } else {
-  //     setDateOfVisitErr(null)
-  //   }
-  //   if (!formattedValue || formattedValue === "" || formattedValue === " ") {
-  //     setPhoneErr("Phone number is required is required")
-  //   } else {
-  //     setPhoneErr(null)
-  //   }
-  //   if (!selectedSG || selectedSG === "" || selectedSG === " ") {
-  //     setSingleOrGroupErr("Single or Group is required")
-  //   } else {
-  //     setSingleOrGroupErr(null)
-  //   }
-  //   if (!selectedHO || selectedHO === "" || selectedHO === " ") {
-  //     setHomeOrOfficeErr("Home or Office is required")
-  //   } else {
-  //     setHomeOrOfficeErr(null)
-  //   }
-  //   if (!selectedGender || selectedGender === "" || selectedGender === " ") {
-  //     setGenderErr("Gender is required")
-  //     if (selectedGender === 'Male') {
-  //       setMen('1');
-  //       setWomen('0');
-  //     } else if (selectedGender === 'Female') {
-  //       setWomen('1');
-  //       setMen('0');
-  //     }
-  //   } else {
-  //     setGenderErr(null)
-  //   }
-  // }
 
 
   const handleSubmit = async () => {
@@ -502,28 +479,21 @@ const FillByYourSelf = ({ navigation }) => {
               flagButtonStyle={styles.flagButton}
               codeTextStyle={styles.codeText}
               onChangeText={text => {
-                handleChange();
-                setValue(text);
+                setPhoneNumber(text);
                 if (submitFlag) {
                   validateForm();
                 }
-                setPhoneError(null);
               }}
               onChangeFormattedText={text => {
                 setFormattedValue(text);
-                setCountryCode(phoneInput.current?.getCountryCode());
               }}
               countryPickerProps={{ withAlphaFilter: true }}
               disabled={disabled}
               withDarkTheme
               withShadow
             />
-            {(value.length != 0 || value.length == 10) && (
-              <Text style={styles.errorText}>{phoneError}</Text>
-            )}
-            {phoneErr && (
-              <Text style={styles.errorText}>{phoneErr}</Text>
-            )}
+            {phoneErr && <Text style={styles.errorText}>{phoneErr}</Text>}
+            {phoneValidErr && <Text style={styles.errorText}>{phoneValidErr}</Text>}
           </View>
           <View style={styles.namecontainer}>
             <Text style={styles.label}>
@@ -737,12 +707,12 @@ const FillByYourSelf = ({ navigation }) => {
                     {/* Add more vehicle types as needed */}
                   </Picker>
                   <TextInput
-                  style={styles.vehicleinput}
+                    style={styles.vehicleinput}
                     value={vehicle.Vehicle_Number}
                     onChangeText={(text) => handleTextChange(index, 'Vehicle_Number', text)}
                   />
                   <TouchableOpacity onPress={() => handleRemoveVehicle(index)}>
-                    <Image source={require('../assets/delete.png')} style={styles.removeButton}/>
+                    <Image source={require('../assets/delete.png')} style={styles.removeButton} />
                   </TouchableOpacity>
                 </View>
               ))}
@@ -824,6 +794,42 @@ const FillByYourSelf = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
+
+  phoneContainer: {
+    flex: 1,
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: '50%',
+    fontFamily: 'Arial',
+    backgroundColor: '#f5f5f5',
+  },
+  heading: {
+    textAlign: 'center',
+  },
+  phoneInputContainer: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    width: 300,
+    padding: 20,
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3, // Add elevation for Android shadow
+  },
+  label: {
+    marginBottom: 10,
+  },
+  errorMessage: {
+    color: 'red',
+    marginTop: 10,
+    fontSize: 14,
+  },
+
+  //////////
   container: {
     flex: 1,
     alignItems: 'center',
@@ -864,7 +870,7 @@ const styles = StyleSheet.create({
     flex: 2,
     height: 40,
   },
-  vehicleinput:{
+  vehicleinput: {
     flex: 1,
     height: 40,
   },
