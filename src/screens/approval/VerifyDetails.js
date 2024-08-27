@@ -251,6 +251,8 @@ const VerifyDetails = ({navigation, route}) => {
       user.ID,
     );
 
+    console.log('this is the response '+ response.code);
+
     if (response.code === 3000) {
       if (status === 'PENDING APPROVAL') {
         setPendingDataFetched(false);
@@ -562,7 +564,7 @@ return () => {
               
             </View>
               ): <><View style={[styles.left, { width: '50%' }]}>
-                  <TouchableOpacity style={[styles.btnAccept, {marginLeft: '30%'}]} onPress={onApprove}>
+                  <TouchableOpacity style={[styles.btnAccept,heightStyles.apprejBtnPosition ]} onPress={onApprove}>
                     <Text style={styles.btntxt}>Approve</Text>
                   </TouchableOpacity>
                 </View><View style={styles.right}>
@@ -887,6 +889,13 @@ return () => {
 export default VerifyDetails;
 
 const mediumScreen = StyleSheet.create({
+
+  apprejBtnPosition:{
+    marginLeft: '30%'
+  },
+
+
+
   ApproveActivityIndicatorContainer: {
     top: 10,
     backgroundColor: '#9FE2BF',
@@ -1045,6 +1054,13 @@ const mediumScreen = StyleSheet.create({
 });
 
 const smallScreen = StyleSheet.create({
+
+  apprejBtnPosition:{
+    marginLeft: '37%'
+  },
+
+
+
   ApproveActivityIndicatorContainer: {
     top: 10,
     backgroundColor: '#9FE2BF',
@@ -1198,6 +1214,9 @@ const smallScreen = StyleSheet.create({
 });
 
 const normalScreen = StyleSheet.create({
+  apprejBtnPosition:{
+    marginLeft: '40%'
+  },
   ApproveActivityIndicatorContainer: {
     top: 10,
     backgroundColor: '#9FE2BF',
@@ -1363,6 +1382,9 @@ ActivityIndicator: {
 });
 
 const styles = StyleSheet.create({
+  apprejBtnPosition:{
+    marginLeft: '30%'
+  },
   header: {
     width: '100%',
     height: '8%',

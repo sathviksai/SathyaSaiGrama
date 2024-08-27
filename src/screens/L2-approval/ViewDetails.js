@@ -434,7 +434,7 @@ const ViewDetails = ({navigation, route}) => {
           ) : null} 
           </View>) :
              <><View style={[styles.left, {width: '50%'}]}>
-                <TouchableOpacity style={[styles.btnAccept, {marginLeft: '35%',}]} onPress={onApprove}>
+                <TouchableOpacity style={[styles.btnAccept, heightStyles.apprejBtnPosition]} onPress={onApprove}>
                   <Text style={styles.btntxt}>Approve</Text>
                 </TouchableOpacity>
               </View>
@@ -718,6 +718,13 @@ const ViewDetails = ({navigation, route}) => {
 export default ViewDetails;
 
 const mediumScreen = StyleSheet.create({
+
+  apprejBtnPosition:{
+    marginLeft: '36%'
+  },
+
+
+
   ApproveActivityIndicatorContainer: {
     top: 10,
     backgroundColor: '#9FE2BF',
@@ -878,6 +885,15 @@ const mediumScreen = StyleSheet.create({
 });
 
 const smallScreen = StyleSheet.create({
+
+  apprejBtnPosition:{
+    marginLeft: '42%'
+  },
+
+
+
+
+
   ApproveActivityIndicatorContainer: {
     top: 10,
     backgroundColor: '#9FE2BF',
@@ -1031,7 +1047,12 @@ const smallScreen = StyleSheet.create({
 });
 
 const normalScreen = StyleSheet.create({
-  ApproveActivityIndicatorContainer: {
+
+  apprejBtnPosition:{
+    marginLeft: '45%'
+  },
+
+ApproveActivityIndicatorContainer: {
     top: 10,
     backgroundColor: '#9FE2BF',
     zIndex: 1,
