@@ -2,6 +2,7 @@ import {
   Modal, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, TouchableWithoutFeedback,
   Dimensions,
   Image,
+  ActivityIndicator,
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import React, { useState, useContext, useEffect } from 'react';
@@ -137,7 +138,7 @@ const EditVerifyDetails = ({ navigation, route }) => {
 
       const responseData = await response.json();
       console.log("--------------------------------------------------------------------------------------------------------")
-      console.log("@@@@@@@@@@@@@@@@@",responseData)
+      console.log("@@@@@@@@@@@@@@@@@", responseData)
 
       if (responseData.code === 3000) {
         if (user.Referrer_Approval === 'PENDING APPROVAL') {
@@ -200,7 +201,7 @@ const EditVerifyDetails = ({ navigation, route }) => {
     let people = menCount + womenCount + boysCount + girlsCount;
     console.log('Total people : ', people);
 
-    vehicles.map((vehicle)=>{
+    vehicles.map((vehicle) => {
       delete vehicle.ID;
       delete vehicle.zc_display_value;
     })
@@ -233,7 +234,7 @@ const EditVerifyDetails = ({ navigation, route }) => {
       updateData,
       getAccessToken(),
     );
-    
+
     if (response.result[0].code === 3000) {
       console.log('----------------------------Update Successful---------------------------------');
       const newUser = { ...user, ...updateData };
@@ -259,7 +260,7 @@ const EditVerifyDetails = ({ navigation, route }) => {
 
 
   const handleAddVehicle = () => {
-    setVehicles([...vehicles, { Vehicle_Type: '', Vehicle_Number: ''}]);
+    setVehicles([...vehicles, { Vehicle_Type: '', Vehicle_Number: '' }]);
   };
 
   const handleRemoveVehicle = (index) => {
@@ -277,18 +278,18 @@ const EditVerifyDetails = ({ navigation, route }) => {
 
   const [dots, setDots] = useState(""); // State to manage dots animation
 
-// Use an interval to animate the dots
-useEffect(() => {
-  let interval;
-  if (updateLoading) {
-    interval = setInterval(() => {
-      setDots((prev) => (prev.length < 3 ? prev + "." : ""));
-    }, 500); // Adjust the speed as necessary
-  } else {
-    setDots("");
-  }
-  return () => clearInterval(interval); // Clean up the interval on unmount
-}, [updateLoading]);
+  // Use an interval to animate the dots
+  useEffect(() => {
+    let interval;
+    if (updateLoading) {
+      interval = setInterval(() => {
+        setDots((prev) => (prev.length < 3 ? prev + "." : ""));
+      }, 500); // Adjust the speed as necessary
+    } else {
+      setDots("");
+    }
+    return () => clearInterval(interval); // Clean up the interval on unmount
+  }, [updateLoading]);
 
 
   return (
@@ -573,23 +574,44 @@ useEffect(() => {
 
 
 
-        <View style={styles.btnRoot}>
-    {!updateLoading ? (
-      <TouchableOpacity
-        style={styles.save}
-        onPress={onSave}
-        disabled={updateLoading} // Disable the button when loading
-      >
-        <View style={styles.btn}>
-          <Text style={styles.btnsave}>Update</Text>
-        </View>
-      </TouchableOpacity>
-    ) : (
-      <View style={styles.save}>
-        <Text style={styles.btnsave}>Uploading{dots}</Text>
+        {/* <View style={styles.btnRoot}>
+          {!updateLoading ? (
+            <TouchableOpacity
+              style={styles.save}
+              onPress={onSave}
+              disabled={updateLoading} // Disable the button when loading
+            >
+              <View style={styles.btn}>
+                <Text style={styles.btnsave}>Update</Text>
+              </View>
+            </TouchableOpacity>
+          ) : (
+            <View style={styles.save}>
+              <Text style={styles.btnsave}>Uploading{dots}</Text>
+            </View>
+          )}
+        </View> */}
+
+      <View style={styles.btnRoot}>
+        <TouchableOpacity
+          style={styles.save}
+          onPress={onSave}
+          disabled={updateLoading} // Disable the button when loading
+        >
+            <Text style={styles.btnsave}>Update</Text>
+        </TouchableOpacity>
       </View>
-    )}
-  </View>
+
+    <Modal
+        transparent={true}
+        animationType="fade"
+        visible={updateLoading}
+        onRequestClose={() => {}}
+      >
+        <View style={styles.modalBackground}>
+          <ActivityIndicator size="large" color="#fff" />
+        </View>
+      </Modal>
 
       </ScrollView>
       <Dialog.Container visible={DialogVisible} contentStyle={styles.detailsNotEditableDialogue}>
@@ -606,6 +628,13 @@ useEffect(() => {
 export default EditVerifyDetails;
 
 const styles = StyleSheet.create({
+
+  modalBackground: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Semi-transparent background
+  },
 
   vehicle: {
     flex: 1,
@@ -719,6 +748,10 @@ const styles = StyleSheet.create({
   },
   save: {
     marginRight: 10,
+    backgroundColor: '#b21e2b',
+    width: 140,
+    height: 40,
+    borderRadius: 10
   },
   cancel: {
     marginLeft: 10,
@@ -729,7 +762,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   btnsave: {
-    borderWidth: 1,
     width: 135,
     height: 40,
     textAlign: 'center',
@@ -737,10 +769,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     fontSize: 20,
     marginBottom: 20,
-    backgroundColor: '#b21e2b',
     color: 'white',
-    borderColor: '#b21e2b',
-    elevation: 5,
   },
   single: {
     flexDirection: 'row',
