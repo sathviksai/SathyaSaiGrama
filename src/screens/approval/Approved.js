@@ -78,9 +78,11 @@ const Approved = ({ navigation }) => {
    <><View style={{ flex: 1, paddingTop: 10, backgroundColor: "#FFFF" }}>
       {loading ? (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#0000ff" />
+          <ActivityIndicator size="large" color="#B21E2B"  />
         </View>
-      ) : ( ( refreshing ?  (<View style={styles.refreshingTextView}><Text style={styles.refreshingText} >Refreshing data.....</Text></View>):(
+      ) : ( ( refreshing ?  (<View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#B21E2B"  />
+      </View>):(
         <FlatList
           data={approveds}
           renderItem={({ item }) => (
@@ -110,5 +112,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: "#FFFF",
-  }
+  },
+  refreshingTextView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  refreshingText: {
+    flex:10,
+    fontSize: 20, 
+  },
 });

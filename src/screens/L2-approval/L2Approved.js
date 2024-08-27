@@ -1,9 +1,10 @@
 import { StyleSheet, ActivityIndicator, View, FlatList, RefreshControl, Text } from 'react-native';
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState, useCallback } from 'react'
 import { getL2Data } from '../../components/ApiRequest'
 import UserContext from '../../../context/UserContext'
 import L2ApprovalComponent from './L2ApprovalComponent';
 import parseDate from '../../components/ParseDate';
+import { useFocusEffect, } from '@react-navigation/native';
 
 const L2Approved = ({navigation}) => {
 
@@ -20,7 +21,9 @@ const L2Approved = ({navigation}) => {
     if (result.data=== undefined){
       setL2Approveds(null);
       setL2ApproveDataFetched(false);
-      setLoading(false);} else{
+      setLoading(false);
+    
+    } else{
     all_L2approveds.sort((a, b) => {
       // Parse the date strings into Date objects
       const dateA = new parseDate(a.Date_of_Visit);
@@ -66,13 +69,19 @@ const L2Approved = ({navigation}) => {
   } 
 };
 
+
+useFocusEffect(useCallback(() => {
+  onRefresh();
+}, [L2Approved]));
   return (
 <><View style={{ flex: 1, paddingTop: 10 }}>
       {loading ? (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#0000ff" />
+          <ActivityIndicator size="large" color="#B21E2B"  />
         </View>
-      ) : ( (refreshing ? (<View style={styles.refreshingTextView}><Text style={styles.refreshingText} >Refreshing data.....</Text></View>):(
+      ) : ( (refreshing ? (<View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#B21E2B"  />
+      </View>):(
         <FlatList
           data={L2Approveds}
           renderItem={({ item }) => (

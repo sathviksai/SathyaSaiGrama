@@ -251,6 +251,8 @@ const VerifyDetails = ({navigation, route}) => {
       user.ID,
     );
 
+    console.log('this is the response '+ response.code);
+
     if (response.code === 3000) {
       if (status === 'PENDING APPROVAL') {
         setPendingDataFetched(false);
@@ -562,12 +564,12 @@ return () => {
               
             </View>
               ): <><View style={[styles.left, { width: '50%' }]}>
-                  <TouchableOpacity style={styles.btnAccept} onPress={onApprove}>
+                  <TouchableOpacity style={[styles.btnAccept,heightStyles.apprejBtnPosition ]} onPress={onApprove}>
                     <Text style={styles.btntxt}>Approve</Text>
                   </TouchableOpacity>
                 </View><View style={styles.right}>
                     <TouchableOpacity style={styles.btnReject} onPress={onReject}>
-                      <Text style={styles.btntxt}>Reject</Text>
+                      <Text style={styles.rejectBtnTxt}>Reject</Text>
                     </TouchableOpacity>
                   </View></>
             }
@@ -585,7 +587,7 @@ return () => {
               </View>
             ) : <View style={{width: '100%', padding: 10, marginLeft: '30%'}}>
             <TouchableOpacity style={[styles.btnReject]} onPress={onReject}>
-              <Text style={[styles.btntxt]}>Reject</Text>
+              <Text style={[styles.rejectBtnTxt]}>Reject</Text>
             </TouchableOpacity>
           </View>}
           </View>
@@ -887,6 +889,13 @@ return () => {
 export default VerifyDetails;
 
 const mediumScreen = StyleSheet.create({
+
+  apprejBtnPosition:{
+    marginLeft: '30%'
+  },
+
+
+
   ApproveActivityIndicatorContainer: {
     top: 10,
     backgroundColor: '#9FE2BF',
@@ -1045,6 +1054,13 @@ const mediumScreen = StyleSheet.create({
 });
 
 const smallScreen = StyleSheet.create({
+
+  apprejBtnPosition:{
+    marginLeft: '37%'
+  },
+
+
+
   ApproveActivityIndicatorContainer: {
     top: 10,
     backgroundColor: '#9FE2BF',
@@ -1198,6 +1214,9 @@ const smallScreen = StyleSheet.create({
 });
 
 const normalScreen = StyleSheet.create({
+  apprejBtnPosition:{
+    marginLeft: '40%'
+  },
   ApproveActivityIndicatorContainer: {
     top: 10,
     backgroundColor: '#9FE2BF',
@@ -1363,6 +1382,9 @@ ActivityIndicator: {
 });
 
 const styles = StyleSheet.create({
+  apprejBtnPosition:{
+    marginLeft: '30%'
+  },
   header: {
     width: '100%',
     height: '8%',
@@ -1433,18 +1455,28 @@ const styles = StyleSheet.create({
     width: 100,
     height: 40,
     borderWidth: 1,
-    borderColor: 'grey',
+    borderColor: 'red',
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 5,
-    backgroundColor: 'red',
+    borderWidth: 1,
+    borderStyle: 'solid',
+    borderColor: '#B21e2B',
   },
   btntxt: {
     fontWeight: 'bold',
     fontSize: 20,
     //color: "#752A26"
     color: '#FFF',
-
+  },
+  rejectBtnTxt: {
+    fontWeight: 'bold',
+    fontSize: 20,
+    //color: "#752A26"
+    color: '#B21E2B',
+    fontStyle: 'normal',
+    fontFamily: 'Inter',
+    fontWeight: '700',
   },
   HomeButton: {
     height: 30,
