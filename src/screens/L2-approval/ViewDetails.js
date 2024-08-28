@@ -20,6 +20,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import QRCode from 'react-native-qrcode-svg';
 import {captureRef} from 'react-native-view-shot';
 import RNFS from 'react-native-fs';
+import Dialog from 'react-native-dialog';
 
 const {height} = Dimensions.get('window');
 
@@ -100,8 +101,15 @@ const ViewDetails = ({navigation, route}) => {
     ).toString();
     setCode(newCode);
   };
+
+  const onPressOk = () => {
+    setDialogVisible(false);
+    navigation.navigate('L2Pending');
+  }
+
   const [approvingLoading, setapprovingLoading] = useState(false);
   const [deniedLoading, setdeniedLoading] = useState(false);
+  const [DialogVisible, setDialogVisible] = useState(false);
 
   const getImage = async () => {
     try {
@@ -200,8 +208,11 @@ const ViewDetails = ({navigation, route}) => {
       updateData,
       accessToken,
     );
-
-    if (response.data) {
+    if(response.code === 3001){
+      setDialogVisible(true);
+      setapprovingLoading(false);
+    }
+   else if (response.data) {
       if (status === 'PENDING APPROVAL') {
         setL2PendingDataFetched(false);
         setL2ApproveDataFetched(false);
@@ -379,6 +390,17 @@ const ViewDetails = ({navigation, route}) => {
     }
   }, [codeReload]);
 
+
+
+
+
+
+
+
+
+
+  
+
   //zIndex:1
 
   return (
@@ -433,16 +455,15 @@ const ViewDetails = ({navigation, route}) => {
             </View>
           ) : null} 
           </View>) :
-             <><View style={[styles.left, {width: '50%'}]}>
-                <TouchableOpacity style={[styles.btnAccept, heightStyles.apprejBtnPosition]} onPress={onApprove}>
-                  <Text style={styles.btntxt}>Approve</Text>
-                </TouchableOpacity>
-              </View>
-              <View style={styles.right}>
-                <TouchableOpacity style={styles.btnReject} onPress={onReject}>
-                  <Text style={styles.rejectBtnTxt}>Reject</Text>
-                </TouchableOpacity>
-              </View></> 
+             <>{DialogVisible ? (<Text style={heightStyles.canNotApproveTxt}>Cannot approve at the moment</Text>): (<><View style={[styles.left, { width: '50%' }]}>
+                  <TouchableOpacity style={[styles.btnAccept, heightStyles.apprejBtnPosition]} onPress={onApprove}>
+                    <Text style={styles.btntxt}>Approve</Text>
+                  </TouchableOpacity>
+                </View><View style={styles.right}>
+                    <TouchableOpacity style={styles.btnReject} onPress={onReject}>
+                      <Text style={styles.rejectBtnTxt}>Reject</Text>
+                    </TouchableOpacity>
+                  </View></>)}</> 
             
           }</View>
           ) : user?.L2_Approval_Status === 'APPROVED' ? (
@@ -711,6 +732,13 @@ const ViewDetails = ({navigation, route}) => {
           </View>
         </View>
       </View>
+           
+     <Dialog.Container visible={DialogVisible} contentStyle={styles.canNotApproveDialogue}>
+      <Dialog.Title style={styles.canNotApproveTitle}>Cannot Approve at this time</Dialog.Title>
+      <Dialog.Description>L1 approver has either denied the visitor or something has gone wrong.</Dialog.Description>
+      <Dialog.Button label="Ok" onPress={onPressOk} />
+      
+      </Dialog.Container>
     </>
   );
 };
@@ -718,6 +746,15 @@ const ViewDetails = ({navigation, route}) => {
 export default ViewDetails;
 
 const mediumScreen = StyleSheet.create({
+
+  canNotApproveTxt:{
+    color: '#B21E2B',
+    fontWeight: 'bold',
+    marginLeft: '20%',
+    
+   },
+
+
 
   apprejBtnPosition:{
     marginLeft: '36%'
@@ -885,11 +922,17 @@ const mediumScreen = StyleSheet.create({
 });
 
 const smallScreen = StyleSheet.create({
+  canNotApproveTxt:{
+    color: '#B21E2B',
+    fontWeight: 'bold',
+    marginLeft: '25%',
+    
+   },
+
 
   apprejBtnPosition:{
     marginLeft: '42%'
   },
-
 
 
 
@@ -1047,6 +1090,14 @@ const smallScreen = StyleSheet.create({
 });
 
 const normalScreen = StyleSheet.create({
+
+  canNotApproveTxt:{
+    color: '#B21E2B',
+    fontWeight: 'bold',
+    marginLeft: '25%',
+    
+   },
+
 
   apprejBtnPosition:{
     marginLeft: '45%'
@@ -1306,5 +1357,19 @@ const styles = StyleSheet.create({
     fontStyle: 'normal',
     fontFamily: 'Inter',
     fontWeight: '700',
-  }
+  },
+  canNotApproveDialogue:{
+    borderRadius: 30,
+    backgroundColor: 'pink',
+  
+    },
+  
+    canNotApproveTitle:{
+   
+    fontWeight:'bold',
+  
+    },
+
+
+
 });
