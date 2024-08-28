@@ -54,15 +54,9 @@ const FillByYourSelf = ({ navigation }) => {
   const [isVehicle, setIsVehicle] = useState(false);
   const [vehicleNumber, setVehicleNumber] = useState('');
   //just so that the othe code gets commited can delete after
-  const phoneInput = useRef(null);
 
   const [vehicles, setVehicles] = useState([]);
 
-  const handleChange = text => {
-    return (
-      phoneInput.current?.isValidNumber(value) && phoneInput.current !== null
-    );
-  };
   const { getAccessToken, loggedUser } = useContext(UserContext);
   const [date, setDate] = useState('Select Date');
   const [showModal, setShowModal] = useState(false);
@@ -174,7 +168,6 @@ const FillByYourSelf = ({ navigation }) => {
         Referrer_App_User_lookup: L1ID,
         Referrer_Approval: 'APPROVED',
         Department: DepartmentID,
-
         Phone_Number: formattedValue,
         Priority: priority,
         Date_of_Visit: date,
@@ -365,7 +358,6 @@ const FillByYourSelf = ({ navigation }) => {
     setLastName('');
     setFirstName('');
     setValue('');
-    phoneInput.current.setState({ number: '' });
     setImage('Upload Image');
     setGuestCategory('');
     setPriority('');
@@ -380,7 +372,7 @@ const FillByYourSelf = ({ navigation }) => {
     setSingleOrGroupErr(null)
     setHomeOrOfficeErr(null)
     setGenderErr(null)
-    setPhoneErr(null)
+    setPhoneValidErr(null)
   };
 
 
@@ -470,7 +462,6 @@ const FillByYourSelf = ({ navigation }) => {
             </Text>
 
             <PhoneInput
-              ref={phoneInput}
               defaultValue={value}
               defaultCode="IN"
               layout="first"
@@ -794,42 +785,6 @@ const FillByYourSelf = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-
-  phoneContainer: {
-    flex: 1,
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: '50%',
-    fontFamily: 'Arial',
-    backgroundColor: '#f5f5f5',
-  },
-  heading: {
-    textAlign: 'center',
-  },
-  phoneInputContainer: {
-    flexDirection: 'column',
-    alignItems: 'center',
-    width: 300,
-    padding: 20,
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3, // Add elevation for Android shadow
-  },
-  label: {
-    marginBottom: 10,
-  },
-  errorMessage: {
-    color: 'red',
-    marginTop: 10,
-    fontSize: 14,
-  },
-
-  //////////
   container: {
     flex: 1,
     alignItems: 'center',

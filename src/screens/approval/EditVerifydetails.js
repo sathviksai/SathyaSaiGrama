@@ -1,30 +1,24 @@
 import {
-  Modal,
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-  TouchableWithoutFeedback,
+  Modal, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, TouchableWithoutFeedback,
   Dimensions,
+  Image,
   ActivityIndicator,
 } from 'react-native';
-import React, {useState, useContext} from 'react';
-import DatePicker, {getFormatedDate} from 'react-native-modern-datepicker';
-import {Dropdown} from 'react-native-element-dropdown';
+import { Picker } from '@react-native-picker/picker';
+import React, { useState, useContext, useEffect } from 'react';
+import DatePicker, { getFormatedDate } from 'react-native-modern-datepicker';
+import { Dropdown } from 'react-native-element-dropdown';
 import moment from 'moment';
-import {updateRecord} from './VerifyDetails';
+import { updateRecord } from './VerifyDetails';
 import UserContext from '../../../context/UserContext';
-import {Alert} from 'react-native';
-import {BASE_APP_URL, APP_LINK_NAME, APP_OWNER_NAME, } from '@env';
+import { Alert } from 'react-native';
+import { BASE_APP_URL, APP_LINK_NAME, APP_OWNER_NAME, } from '@env';
 import Dialog from 'react-native-dialog';
 import { set } from 'react-hook-form';
 
 
-const EditVerifyDetails = ({navigation, route}) => {
-  const {height} = Dimensions.get('window');
+const EditVerifyDetails = ({ navigation, route }) => {
+  const { height } = Dimensions.get('window');
   let heightStyles;
   if (height > 900) {
     heightStyles = normalScreen;
@@ -33,7 +27,7 @@ const EditVerifyDetails = ({navigation, route}) => {
   } else {
     heightStyles = smallScreen;
   }
-  const {user} = route.params;
+  const { user } = route.params;
   if (typeof user === 'string') {
     console.log('inside if stringified');
     // const {user} = route.params;
@@ -59,9 +53,9 @@ const EditVerifyDetails = ({navigation, route}) => {
 
 
 
-  if(user. L2_Approval_Status === 'APPROVED'){
+  if (user.L2_Approval_Status === 'APPROVED') {
     // Alert.alert('Can not edit details once Visitor is L2 approved', 'Please fill another form', [{style:styles.errorText}]);
-    navigation.navigate('VerifyDetails', {user: user, triggerDialog: true});
+    navigation.navigate('VerifyDetails', { user: user, triggerDialog: true });
   }
 
   const [date, setDate] = useState(user.Date_of_Visit);
@@ -79,6 +73,7 @@ const EditVerifyDetails = ({navigation, route}) => {
   const [boys, setBoys] = useState(user.Number_of_Boys);
   const [girls, setGirls] = useState(user.Number_of_Girls);
   const [remarks, setRemarks] = useState(user.Remarks);
+  const [vehicles, setVehicles] = useState(user.Vehicle_Information);
   const [selectedGender, setSelectedGender] = useState(user.Gender);
   const [updateLoading, setUpdateLoading] = useState(false);
   const [DialogVisible, setDialogVisible] = useState(false);
@@ -86,9 +81,7 @@ const EditVerifyDetails = ({navigation, route}) => {
   const [showModal, setShowModal] = useState(false);
   const gender = ['Male', 'Female'];
 
-  console.log('No of boys initially : ', user);
-
-  const {getAccessToken} = useContext(UserContext);
+  const { getAccessToken } = useContext(UserContext);
 
   const handleDateChange = selectedDate => {
     const formattedDate = moment(selectedDate, 'YYYY-MM-DD').format(
@@ -99,28 +92,28 @@ const EditVerifyDetails = ({navigation, route}) => {
   };
 
   const homeOrOffice = [
-    {label: 'Home', value: 'Home'},
-    {label: 'Office', value: 'Office'},
+    { label: 'Home', value: 'Home' },
+    { label: 'Office', value: 'Office' },
   ];
 
   const singleOrGroup = [
-    {label: 'Single', value: 'Single'},
-    {label: 'Group', value: 'Group'},
+    { label: 'Single', value: 'Single' },
+    { label: 'Group', value: 'Group' },
   ];
 
   const guestCategory = [
-    {label: 'Govt Officials', value: 'Govt Officials'},
-    {label: 'Politician', value: 'Politician'},
-    {label: 'Corporate', value: 'Corporate'},
-    {label: 'Press', value: 'Press'},
-    {label: 'Parent', value: 'Parent'},
-    {label: 'Devotee', value: 'Devotee'},
+    { label: 'Govt Officials', value: 'Govt Officials' },
+    { label: 'Politician', value: 'Politician' },
+    { label: 'Corporate', value: 'Corporate' },
+    { label: 'Press', value: 'Press' },
+    { label: 'Parent', value: 'Parent' },
+    { label: 'Devotee', value: 'Devotee' },
   ];
 
   const guestPriority = [
-    {label: 'P1', value: 'P1'},
-    {label: 'P2', value: 'P2'},
-    {label: 'P3', value: 'P3'},
+    { label: 'P1', value: 'P1' },
+    { label: 'P2', value: 'P2' },
+    { label: 'P3', value: 'P3' },
   ];
 
   const today = new Date();
@@ -142,31 +135,33 @@ const EditVerifyDetails = ({navigation, route}) => {
         },
         body: JSON.stringify(modified_data),
       });
-     
+
       const responseData = await response.json();
-    
-      if( responseData.code === 3000){ 
-        if(user.Referrer_Approval=== 'PENDING APPROVAL'){
-          setTimeout(()=>  Alert.alert('Visitor details changed'), 2000)
-          setTimeout(()=> navigation.navigate('Pending'), 2000); 
-        } else if(user.Referrer_Approval === 'APPROVED'){
-        setTimeout(()=>  Alert.alert('Visitor details changed'), 2000)
-      setTimeout(()=> navigation.navigate('Approved'), 2000); 
+      console.log("--------------------------------------------------------------------------------------------------------")
+      console.log("@@@@@@@@@@@@@@@@@", responseData)
+
+      if (responseData.code === 3000) {
+        if (user.Referrer_Approval === 'PENDING APPROVAL') {
+          setTimeout(() => Alert.alert('Visitor details changed'), 2000)
+          setTimeout(() => navigation.navigate('Pending'), 2000);
+        } else if (user.Referrer_Approval === 'APPROVED') {
+          setTimeout(() => Alert.alert('Visitor details changed'), 2000)
+          setTimeout(() => navigation.navigate('Approved'), 2000);
         }
-        else if(user.Referrer_Approval === 'DENIED'){
-          setTimeout(()=>  Alert.alert('Visitor details changed'), 2000)
-          setTimeout(()=> navigation.navigate('Denied'), 2000); 
+        else if (user.Referrer_Approval === 'DENIED') {
+          setTimeout(() => Alert.alert('Visitor details changed'), 2000)
+          setTimeout(() => navigation.navigate('Denied'), 2000);
         }
       }
-     else if(responseData.code === 3001){
-    //  Alert.alert('Can not edit details once Visitor is L2 approved', 'Please fill another form');
-      setDialogVisible(true);
-  return responseData;
-      
+      else if (responseData.code === 3001) {
+        //  Alert.alert('Can not edit details once Visitor is L2 approved', 'Please fill another form');
+        setDialogVisible(true);
+        return responseData;
+
+      }
+
     }
-  
-  }
-     catch (err) {
+    catch (err) {
       if (err.message === 'Network request failed')
         Alert.alert(
           'Network Error',
@@ -178,7 +173,7 @@ const EditVerifyDetails = ({navigation, route}) => {
       }
       setUpdateLoading(false)
     }
-    
+
   };
 
   const onSave = async () => {
@@ -206,6 +201,11 @@ const EditVerifyDetails = ({navigation, route}) => {
     let people = menCount + womenCount + boysCount + girlsCount;
     console.log('Total people : ', people);
 
+    vehicles.map((vehicle) => {
+      delete vehicle.ID;
+      delete vehicle.zc_display_value;
+    })
+
     const updateField = {
       Date_of_Visit: date,
       Gender: selectedGender,
@@ -219,6 +219,7 @@ const EditVerifyDetails = ({navigation, route}) => {
       Remarks: remarks,
       Single_or_Group_Visit: isSingle,
       Guest_Category: category,
+      Vehicle_Information: vehicles
     };
 
     const updateData = {
@@ -226,7 +227,8 @@ const EditVerifyDetails = ({navigation, route}) => {
       data: updateField,
     };
 
-    console.log('saved details : ', updateField);
+    console.log('#############saved details are : ', updateField);
+
     const response = await updateRecord(
       'Approval_to_Visitor_Report',
       updateData,
@@ -234,39 +236,71 @@ const EditVerifyDetails = ({navigation, route}) => {
     );
 
     if (response.result[0].code === 3000) {
-      Alert.alert('Edit Successful');
-      const newUser = {...user, ...updateData};
+      console.log('----------------------------Update Successful---------------------------------');
+      const newUser = { ...user, ...updateData };
       console.log('New user data is:', newUser);
-      navigation.navigate('VerifyDetails', {user: {...user, ...updateField}});
+      navigation.navigate('VerifyDetails', { user: { ...user, ...updateField } });
     } else {
       Alert.alert('Error: ', response.code);
     }
   };
 
   const onCancel = () => {
-    navigation.navigate('VerifyDetails', {user: user});
+    navigation.navigate('VerifyDetails', { user: user });
   };
 
   const onPressOk = () => {
     setDialogVisible(false);
-    if(user.Referrer_Approval=== 'PENDING APPROVAL'){
+    if (user.Referrer_Approval === 'PENDING APPROVAL') {
       navigation.navigate('Pending')
-    } else if(user.Referrer_Approval === 'APPROVED'){
+    } else if (user.Referrer_Approval === 'APPROVED') {
       navigation.navigate('Approved')
     }
-      }
-  
+  }
 
-  console.log('User in verify details : ', user);
+
+  const handleAddVehicle = () => {
+    setVehicles([...vehicles, { Vehicle_Type: '', Vehicle_Number: '' }]);
+  };
+
+  const handleRemoveVehicle = (index) => {
+    const updatedVehicles = vehicles.filter((_, i) => i !== index);
+    setVehicles(updatedVehicles);
+  };
+
+  const handleTextChange = (index, field, value) => {
+    const updatedVehicles = vehicles.map((vehicle, i) =>
+      i === index ? { ...vehicle, [field]: value } : vehicle
+    );
+    setVehicles(updatedVehicles);
+  };
+
+
+  const [dots, setDots] = useState(""); // State to manage dots animation
+
+  // Use an interval to animate the dots
+  useEffect(() => {
+    let interval;
+    if (updateLoading) {
+      interval = setInterval(() => {
+        setDots((prev) => (prev.length < 3 ? prev + "." : ""));
+      }, 500); // Adjust the speed as necessary
+    } else {
+      setDots("");
+    }
+    return () => clearInterval(interval); // Clean up the interval on unmount
+  }, [updateLoading]);
+
+
   return (
-    <SafeAreaView style={{flex: 1}}>
+    <SafeAreaView style={{ flex: 1 }}>
       {/* <View style={styles.header}>
         <Text style={styles.headertxt}>Edit visitor details</Text>
       </View> */}
       <ScrollView
-        style={{height: '92%s', backgroundColor: '#FFF', fontFamily: 'Inter'}}>
+        style={{ height: '92%s', backgroundColor: '#FFF', fontFamily: 'Inter' }}>
         <View style={styles.v}>
-          <Text style={[styles.txt, {marginTop: 20}]}>Visitor Name</Text>
+          <Text style={[styles.txt, { marginTop: 20 }]}>Visitor Name</Text>
           <TextInput
             style={styles.inputtxt}
             value={user.Name_field.zc_display_value}
@@ -282,7 +316,7 @@ const EditVerifyDetails = ({navigation, route}) => {
           <Text style={styles.txt}>Date of visit</Text>
           <TouchableOpacity onPress={() => setShowModal(true)}>
             <TextInput
-              style={[styles.inputtxt, {color: 'black'}]}
+              style={[styles.inputtxt, { color: 'black' }]}
               value={date}
               editable={false}
             />
@@ -295,7 +329,7 @@ const EditVerifyDetails = ({navigation, route}) => {
             onRequestClose={() => setShowModal(false)}>
             <TouchableWithoutFeedback onPress={() => setShowModal(false)}>
               <View style={styles.modalContainer}>
-                <TouchableWithoutFeedback onPress={() => {}}>
+                <TouchableWithoutFeedback onPress={() => { }}>
                   <View style={styles.modalContent}>
                     <DatePicker
                       mode="calendar"
@@ -332,7 +366,7 @@ const EditVerifyDetails = ({navigation, route}) => {
                     <View style={styles.innerCircle} />
                   )}
                 </View>
-                <Text style={{marginLeft: 10, fontSize: 14}}>{option}</Text>
+                <Text style={{ marginLeft: 10, fontSize: 14 }}>{option}</Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -485,38 +519,176 @@ const EditVerifyDetails = ({navigation, route}) => {
             onChangeText={txt => setRemarks(txt)}
           />
         </View>
-        {updateLoading ? (
-        <View style={heightStyles.UpdatingActivityIndicatorContainer}>
-              <Text style={[heightStyles.ActivityIndicatorText, {color:'white'}]}>Updating</Text>
-              <ActivityIndicator
-                size="large"
-                color="pink"
-                style={heightStyles.ActivityIndicator}
+
+        <View style={styles.v}>
+          <Text style={styles.txt}>Vehicle Information</Text>
+          <View style={styles.vehicle}>
+            <Text>Vehicle type</Text>
+            <Text>Vehicle Number</Text>
+          </View>
+          {vehicles.map((vehicle, index) => (
+            <View key={index} style={styles.newvehicle}>
+              <Picker
+                selectedValue={vehicle.Vehicle_Type}
+                style={styles.picker}
+                onValueChange={(value) => handleTextChange(index, 'Vehicle_Type', value)}>
+                <Picker.Item label="Select" value="" />
+                <Picker.Item label="2-Wheeler" value="2-Wheeler" />
+                <Picker.Item label="Car" value="Car" />
+                <Picker.Item label="Bus" value="Bus" />
+                <Picker.Item label="Taxi" value="Taxi" />
+                <Picker.Item label="School Bus" value="School Bus" />
+                <Picker.Item label="Police Van" value="Police Van" />
+                <Picker.Item label="Van" value="Van" />
+                <Picker.Item label="Auto" value="Auto" />
+                <Picker.Item label="Ambulance" value="Ambulancer" />
+                <Picker.Item label="Truck" value="Truck" />
+                <Picker.Item label="Tractor" value="Tractor" />
+                <Picker.Item label="Cement Mixer" value="Cement Mixer" />
+                <Picker.Item label="Fire Engine" value="Fire Engine" />
+                <Picker.Item label="Transport Van" value="Transport Van" />
+                <Picker.Item label="Bulldozer" value="Bulldozer" />
+                <Picker.Item label="Roller Machine" value="Roller Machine" />
+                {/* Add more vehicle types as needed */}
+              </Picker>
+              <TextInput
+                style={styles.vehicleinput}
+                value={vehicle.Vehicle_Number}
+                onChangeText={(text) => handleTextChange(index, 'Vehicle_Number', text)}
               />
-            </View> ) :null}
-        <View style={styles.btnRoot}>
-        {!updateLoading ? (  <TouchableOpacity style={styles.save} onPress={onSave}>
-            <View style={styles.btn}>
-              <Text style={styles.btnsave}>Update</Text>
+              <TouchableOpacity onPress={() => handleRemoveVehicle(index)}>
+                <Image source={require('../../assets/delete.png')} style={styles.removeButton} />
+              </TouchableOpacity>
             </View>
-          </TouchableOpacity>):null}
-        </View> 
+          ))}
+          <TouchableOpacity style={styles.addvehicle} onPress={handleAddVehicle}>
+            <Image
+              source={require('../../assets/add.png')}
+              style={{ width: 15, height: 15 }}
+            />
+            <Text style={{ color: "black", fontSize: 15 }}>Add New</Text>
+          </TouchableOpacity>
+        </View>
+
+
+
+
+
+        {/* <View style={styles.btnRoot}>
+          {!updateLoading ? (
+            <TouchableOpacity
+              style={styles.save}
+              onPress={onSave}
+              disabled={updateLoading} // Disable the button when loading
+            >
+              <View style={styles.btn}>
+                <Text style={styles.btnsave}>Update</Text>
+              </View>
+            </TouchableOpacity>
+          ) : (
+            <View style={styles.save}>
+              <Text style={styles.btnsave}>Uploading{dots}</Text>
+            </View>
+          )}
+        </View> */}
+
+      <View style={styles.btnRoot}>
+        <TouchableOpacity
+          style={styles.save}
+          onPress={onSave}
+          disabled={updateLoading} // Disable the button when loading
+        >
+            <Text style={styles.btnsave}>Update</Text>
+        </TouchableOpacity>
+      </View>
+
+    <Modal
+        transparent={true}
+        animationType="fade"
+        visible={updateLoading}
+        onRequestClose={() => {}}
+      >
+        <View style={styles.modalBackground}>
+          <ActivityIndicator size="large" color="#fff" />
+        </View>
+      </Modal>
 
       </ScrollView>
       <Dialog.Container visible={DialogVisible} contentStyle={styles.detailsNotEditableDialogue}>
-      <Dialog.Title style={styles.detailsNotEditableTitle}>Visitor just got / is L2 approved</Dialog.Title>
-      <Dialog.Description>Please fill another form for new details</Dialog.Description>
-      <Dialog.Button label="Ok" onPress={onPressOk} />
-      
+        <Dialog.Title style={styles.detailsNotEditableTitle}>Visitor just got / is L2 approved</Dialog.Title>
+        <Dialog.Description>Please fill another form for new details</Dialog.Description>
+        <Dialog.Button label="Ok" onPress={onPressOk} />
+
       </Dialog.Container>
     </SafeAreaView>
-    
+
   );
 };
 
 export default EditVerifyDetails;
 
 const styles = StyleSheet.create({
+
+  modalBackground: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Semi-transparent background
+  },
+
+  vehicle: {
+    flex: 1,
+    flexDirection: "row",
+    justifyContent: "space-around",
+    alignItems: "center",
+    backgroundColor: "lightgrey",
+    marginHorizontal: 15,
+    height: 30,
+    borderRadius: 10
+  },
+  addvehicle: {
+    flex: 1,
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: 5,
+    marginTop: 10
+  },
+  newvehicle: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 5,
+    padding: 10,
+    borderRadius: 10,
+    borderColor: "#B21E2B",
+    borderWidth: 1,
+    height: 50,
+    marginHorizontal: 20
+  },
+  picker: {
+    flex: 2,
+    height: 40,
+  },
+  vehicleinput: {
+    flex: 1,
+    height: 40,
+  },
+
+  removeButton: {
+    color: 'red',
+    fontWeight: 'bold',
+    marginLeft: 10,
+    width: 20,
+    height: 20
+  },
+  header: {
+    fontFamily: 'Inter',
+    fontSize: 16,
+    fontStyle: 'normal',
+    fontWeight: 'bold',
+    color: '#1F2024',
+    marginBottom: 24,
+  },
+
   errorText: {
     color: 'red',
     marginTop: 5,
@@ -576,6 +748,10 @@ const styles = StyleSheet.create({
   },
   save: {
     marginRight: 10,
+    backgroundColor: '#b21e2b',
+    width: 140,
+    height: 40,
+    borderRadius: 10
   },
   cancel: {
     marginLeft: 10,
@@ -586,7 +762,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   btnsave: {
-    borderWidth: 1,
     width: 135,
     height: 40,
     textAlign: 'center',
@@ -594,10 +769,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     fontSize: 20,
     marginBottom: 20,
-    backgroundColor: '#b21e2b',
     color: 'white',
-    borderColor: '#b21e2b',
-    elevation: 5,
   },
   single: {
     flexDirection: 'row',
@@ -663,18 +835,18 @@ const styles = StyleSheet.create({
   },
 
 
-  detailsNotEditableDialogue:{
+  detailsNotEditableDialogue: {
     borderRadius: 30,
     backgroundColor: 'pink',
-  
-    },
-  
-    detailsNotEditableTitle:{
-   
-    fontWeight:'bold',
-  
-    }
-  
+
+  },
+
+  detailsNotEditableTitle: {
+
+    fontWeight: 'bold',
+
+  }
+
 });
 
 const mediumScreen = StyleSheet.create({
@@ -701,6 +873,7 @@ const mediumScreen = StyleSheet.create({
 });
 
 const smallScreen = StyleSheet.create({
+
   UpdatingActivityIndicatorContainer: {
     top: 35,
     backgroundColor: '#b21e2b',
@@ -737,7 +910,7 @@ const normalScreen = StyleSheet.create({
   },
 
 
-ActivityIndicator: {
+  ActivityIndicator: {
     top: -10,
     right: -60,
   },
