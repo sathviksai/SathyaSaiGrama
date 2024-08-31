@@ -34,6 +34,7 @@ const Register = ({navigation}) => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [focusedInput, setFocusedInput] = useState(null);
+  const [email, setEmail] = useState('');
 
   const handleRegForm = async userCred => {
     setLoading(true);
@@ -57,7 +58,7 @@ const Register = ({navigation}) => {
         sendEmailVerification(auth.currentUser);
         setLoading(false);
         console.log('Id in register: ', res.data[0]);
-        navigation.navigate('VerificationNotice', {id: res.data[0].ID});
+        navigation.navigate('VerificationNotice', {id: res.data[0].ID, email:email});
       } catch (error) {
         setLoading(false);
         if (error.message === 'Network request failed')
@@ -139,7 +140,10 @@ const Register = ({navigation}) => {
                     value={value}
                     selectionColor="#B21E2B"
                     onFocus={() => setFocusedInput('email')}
-                    onChangeText={onChange}
+                    onChangeText={value => {
+                      onChange(value);
+                      setEmail(value);
+                    }}
                   />
                 )}
                 rules={{required: true, pattern: /^\S+@\S+$/i}}
