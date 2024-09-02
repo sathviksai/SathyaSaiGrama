@@ -266,7 +266,7 @@ const Register = ({navigation}) => {
               <Text style={styles.textError}>Passwords do not match</Text>
             )}
 
-            <Controller
+            {/* <Controller
               control={control}
               name="terms"
               rules={{required: true}}
@@ -302,7 +302,7 @@ const Register = ({navigation}) => {
               <Text style={styles.textError}>
                 You must accept the terms and conditions.
               </Text>
-            )}
+            )} */}
 
             <TouchableOpacity
               onPress={handleSubmit(handleRegForm)}

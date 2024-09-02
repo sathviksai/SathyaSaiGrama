@@ -10,7 +10,7 @@ import {
   ActivityIndicator,
   TouchableWithoutFeedback,
 } from 'react-native';
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { auth } from '../auth/firebaseConfig';
 // import ImagePicker from 'react-native-image-crop-picker';
 import {
@@ -31,7 +31,9 @@ import { useForm, Controller } from 'react-hook-form';
 import { AuthContext } from '../auth/AuthProvider';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import RNRestart from 'react-native-restart';
+import Dialog from 'react-native-dialog';
 import { BASE_APP_URL, APP_LINK_NAME, APP_OWNER_NAME } from '@env';
+import Toast from 'react-native-toast-message';
 
 const Profile = ({ navigation }) => {
   const {
@@ -51,10 +53,24 @@ const Profile = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
   const [focusedInput, setFocusedInput] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
+  const [toastVisible, setToastVisible] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+
+  let OndeleteStyles;
+  if (deleteLoading) {
+    OndeleteStyles = deleteLoadingStyles;
+  } else if (!deleteLoading) {
+    OndeleteStyles = styles; }
+
 
   const handleModal = () => {
     setModalVisible(!modalVisible);
   };
+
+  const onPressOk = () => {
+    onLogout();
+    setDialogVisible(false);
+  }
 
   const handleProfileModal = () => {
     setProfileImageModalVisible(!profileImageModalVisible);
@@ -75,8 +91,9 @@ const Profile = ({ navigation }) => {
 
       await deleteUser(user);
       console.log('User account deleted successfully.');
-      Alert.alert('Success', 'User account deleted successfully.');
-      navigation.navigate('Login');
+      setModalVisible(!modalVisible);
+      setDeleteLoading(false);
+      setToastVisible(true);
     } catch (error) {
       console.error('Error reauthenticating or deleting user:', error);
       Alert.alert(
@@ -136,7 +153,7 @@ const Profile = ({ navigation }) => {
   };
 
   const onDelete = async userCred => {
-    setModalVisible(!modalVisible);
+    setDeleteLoading(true);
     console.log(userCred);
     await handleDeleteAccount(userCred.email, userCred.password);
   };
@@ -353,6 +370,26 @@ const Profile = ({ navigation }) => {
       }
     }
   };
+
+  useEffect(() => {
+
+    if(toastVisible){
+
+        Toast.show({
+          type: 'success',
+          position: 'bottom',
+          text1: 'Account Deleted',
+          text2: 'Your account has been deleted successfully',
+          visibilityTime: 4000,
+          autoHide: true,
+        
+          bottomOffset: 20,
+          
+      });
+    onLogout();
+    
+    
+    } }, [toastVisible]);
   return (
     <SafeAreaView style={styles.container}>
       {loading ? (
@@ -491,7 +528,7 @@ const Profile = ({ navigation }) => {
               </View>
             </View>
           </Modal> */}
-
+ 
           <Modal
             animationType="fade"
             transparent={true}
@@ -499,7 +536,8 @@ const Profile = ({ navigation }) => {
             onRequestClose={() => setModalVisible(!modalVisible)}>
             <TouchableWithoutFeedback onPress={handleModal}>
               <View style={styles.centeredView}>
-                <View style={styles.modalView}>
+                <View style={OndeleteStyles.modalView}>
+                { deleteLoading ? (<View style={{flex: 1, justifyContent: 'center', alignItems: 'center' }}><ActivityIndicator size="large" color="#B21E2B" /><Text>Deleting profile...</Text></View>)  : <>
                   <Text style={styles.shareLink}>
                     Enter your credentials to delete your account permanently
                   </Text>
@@ -607,10 +645,11 @@ const Profile = ({ navigation }) => {
                       <Text style={[styles.wewe, styles.wewe2]}>Cancel</Text>
                     </TouchableOpacity>
                   </View>
+                </>}
                 </View>
               </View>
             </TouchableWithoutFeedback>
-          </Modal>
+          </Modal> 
 
           <Modal
             animationType="fade"
@@ -646,6 +685,10 @@ const Profile = ({ navigation }) => {
           </Modal>
         </View>
       )}
+
+<Toast />
+
+
     </SafeAreaView>
   );
 };
@@ -901,4 +944,35 @@ const styles = StyleSheet.create({
     marginLeft: 4,
     marginRight: 4,
   },
+  detailsNotEditableDialogue: {
+    borderRadius: 30,
+    backgroundColor: 'pink',
+
+  },
+
+  detailsNotEditableTitle: {
+
+    fontWeight: 'bold',
+
+  }
+});
+
+const deleteLoadingStyles = StyleSheet.create({ 
+  modalView: {
+    margin: 20,
+    height:180 ,
+    width: 300,
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 35,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    }
+  }
+
+
+
 });
