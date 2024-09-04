@@ -251,7 +251,7 @@ const VerifyDetails = ({navigation, route}) => {
       user.ID,
     );
 
-    console.log('this is the response '+ response.code);
+    console.log('this is the response ', response)
 
     if (response.code === 3000) {
       if (status === 'PENDING APPROVAL') {
@@ -877,8 +877,14 @@ return () => {
       </View>
 
       <Dialog.Container visible={DialogVisible} contentStyle={styles.detailsNotEditableDialogue}>
+      <Image source={require('../../../src/assets/Denied.png')}
+    
+
+    style={{ width: '15%', height: '25%' , alignSelf:'center',top:-85}} // adjust as needed
+ 
+ />
       <Dialog.Title style={styles.detailsNotEditableTitle}>Can not edit details once Visitor is L2 approved</Dialog.Title>
-      <Dialog.Description>Please fill another form</Dialog.Description>
+      <Dialog.Description style={styles.detailsNotEditableTxT}>Please fill another form</Dialog.Description>
       <Dialog.Button label="Ok" onPress={onPressOk} />
       
       </Dialog.Container>
@@ -1504,14 +1510,21 @@ const styles = StyleSheet.create({
 
   detailsNotEditableDialogue:{
   borderRadius: 30,
-  backgroundColor: 'pink',
+  backgroundColor: '#FFE2E5',
 
   },
 
   detailsNotEditableTitle:{
- 
+    alignSelf:'center',
   fontWeight:'bold',
+  color:'#B21E2B',
+  bottom:-80,
 
+  },
+
+  detailsNotEditableTxT:{
+    color:'black',
+    bottom:-80,
   }
 
 

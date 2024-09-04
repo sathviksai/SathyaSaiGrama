@@ -107,10 +107,21 @@ const ViewDetails = ({navigation, route}) => {
     navigation.navigate('L2Pending');
   }
 
+
+  
+  const onL2ApprovedPressOk = () => {
+    setL2approvedalreadydialogVisible(false);
+    navigation.navigate('L2Denied');
+  }
+
+
+  
+
   const [approvingLoading, setapprovingLoading] = useState(false);
   const [deniedLoading, setdeniedLoading] = useState(false);
   const [DialogVisible, setDialogVisible] = useState(false);
-
+  const [L2approvedalreadydialogVisible, setL2approvedalreadydialogVisible] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   const getImage = async () => {
     try {
       const response = await fetch(url, {
@@ -208,11 +219,8 @@ const ViewDetails = ({navigation, route}) => {
       updateData,
       accessToken,
     );
-    if(response.code === 3001){
-      setDialogVisible(true);
-      setapprovingLoading(false);
-    }
-   else if (response.data) {
+    console.log('Data is updated: ',response);
+    if (response.data && response.code === 3000) {
       if (status === 'PENDING APPROVAL') {
         setL2PendingDataFetched(false);
         setL2ApproveDataFetched(false);
@@ -223,7 +231,17 @@ const ViewDetails = ({navigation, route}) => {
       PasscodeData();
       // Alert.alert('Visitor Approved');
       // navigation.navigate('L2Approved');
-    } else {
+    } 
+    else if(response.error[0].alert_message[0] === "L2 is already approved." || response.error[0].alert_message[0] === "Record cannot be edited after L2 Approved"){
+      setL2approvedalreadydialogVisible(true);
+      setapprovingLoading(false);
+      setErrorMessage(response.error[0].alert_message[0]);
+    }
+   else if(response.error[0].alert_message[0] === "You cannot approve the L1 Denied requests"){
+      setDialogVisible(true);
+      setapprovingLoading(false);
+    }
+ else {
       Alert.alert('Error in approving: ', response.code);
     }
   };
@@ -273,6 +291,7 @@ const ViewDetails = ({navigation, route}) => {
 
   let heightStyles;
   if (height > 900) {
+
     heightStyles = normalScreen;
   } else if (height > 750) {
     heightStyles = mediumScreen;
@@ -337,7 +356,7 @@ const ViewDetails = ({navigation, route}) => {
       );
       if (response1.ok) {
         console.log('code posted successfully to Zoho.');
-        console.log('response', response1);
+        console.log('response for the code is:', response1);
       } else {
         console.log(
           'Failed to post code to Zoho:',
@@ -363,7 +382,7 @@ const ViewDetails = ({navigation, route}) => {
       );
 
       if (response.ok) {
-        console.log('Image uploaded successfully to Zoho.');
+        console.log('Image uploaded successfully to Zoho.', response);
         console.log('inside function of chainging screens');
         Alert.alert('Visitor Approved');
         navigation.navigate('L2Approved');
@@ -734,11 +753,33 @@ const ViewDetails = ({navigation, route}) => {
       </View>
            
      <Dialog.Container visible={DialogVisible} contentStyle={styles.canNotApproveDialogue}>
+      <Image source={require('../../../src/assets/Denied.png')}
+    
+
+         style={{ width: '20%', height: '30%' , alignSelf:'center',top:-85}} // adjust as needed
+      
+      />
       <Dialog.Title style={styles.canNotApproveTitle}>Cannot Approve at this time</Dialog.Title>
-      <Dialog.Description>L1 approver has either denied the visitor or something has gone wrong.</Dialog.Description>
+      <Dialog.Description style={styles.canNotApproveTxT}>L1 approver has either denied the visitor or something has gone wrong.</Dialog.Description>
       <Dialog.Button label="Ok" onPress={onPressOk} />
       
       </Dialog.Container>
+
+
+      <Dialog.Container visible={L2approvedalreadydialogVisible} contentStyle={styles.canNotApproveDialogue}>
+      <Image source={require('../../../src/assets/Denied.png')}
+    
+
+    style={{ width: '20%', height: '30%' , alignSelf:'center',top:-85}} // adjust as needed
+ 
+ />
+      <Dialog.Title style={styles.canNotApproveTitle}>L2 approved already</Dialog.Title>
+      <Dialog.Description style={styles.canNotApproveTxT}>The visitor is already L2 approved</Dialog.Description>
+      <Dialog.Button label="Ok" onPress={onL2ApprovedPressOk} />
+      
+      </Dialog.Container>
+
+     
     </>
   );
 };
@@ -1360,15 +1401,22 @@ const styles = StyleSheet.create({
   },
   canNotApproveDialogue:{
     borderRadius: 30,
-    backgroundColor: 'pink',
+    backgroundColor: '#FFE2E5',
+    height: 225,
   
     },
   
     canNotApproveTitle:{
-   
+   alignSelf:'center',
     fontWeight:'bold',
-  
+    color:'#B21E2B',
+    bottom:-70,
     },
+
+    canNotApproveTxT:{
+      color:'black',
+      bottom:-70,
+    }
 
 
 
