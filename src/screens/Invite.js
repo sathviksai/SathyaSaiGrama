@@ -176,8 +176,7 @@ const Invite = ({navigation}) => {
       Alert.alert(error.message);
     }
   };
-//if l1 exists in Residents
-//
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView>

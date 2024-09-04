@@ -13,7 +13,7 @@ import {
   Dimensions,
 } from 'react-native';
 import React, {useState, useContext, useEffect} from 'react';
-import {useForm, Controller, set} from 'react-hook-form';
+import {useForm, Controller} from 'react-hook-form';
 import {auth} from '../auth/firebaseConfig';
 import {signInWithEmailAndPassword, sendEmailVerification} from 'firebase/auth';
 import {getDataWithInt, getDataWithString} from '../components/ApiRequest';
