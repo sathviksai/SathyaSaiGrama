@@ -166,11 +166,13 @@ const Invite = ({navigation}) => {
           message: `Please Fill the form using this Link : ${veryshortUrl}`,
         });
         setLoading(false); // stop loading after sharing apps appear
+        setModal(false);
       } else {
         Alert.alert('Select anyone option');
       }
     } catch (error) {
       setLoading(false);
+      setModal(false);
       Alert.alert(error.message);
     }
   };
