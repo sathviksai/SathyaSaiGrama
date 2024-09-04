@@ -251,7 +251,7 @@ const VerifyDetails = ({navigation, route}) => {
       user.ID,
     );
 
-    console.log('this is the response ', response)
+   
 
     if (response.code === 3000) {
       if (status === 'PENDING APPROVAL') {
