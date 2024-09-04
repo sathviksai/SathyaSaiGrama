@@ -10,7 +10,7 @@ const ApprovalComponent = ({ navigation, user }) => {
         navigation.navigate("VerifyDetails", { user: user })
     }
 
-    const containerHeight = user.Referrer_Approval === "APPROVED" && loggedUser.role == "L1" ? 100 : 70;
+    const containerHeight = user.Referrer_Approval === "APPROVED" ? 100 : 70;
     let statusColor;
     let backColor;
     let statusTxtColor
@@ -19,15 +19,15 @@ const ApprovalComponent = ({ navigation, user }) => {
     if (user.L2_Approval_Status === "APPROVED") {
         statusColor = "#008000"
         statusTxtColor = "#FFF"
-        status = "APPROVED"
+        status = "L2 Approval Status: APPROVED"
     } else if (user.L2_Approval_Status === "PENDING APPROVAL") {
         statusColor = "#FADC3D"
         statusTxtColor = "#B21E2B"
-        status = "PENDING"
+        status = "L2 Approval Status: PENDING"
     } else if (user.L2_Approval_Status === "DENIED") {
         statusColor = "#FF0000"
         statusTxtColor = "#FFF"
-        status = "DENIED"
+        status = "L2 Approval Status: DENIED"
     }
 
     
@@ -47,9 +47,8 @@ const ApprovalComponent = ({ navigation, user }) => {
                     <Text style={styles.txt2}>No. of people: {user.Number_of_People}</Text>
                 </View>
                 {
-                    user?.Referrer_Approval === "APPROVED" && loggedUser.role == "L1" ? (
+                    user?.Referrer_Approval === "APPROVED" ? (
                         <View style={styles.status}>
-                            <Text style={styles.txt}>L2 Approval Status</Text>
                             <View style={[styles.statusview, { backgroundColor: statusColor }]}>
                                 <Text style={{ color: statusTxtColor }}>{status}</Text>
                             </View >
@@ -101,9 +100,9 @@ const styles = StyleSheet.create({
         marginTop: 5
     },
     statusview: {
-        width: "40%",
-        height: "55%",
-        marginLeft: 25,
+        width: "80%",
+        height: "65%",
+        marginLeft: 35,
         marginTop: 6,
         paddingVertical: 5,
         paddingHorizontal: 10,

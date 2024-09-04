@@ -39,6 +39,8 @@ const Login = ({navigation}) => {
     loggedUser,
     setLoggedUser,
     deviceToken,
+    resident, setResident,
+    employee, setEmployee,
   } = useContext(UserContext);
   const [currentUser, setCurrentUser] = useState(null);
   const [departmentIds, setDepartmentIds] = useState([]);
@@ -73,6 +75,42 @@ const Login = ({navigation}) => {
       setUserType('L2');
     } else {
       setUserType('L1');
+    }
+    console.log('response in fetchDataFromOffice in login: '.res);
+  };
+
+  const isResident = async id => {
+    
+    const res = await getDataWithInt(
+      'All_Residents',
+      'App_User_lookup',
+      id,
+      accessToken,
+    );
+    if (res && res.data) {
+      console.log('resident data found in Login:', res.data);
+      setResident(true);
+    } else {
+      setUserType('L1');
+      setResident(false);
+    }
+    console.log('response in fetchDataFromOffice in login: '.res);
+  };
+
+
+  const isEmployee = async id => {
+    
+    const res = await getDataWithInt(
+      'All_Employees',
+      'App_User_lookup',
+      id,
+      accessToken,
+    );
+    if (res && res.data) {
+      console.log('resident data found in Login:', res.data);
+      setEmployee(true);
+    } else {
+      setEmployee(false);
     }
     console.log('response in fetchDataFromOffice in login: '.res);
   };
@@ -155,6 +193,7 @@ const Login = ({navigation}) => {
     }
   };
 
+
   const handleLoginForm = async userCred => {
     setLoading(true);
     const res = await getDataWithString(
@@ -204,6 +243,8 @@ const Login = ({navigation}) => {
             res.data[0].ID,
           );
           console.log('update device token response: ', updateResponse);
+          isEmployee(res.data[0].ID);
+          isResident(res.data[0].ID);
         } else {
           // Email is not verified, display message and send verification email (if needed)
           await sendEmailVerification(auth.currentUser);
@@ -231,6 +272,7 @@ const Login = ({navigation}) => {
       setDialogVisible(true);
     }
   };
+
 
   return (
     <>
