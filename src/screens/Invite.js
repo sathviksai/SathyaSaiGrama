@@ -21,7 +21,7 @@ import axios from 'axios';
 const Invite = ({navigation}) => {
   const {user} = useContext(AuthContext);
 
-  const {userEmail, getAccessToken, loggedUser} = useContext(UserContext);
+  const {userEmail, getAccessToken, loggedUser, employee, resident} = useContext(UserContext);
   const L1ID = loggedUser.userId;
   const [selectedOption, setSelectedOption] = useState(null);
   const [modal, setModal] = useState(false);
@@ -176,7 +176,8 @@ const Invite = ({navigation}) => {
       Alert.alert(error.message);
     }
   };
-
+//if l1 exists in Residents
+//
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView>
@@ -245,7 +246,7 @@ const Invite = ({navigation}) => {
                         style={{
                           flexDirection: 'row',
                         }}>
-                        <TouchableOpacity
+                       {resident? <TouchableOpacity
                           style={[
                             styles.HomeButton,
                             {backgroundColor: '#B21E2B'},
@@ -254,8 +255,8 @@ const Invite = ({navigation}) => {
                             onShare('Home');
                           }}>
                           <Text style={[styles.wewe, styles.wewe1]}>Home</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
+                        </TouchableOpacity> : null}
+                        {employee? <TouchableOpacity
                           style={[
                             styles.HomeButton,
                             {backgroundColor: '#FFBE65'},
@@ -266,7 +267,7 @@ const Invite = ({navigation}) => {
                           <Text style={[styles.wewe, styles.wewe2]}>
                             Office
                           </Text>
-                        </TouchableOpacity>
+                        </TouchableOpacity> : null }
                       </View>
                       {loading && ( // Display ActivityIndicator if loading
                         <ActivityIndicator
