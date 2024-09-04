@@ -448,7 +448,7 @@ const EditVerifyDetails = ({ navigation, route }) => {
           </View>
         )}
 
-        <View style={styles.v}>
+        {/* <View style={styles.v}>
           <Text style={styles.txt}>
             Is the guest being invited to your Home or Office
           </Text>
@@ -465,6 +465,17 @@ const EditVerifyDetails = ({ navigation, route }) => {
               setIsHome(item.value);
               setIsHomeFocus(false);
             }}
+            
+          />
+        </View> This is the dropdown to edit to Home or Office, the thought for future implementation of this is to only show this dropdown
+ if the user is both an employee and a resident. */}  
+
+<View style={styles.v}>
+          <Text style={styles.txt}>Place of visit:</Text>
+          <TextInput
+            style={styles.dropdownstyle}
+            value={isHome}
+            editable={false}
           />
         </View>
 
