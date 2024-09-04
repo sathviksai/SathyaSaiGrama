@@ -100,6 +100,8 @@ const FillByYourSelf = ({navigation}) => {
     {label: 'Devotee', value: 'Devotee'},
     {label: 'Guest', value: 'Guest'},
     {label: 'Staff', value: 'Staff'},
+    {label: 'Student', value: 'Student'},
+    {label: 'Intern', value: 'Intern'},
     {label: 'Other', value: 'Other'},
   ];
   const priorityValues = [
