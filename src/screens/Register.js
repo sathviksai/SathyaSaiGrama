@@ -29,12 +29,46 @@ const Register = ({navigation}) => {
     formState: {errors},
   } = useForm();
   const [password, setPassword] = useState();
-  const {accessToken} = useContext(UserContext);
+  const {accessToken, resident, setResident, employee, setEmployee} =
+    useContext(UserContext);
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [focusedInput, setFocusedInput] = useState(null);
   const [email, setEmail] = useState('');
+
+  const isResident = async id => {
+    const res = await getDataWithInt(
+      'All_Residents',
+      'App_User_lookup',
+      id,
+      accessToken,
+    );
+    if (res && res.data) {
+      console.log('resident data found in Login:', res.data);
+      setResident(true);
+    } else {
+      setUserType('L1');
+      setResident(false);
+    }
+    console.log('response in fetchDataFromOffice in login: '.res);
+  };
+
+  const isEmployee = async id => {
+    const res = await getDataWithInt(
+      'All_Employees',
+      'App_User_lookup',
+      id,
+      accessToken,
+    );
+    if (res && res.data) {
+      console.log('resident data found in Login:', res.data);
+      setEmployee(true);
+    } else {
+      setEmployee(false);
+    }
+    console.log('response in fetchDataFromOffice in login: '.res);
+  };
 
   const handleRegForm = async userCred => {
     setLoading(true);
@@ -45,9 +79,12 @@ const Register = ({navigation}) => {
       userCred.email.toLowerCase().trim(),
       accessToken,
     );
-    console.log('response object returned ', res);
+    console.log('App user response returned in handleReg', res);
+    isResident(res.data[0].ID);
+    isEmployee(res.data[0].ID);
+    console.log('resident || employee boolean in Register', resident, employee);
 
-    if (res.data && res.data.length > 0) {
+    if (res.data && res.data.length > 0 && (resident || employee)) {
       //authentication
       try {
         await createUserWithEmailAndPassword(
@@ -58,7 +95,10 @@ const Register = ({navigation}) => {
         sendEmailVerification(auth.currentUser);
         setLoading(false);
         console.log('Id in register: ', res.data[0]);
-        navigation.navigate('VerificationNotice', {id: res.data[0].ID, email:email});
+        navigation.navigate('VerificationNotice', {
+          id: res.data[0].ID,
+          email: email,
+        });
       } catch (error) {
         setLoading(false);
         if (error.message === 'Network request failed')
