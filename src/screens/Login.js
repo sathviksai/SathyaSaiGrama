@@ -39,8 +39,10 @@ const Login = ({navigation}) => {
     loggedUser,
     setLoggedUser,
     deviceToken,
-    resident, setResident,
-    employee, setEmployee,
+    resident,
+    setResident,
+    employee,
+    setEmployee,
   } = useContext(UserContext);
   const [currentUser, setCurrentUser] = useState(null);
   const [departmentIds, setDepartmentIds] = useState([]);
@@ -80,7 +82,6 @@ const Login = ({navigation}) => {
   };
 
   const isResident = async id => {
-    
     const res = await getDataWithInt(
       'All_Residents',
       'App_User_lookup',
@@ -97,9 +98,7 @@ const Login = ({navigation}) => {
     console.log('response in fetchDataFromOffice in login: '.res);
   };
 
-
   const isEmployee = async id => {
-    
     const res = await getDataWithInt(
       'All_Employees',
       'App_User_lookup',
@@ -193,7 +192,6 @@ const Login = ({navigation}) => {
     }
   };
 
-
   const handleLoginForm = async userCred => {
     setLoading(true);
     const res = await getDataWithString(
@@ -203,7 +201,10 @@ const Login = ({navigation}) => {
       accessToken,
     );
     console.log('Whether user exis or not in login: ', res);
-    if (res && res.data) {
+    isResident(res.data[0].ID);
+    isEmployee(res.data[0].ID);
+    console.log('resident || employee boolean', resident, employee);
+    if (res && res.data && (resident || employee)) {
       try {
         fetchDataFromOffice(res.data[0].ID);
         const userCredential = await signInWithEmailAndPassword(
@@ -243,8 +244,6 @@ const Login = ({navigation}) => {
             res.data[0].ID,
           );
           console.log('update device token response: ', updateResponse);
-          isEmployee(res.data[0].ID);
-          isResident(res.data[0].ID);
         } else {
           // Email is not verified, display message and send verification email (if needed)
           await sendEmailVerification(auth.currentUser);
@@ -272,7 +271,6 @@ const Login = ({navigation}) => {
       setDialogVisible(true);
     }
   };
-
 
   return (
     <>
