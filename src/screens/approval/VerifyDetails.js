@@ -234,7 +234,8 @@ const VerifyDetails = ({navigation, route}) => {
     if (loggedUser.role === 'L2') {
       if (
         (user.Home_or_Office === 'Home' &&
-          loggedUser.deptIds.includes('3318254000027832015')) ||
+          (loggedUser.deptIds.includes('3318254000027832015') ||
+            loggedUser.deptIds.includes('3318254000031368009'))) ||
         user.Home_or_Office === 'Office'
       ) {
         updateField = {
@@ -268,7 +269,6 @@ const VerifyDetails = ({navigation, route}) => {
       accessToken,
       user.ID,
     );
-
 
     if (response.code === 3000) {
       if (status === 'PENDING APPROVAL') {
@@ -912,19 +912,20 @@ const VerifyDetails = ({navigation, route}) => {
         </View>
       </View>
 
-
-      <Dialog.Container visible={DialogVisible} contentStyle={styles.detailsNotEditableDialogue}>
-      <Image source={require('../../../src/assets/Denied.png')}
-    
-
-    style={{ width: '15%', height: '25%' , alignSelf:'center',top:-85}} // adjust as needed
- 
- />
-      <Dialog.Title style={styles.detailsNotEditableTitle}>Can not edit details once Visitor is L2 approved</Dialog.Title>
-      <Dialog.Description style={styles.detailsNotEditableTxT}>Please fill another form</Dialog.Description>
-      <Dialog.Button label="Ok" onPress={onPressOk} />
-      
-
+      <Dialog.Container
+        visible={DialogVisible}
+        contentStyle={styles.detailsNotEditableDialogue}>
+        <Image
+          source={require('../../../src/assets/Denied.png')}
+          style={{width: '15%', height: '25%', alignSelf: 'center', top: -85}} // adjust as needed
+        />
+        <Dialog.Title style={styles.detailsNotEditableTitle}>
+          Can not edit details once Visitor is L2 approved
+        </Dialog.Title>
+        <Dialog.Description style={styles.detailsNotEditableTxT}>
+          Please fill another form
+        </Dialog.Description>
+        <Dialog.Button label="Ok" onPress={onPressOk} />
       </Dialog.Container>
     </>
   );
@@ -1537,7 +1538,6 @@ const styles = StyleSheet.create({
     color: '#B21E2B',
   },
 
-
   detailsNotEditableDialogue: {
     borderRadius: 30,
     backgroundColor: '#FFE2E5',
@@ -1549,7 +1549,6 @@ const styles = StyleSheet.create({
     color: '#B21E2B',
     bottom: -80,
   },
-
 
   detailsNotEditableTxT: {
     color: 'black',

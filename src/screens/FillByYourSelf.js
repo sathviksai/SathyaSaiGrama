@@ -56,7 +56,7 @@ const FillByYourSelf = ({navigation}) => {
 
   const [vehicles, setVehicles] = useState([]);
 
-  const {getAccessToken, loggedUser} = useContext(UserContext);
+  const {getAccessToken, loggedUser, testResident} = useContext(UserContext);
   const [date, setDate] = useState('Select Date');
   const [showModal, setShowModal] = useState(false);
   const L1ID = loggedUser.userId;
@@ -352,6 +352,9 @@ const FillByYourSelf = ({navigation}) => {
 
       if (selectedHO === 'Home') {
         office_id = '3318254000027832015';
+        if (testResident) {
+          office_id = '3318254000031368009';
+        }
         console.log('In Home conditional block');
       } else {
         const empId = await getEmpId();
