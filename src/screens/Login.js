@@ -147,6 +147,7 @@ const Login = ({navigation}) => {
             role: userType,
             email: currentUser.email,
             deptIds: departmentIds,
+            name: currentUser.L1name,
           }),
         );
         console.log('login data saved into local storage');
@@ -247,6 +248,7 @@ const Login = ({navigation}) => {
           setCurrentUser({
             id: res.data[0].ID,
             email: userCred.email.toLowerCase().trim(),
+            L1name: res.data[0].Name_field,
           });
           const response = await findDeviceToken(res.data[0].ID);
           console.log('response is: ', response);
