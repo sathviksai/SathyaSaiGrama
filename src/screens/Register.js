@@ -18,7 +18,11 @@ import {
   createUserWithEmailAndPassword,
   sendEmailVerification,
 } from 'firebase/auth';
-import {getDataWithString} from '../components/ApiRequest';
+import {
+  getDataWithString,
+  getDataWithInt,
+  getDataWithTwoInt,
+} from '../components/ApiRequest';
 import UserContext from '../../context/UserContext';
 
 const Register = ({navigation}) => {
@@ -29,13 +33,31 @@ const Register = ({navigation}) => {
     formState: {errors},
   } = useForm();
   const [password, setPassword] = useState();
-  const {accessToken, resident, setResident, employee, setEmployee} =
+  const {accessToken, resident, employee, testResident} =
     useContext(UserContext);
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [focusedInput, setFocusedInput] = useState(null);
   const [email, setEmail] = useState('');
+
+  const isTestResident = async id => {
+    const res = await getDataWithTwoInt(
+      'All_Residents',
+      'App_User_lookup',
+      id,
+      'Flats_lookup',
+      '3318254000031368021',
+      accessToken,
+    );
+    if (res && res.data) {
+      console.log('Test resident is true');
+      testResident.current = true;
+    } else {
+      console.log('Test Resident is false');
+      testResident.current = false;
+    }
+  };
 
   const isResident = async id => {
     const res = await getDataWithInt(
@@ -46,10 +68,9 @@ const Register = ({navigation}) => {
     );
     if (res && res.data) {
       console.log('resident data found in Login:', res.data);
-      setResident(true);
+      resident.current = true;
     } else {
-      setUserType('L1');
-      setResident(false);
+      resident.current = false;
     }
     console.log('response in fetchDataFromOffice in login: '.res);
   };
@@ -63,9 +84,9 @@ const Register = ({navigation}) => {
     );
     if (res && res.data) {
       console.log('resident data found in Login:', res.data);
-      setEmployee(true);
+      employee.current = true;
     } else {
-      setEmployee(false);
+      employee.current = false;
     }
     console.log('response in fetchDataFromOffice in login: '.res);
   };
@@ -80,11 +101,19 @@ const Register = ({navigation}) => {
       accessToken,
     );
     console.log('App user response returned in handleReg', res);
-    isResident(res.data[0].ID);
-    isEmployee(res.data[0].ID);
-    console.log('resident || employee boolean in Register', resident, employee);
-
-    if (res.data && res.data.length > 0 && (resident || employee)) {
+    await isResident(res.data[0].ID);
+    await isEmployee(res.data[0].ID);
+    console.log(
+      'resident || employee boolean in Register',
+      resident.current,
+      employee.current,
+    );
+    await isTestResident(res.data[0].ID);
+    if (
+      res.data &&
+      res.data.length > 0 &&
+      (resident.current || employee.current)
+    ) {
       //authentication
       try {
         await createUserWithEmailAndPassword(
