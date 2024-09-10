@@ -146,7 +146,7 @@ const Register = ({navigation}) => {
       }
     } else {
       setLoading(false);
-      Alert.alert('data not exist');
+      Alert.alert('your data does not exist please contact admin');
       console.log('false');
     }
   };

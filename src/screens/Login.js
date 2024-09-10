@@ -315,11 +315,11 @@ const Login = ({navigation}) => {
             <KeyboardAvoidingView>
               <Image
                 source={require('../../src/assets/aashram.png')}
-                resizeMode="contain"
+                resizeMode="cover"
                 style={{
                   width: '100%',
                   height: 340,
-                  marginTop: 5,
+                  marginTop: 0,
                 }}
               />
 
