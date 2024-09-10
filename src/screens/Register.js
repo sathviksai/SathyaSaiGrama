@@ -101,7 +101,12 @@ const Register = ({navigation}) => {
       accessToken,
     );
     console.log('App user response returned in handleReg', res);
-    await isResident(res.data[0].ID);
+    if (
+      res.data &&
+      res.data.length > 0 
+     
+    ) {
+      await isResident(res.data[0].ID);
     await isEmployee(res.data[0].ID);
     console.log(
       'resident || employee boolean in Register',
@@ -109,11 +114,7 @@ const Register = ({navigation}) => {
       employee.current,
     );
     await isTestResident(res.data[0].ID);
-    if (
-      res.data &&
-      res.data.length > 0 &&
-      (resident.current || employee.current)
-    ) {
+    if(resident.current || employee.current){
       //authentication
       try {
         await createUserWithEmailAndPassword(
@@ -144,9 +145,16 @@ const Register = ({navigation}) => {
         }
         console.log('Error in auth: ', error);
       }
-    } else {
+    }else {
       setLoading(false);
-      Alert.alert('your data does not exist please contact admin');
+      Alert.alert('Your data does not exist. Please contact Admin');
+      console.log('false');
+    }
+  }
+    
+     else {
+      setLoading(false);
+      Alert.alert('Your data does not exist. Please contact Admin');
       console.log('false');
     }
   };
