@@ -18,7 +18,11 @@ import {
   createUserWithEmailAndPassword,
   sendEmailVerification,
 } from 'firebase/auth';
-import {getDataWithString} from '../components/ApiRequest';
+import {
+  getDataWithString,
+  getDataWithInt,
+  getDataWithTwoInt,
+} from '../components/ApiRequest';
 import UserContext from '../../context/UserContext';
 
 const Register = ({navigation}) => {
@@ -29,11 +33,63 @@ const Register = ({navigation}) => {
     formState: {errors},
   } = useForm();
   const [password, setPassword] = useState();
-  const {accessToken} = useContext(UserContext);
+  const {accessToken, resident, employee, testResident} =
+    useContext(UserContext);
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [focusedInput, setFocusedInput] = useState(null);
+  const [email, setEmail] = useState('');
+
+  const isTestResident = async id => {
+    const res = await getDataWithTwoInt(
+      'All_Residents',
+      'App_User_lookup',
+      id,
+      'Flats_lookup',
+      '3318254000031368021',
+      accessToken,
+    );
+    if (res && res.data) {
+      console.log('Test resident is true');
+      testResident.current = true;
+    } else {
+      console.log('Test Resident is false');
+      testResident.current = false;
+    }
+  };
+
+  const isResident = async id => {
+    const res = await getDataWithInt(
+      'All_Residents',
+      'App_User_lookup',
+      id,
+      accessToken,
+    );
+    if (res && res.data) {
+      console.log('resident data found in Login:', res.data);
+      resident.current = true;
+    } else {
+      resident.current = false;
+    }
+    console.log('response in fetchDataFromOffice in login: '.res);
+  };
+
+  const isEmployee = async id => {
+    const res = await getDataWithInt(
+      'All_Employees',
+      'App_User_lookup',
+      id,
+      accessToken,
+    );
+    if (res && res.data) {
+      console.log('resident data found in Login:', res.data);
+      employee.current = true;
+    } else {
+      employee.current = false;
+    }
+    console.log('response in fetchDataFromOffice in login: '.res);
+  };
 
   const handleRegForm = async userCred => {
     setLoading(true);
@@ -44,9 +100,20 @@ const Register = ({navigation}) => {
       userCred.email.toLowerCase().trim(),
       accessToken,
     );
-    console.log('response object returned ', res);
-
-    if (res.data && res.data.length > 0) {
+    console.log('App user response returned in handleReg', res);
+    await isResident(res.data[0].ID);
+    await isEmployee(res.data[0].ID);
+    console.log(
+      'resident || employee boolean in Register',
+      resident.current,
+      employee.current,
+    );
+    await isTestResident(res.data[0].ID);
+    if (
+      res.data &&
+      res.data.length > 0 &&
+      (resident.current || employee.current)
+    ) {
       //authentication
       try {
         await createUserWithEmailAndPassword(
@@ -57,7 +124,10 @@ const Register = ({navigation}) => {
         sendEmailVerification(auth.currentUser);
         setLoading(false);
         console.log('Id in register: ', res.data[0]);
-        navigation.navigate('VerificationNotice', {id: res.data[0].ID});
+        navigation.navigate('VerificationNotice', {
+          id: res.data[0].ID,
+          email: email,
+        });
       } catch (error) {
         setLoading(false);
         if (error.message === 'Network request failed')
@@ -139,7 +209,10 @@ const Register = ({navigation}) => {
                     value={value}
                     selectionColor="#B21E2B"
                     onFocus={() => setFocusedInput('email')}
-                    onChangeText={onChange}
+                    onChangeText={value => {
+                      onChange(value);
+                      setEmail(value);
+                    }}
                   />
                 )}
                 rules={{required: true, pattern: /^\S+@\S+$/i}}
@@ -262,7 +335,7 @@ const Register = ({navigation}) => {
               <Text style={styles.textError}>Passwords do not match</Text>
             )}
 
-            <Controller
+            {/* <Controller
               control={control}
               name="terms"
               rules={{required: true}}
@@ -298,7 +371,7 @@ const Register = ({navigation}) => {
               <Text style={styles.textError}>
                 You must accept the terms and conditions.
               </Text>
-            )}
+            )} */}
 
             <TouchableOpacity
               onPress={handleSubmit(handleRegForm)}

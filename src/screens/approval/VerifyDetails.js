@@ -12,8 +12,14 @@ import {
   ImageBackground,
   Dimensions,
 } from 'react-native';
-import React, {useContext, useEffect, useState, useRef, useCallback} from 'react';
-import {BASE_APP_URL, APP_LINK_NAME, APP_OWNER_NAME, } from '@env';
+import React, {
+  useContext,
+  useEffect,
+  useState,
+  useRef,
+  useCallback,
+} from 'react';
+import {BASE_APP_URL, APP_LINK_NAME, APP_OWNER_NAME} from '@env';
 
 import UserContext from '../../../context/UserContext';
 import {encode} from 'base64-arraybuffer';
@@ -23,7 +29,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import QRCode from 'react-native-qrcode-svg';
 import {captureRef} from 'react-native-view-shot';
 import Dialog from 'react-native-dialog';
-import { useFocusEffect } from '@react-navigation/native';
+import {useFocusEffect} from '@react-navigation/native';
 
 export const updateRecord = async (reportName, modified_data, token, id) => {
   try {
@@ -96,7 +102,7 @@ const VerifyDetails = ({navigation, route}) => {
 
   const onPressOk = () => {
     setDialogVisible(false);
-  }
+  };
 
   useEffect(() => {
     setEditData(user);
@@ -139,7 +145,7 @@ const VerifyDetails = ({navigation, route}) => {
       });
       const responseData = await passcodeResponse.json();
 
-      console.log('here is the passcode response' + responseData.code);
+      console.log('here is the passcode response', responseData);
 
       if (responseData.code === 3002) {
         console.log('Post of code was un-sucessfull');
@@ -151,7 +157,7 @@ const VerifyDetails = ({navigation, route}) => {
         setcodeReload(false);
       }
 
-      console.log('Passcode data:' + passcodeResponse);
+      console.log('Passcode data:', passcodeResponse);
     } catch (error) {
       console.log(error);
       return false;
@@ -226,12 +232,25 @@ const VerifyDetails = ({navigation, route}) => {
     let updateField;
 
     if (loggedUser.role === 'L2') {
-      updateField = {
-        Referrer_Approval: 'APPROVED',
-        L2_Approval_Status: 'APPROVED',
-      };
-      setapprovingLoading(true);
-      PasscodeData();
+      if (
+        (user.Home_or_Office === 'Home' &&
+          (loggedUser.deptIds.includes('3318254000027832015') ||
+            loggedUser.deptIds.includes('3318254000031368009'))) ||
+        user.Home_or_Office === 'Office'
+      ) {
+        updateField = {
+          Referrer_Approval: 'APPROVED',
+          L2_Approval_Status: 'APPROVED',
+        };
+        setapprovingLoading(true);
+        PasscodeData();
+      } else {
+        updateField = {
+          Referrer_Approval: 'APPROVED',
+          L2_Approval_Status: 'PENDING APPROVAL',
+        };
+        setapprovingLoading(true);
+      }
     } else {
       updateField = {
         Referrer_Approval: 'APPROVED',
@@ -250,8 +269,6 @@ const VerifyDetails = ({navigation, route}) => {
       accessToken,
       user.ID,
     );
-
-    console.log('this is the response '+ response.code);
 
     if (response.code === 3000) {
       if (status === 'PENDING APPROVAL') {
@@ -292,21 +309,13 @@ const VerifyDetails = ({navigation, route}) => {
         Generated_Passcode: null,
         Generated_QR_Code: null,
       };
-    } else{
+    } else {
       updateField = {
         Referrer_Approval: 'DENIED',
         Generated_Passcode: null,
         Generated_QR_Code: null,
       };
-
-     
     }
-
-
-
-      
-     
-    
 
     const updateData = {
       data: updateField,
@@ -330,7 +339,7 @@ const VerifyDetails = ({navigation, route}) => {
       }
       Alert.alert('Visitor Rejected');
       navigation.navigate('Denied');
-     setdeniedLoading(false);
+      setdeniedLoading(false);
     } else {
       Alert.alert('Error in rejecting: ', response.code);
     }
@@ -486,19 +495,18 @@ const VerifyDetails = ({navigation, route}) => {
     }
   }, [codeReload]);
 
-useFocusEffect(
-useCallback(() => {
-  const {triggerDialog} = route.params || {};
-  if(triggerDialog){
-    setDialogVisible(true);
-  }
+  useFocusEffect(
+    useCallback(() => {
+      const {triggerDialog} = route.params || {};
+      if (triggerDialog) {
+        setDialogVisible(true);
+      }
 
-return () => {
-  setDialogVisible(false); };
-
-}, [route.params])
-);
- 
+      return () => {
+        setDialogVisible(false);
+      };
+    }, [route.params]),
+  );
 
   console.log('User in verify details : ', user);
   return (
@@ -537,79 +545,108 @@ return () => {
             </View>
           ) : null} */}
           {user?.Referrer_Approval === 'PENDING APPROVAL' ? (
-            
             <View style={[styles.container, {marginTop: 20}]}>
-              {(approvingLoading || deniedLoading) ? (
-              <View>
-               {approvingLoading ? (
-            <View style={heightStyles.ApproveActivityIndicatorContainer}>
-              <Text style={[heightStyles.ActivityIndicatorText, {color:'white'}]}>Approving</Text>
-              <ActivityIndicator
-                size="large"
-                color="#006400"
-                style={heightStyles.ActivityIndicator}
-              />
-            </View>
-          ) :  null}
-        {deniedLoading ? (
-            <View style={heightStyles.RejectActivityIndicatorContainer}>
-              <Text style={heightStyles.ActivityIndicatorText} >Rejecting</Text>
-              <ActivityIndicator
-                size="large"
-                color="red"
-                style={heightStyles.ActivityIndicator}
-              />
-            </View>
-          ) : null}
-              
-            </View>
-              ): <><View style={[styles.left, { width: '50%' }]}>
-                  <TouchableOpacity style={[styles.btnAccept,heightStyles.apprejBtnPosition ]} onPress={onApprove}>
-                    <Text style={styles.btntxt}>Approve</Text>
-                  </TouchableOpacity>
-                </View><View style={styles.right}>
-                    <TouchableOpacity style={styles.btnReject} onPress={onReject}>
+              {approvingLoading || deniedLoading ? (
+                <View>
+                  {approvingLoading ? (
+                    <View
+                      style={heightStyles.ApproveActivityIndicatorContainer}>
+                      <Text
+                        style={[
+                          heightStyles.ActivityIndicatorText,
+                          {color: 'white'},
+                        ]}>
+                        Approving
+                      </Text>
+                      <ActivityIndicator
+                        size="large"
+                        color="#006400"
+                        style={heightStyles.ActivityIndicator}
+                      />
+                    </View>
+                  ) : null}
+                  {deniedLoading ? (
+                    <View style={heightStyles.RejectActivityIndicatorContainer}>
+                      <Text style={heightStyles.ActivityIndicatorText}>
+                        Rejecting
+                      </Text>
+                      <ActivityIndicator
+                        size="large"
+                        color="red"
+                        style={heightStyles.ActivityIndicator}
+                      />
+                    </View>
+                  ) : null}
+                </View>
+              ) : (
+                <>
+                  <View style={[styles.left, {width: '50%'}]}>
+                    <TouchableOpacity
+                      style={[styles.btnAccept, heightStyles.apprejBtnPosition]}
+                      onPress={onApprove}>
+                      <Text style={styles.btntxt}>Approve</Text>
+                    </TouchableOpacity>
+                  </View>
+                  <View style={styles.right}>
+                    <TouchableOpacity
+                      style={styles.btnReject}
+                      onPress={onReject}>
                       <Text style={styles.rejectBtnTxt}>Reject</Text>
                     </TouchableOpacity>
-                  </View></>
-            }
+                  </View>
+                </>
+              )}
             </View>
           ) : user?.Referrer_Approval === 'APPROVED' ? (
             <View>
-            {deniedLoading ? (
-              <View style={heightStyles.RejectActivityIndicatorContainer}>
-                <Text style={heightStyles.ActivityIndicatorText} >Rejecting</Text>
-                <ActivityIndicator
-                  size="large"
-                  color="red"
-                  style={heightStyles.ActivityIndicator}
-                />
-              </View>
-            ) : <View style={{width: '100%', padding: 10, marginLeft: '30%'}}>
-            <TouchableOpacity style={[styles.btnReject]} onPress={onReject}>
-              <Text style={[styles.rejectBtnTxt]}>Reject</Text>
-            </TouchableOpacity>
-          </View>}
-          </View>
-            
+              {deniedLoading ? (
+                <View style={heightStyles.RejectActivityIndicatorContainer}>
+                  <Text style={heightStyles.ActivityIndicatorText}>
+                    Rejecting
+                  </Text>
+                  <ActivityIndicator
+                    size="large"
+                    color="red"
+                    style={heightStyles.ActivityIndicator}
+                  />
+                </View>
+              ) : (
+                <View style={{width: '100%', padding: 10, marginLeft: '30%'}}>
+                  <TouchableOpacity
+                    style={[styles.btnReject]}
+                    onPress={onReject}>
+                    <Text style={[styles.rejectBtnTxt]}>Reject</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+            </View>
           ) : user?.Referrer_Approval === 'DENIED' ? (
-           <View>
-            {approvingLoading ? (
-              <View style={heightStyles.ApproveActivityIndicatorContainer}>
-                <Text style={[heightStyles.ActivityIndicatorText, {color:'white'}]}>Approving</Text>
-                <ActivityIndicator
-                  size="large"
-                  color="#006400"
-                  style={heightStyles.ActivityIndicator}
-                />
-              </View>
-            ) : <View style={{width: '100%', padding: 10, marginLeft: '15%'}}>
-            <TouchableOpacity style={styles.btnAccept} onPress={onApprove}>
-              <Text style={styles.btntxt}>Approve</Text>
-            </TouchableOpacity>
-          </View>}
-          </View>
-           
+            <View>
+              {approvingLoading ? (
+                <View style={heightStyles.ApproveActivityIndicatorContainer}>
+                  <Text
+                    style={[
+                      heightStyles.ActivityIndicatorText,
+                      {color: 'white'},
+                    ]}>
+                    Approving
+                  </Text>
+                  <ActivityIndicator
+                    size="large"
+                    color="#006400"
+                    style={heightStyles.ActivityIndicator}
+                  />
+                </View>
+              ) : (
+                <View style={{width: '100%', padding: 10, marginLeft: '15%'}}>
+                  <TouchableOpacity
+                    style={styles.btnAccept}
+                    onPress={onApprove}>
+                    <Text style={styles.btntxt}>Approve</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+            </View>
           ) : null}
           {user.Referrer_Approval === 'APPROVED' &&
           user.L2_Approval_Status == 'APPROVED' &&
@@ -638,18 +675,15 @@ return () => {
                     />
                   )
                 )}
-                 {loading ? (
-                  null
-                ) : (
+                {loading ? null : (
                   <TouchableOpacity
-                  style={[styles.HomeButton, {backgroundColor: 'green'}]}
-                  onPress={() => {
-                    onShare();
-                  }}>
-                  <Text style={[styles.wewe, styles.wewe1]}>Share</Text>
-                </TouchableOpacity>
-                  )
-                }
+                    style={[styles.HomeButton, {backgroundColor: 'green'}]}
+                    onPress={() => {
+                      onShare();
+                    }}>
+                    <Text style={[styles.wewe, styles.wewe1]}>Share</Text>
+                  </TouchableOpacity>
+                )}
               </View>
             </View>
           ) : null}
@@ -797,7 +831,9 @@ return () => {
             <View style={styles.right}>
               {user?.Vehicle_Information?.length > 0
                 ? user.Vehicle_Information.map((vehicle, index) => (
-                    <Text key={index} style={styles.value}>{vehicle.zc_display_value}</Text>
+                    <Text key={index} style={styles.value}>
+                      {vehicle.zc_display_value}
+                    </Text>
                   ))
                 : null}
             </View>
@@ -876,11 +912,20 @@ return () => {
         </View>
       </View>
 
-      <Dialog.Container visible={DialogVisible} contentStyle={styles.detailsNotEditableDialogue}>
-      <Dialog.Title style={styles.detailsNotEditableTitle}>Can not edit details once Visitor is L2 approved</Dialog.Title>
-      <Dialog.Description>Please fill another form</Dialog.Description>
-      <Dialog.Button label="Ok" onPress={onPressOk} />
-      
+      <Dialog.Container
+        visible={DialogVisible}
+        contentStyle={styles.detailsNotEditableDialogue}>
+        <Image
+          source={require('../../../src/assets/Denied.png')}
+          style={{width: '15%', height: '25%', alignSelf: 'center', top: -85}} // adjust as needed
+        />
+        <Dialog.Title style={styles.detailsNotEditableTitle}>
+          Can not edit details once Visitor is L2 approved
+        </Dialog.Title>
+        <Dialog.Description style={styles.detailsNotEditableTxT}>
+          Please fill another form
+        </Dialog.Description>
+        <Dialog.Button label="Ok" onPress={onPressOk} />
       </Dialog.Container>
     </>
   );
@@ -889,12 +934,9 @@ return () => {
 export default VerifyDetails;
 
 const mediumScreen = StyleSheet.create({
-
-  apprejBtnPosition:{
-    marginLeft: '30%'
+  apprejBtnPosition: {
+    marginLeft: '30%',
   },
-
-
 
   ApproveActivityIndicatorContainer: {
     top: 10,
@@ -1054,12 +1096,9 @@ const mediumScreen = StyleSheet.create({
 });
 
 const smallScreen = StyleSheet.create({
-
-  apprejBtnPosition:{
-    marginLeft: '37%'
+  apprejBtnPosition: {
+    marginLeft: '37%',
   },
-
-
 
   ApproveActivityIndicatorContainer: {
     top: 10,
@@ -1068,7 +1107,6 @@ const smallScreen = StyleSheet.create({
     borderRadius: 40,
     width: 350,
   },
-
 
   RejectActivityIndicatorContainer: {
     top: 10,
@@ -1214,8 +1252,8 @@ const smallScreen = StyleSheet.create({
 });
 
 const normalScreen = StyleSheet.create({
-  apprejBtnPosition:{
-    marginLeft: '40%'
+  apprejBtnPosition: {
+    marginLeft: '40%',
   },
   ApproveActivityIndicatorContainer: {
     top: 10,
@@ -1226,7 +1264,6 @@ const normalScreen = StyleSheet.create({
     right: -10,
   },
 
-
   RejectActivityIndicatorContainer: {
     top: 10,
     backgroundColor: 'pink',
@@ -1236,8 +1273,7 @@ const normalScreen = StyleSheet.create({
     right: -10,
   },
 
-
-ActivityIndicator: {
+  ActivityIndicator: {
     top: -10,
     right: -60,
   },
@@ -1382,8 +1418,8 @@ ActivityIndicator: {
 });
 
 const styles = StyleSheet.create({
-  apprejBtnPosition:{
-    marginLeft: '30%'
+  apprejBtnPosition: {
+    marginLeft: '30%',
   },
   header: {
     width: '100%',
@@ -1502,20 +1538,20 @@ const styles = StyleSheet.create({
     color: '#B21E2B',
   },
 
-  detailsNotEditableDialogue:{
-  borderRadius: 30,
-  backgroundColor: 'pink',
-
+  detailsNotEditableDialogue: {
+    borderRadius: 30,
+    backgroundColor: '#FFE2E5',
   },
 
-  detailsNotEditableTitle:{
- 
-  fontWeight:'bold',
+  detailsNotEditableTitle: {
+    alignSelf: 'center',
+    fontWeight: 'bold',
+    color: '#B21E2B',
+    bottom: -80,
+  },
 
-  }
-
-
-
-
-
+  detailsNotEditableTxT: {
+    color: 'black',
+    bottom: -80,
+  },
 });

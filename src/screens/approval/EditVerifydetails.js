@@ -1,24 +1,31 @@
 import {
-  Modal, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, TouchableWithoutFeedback,
+  Modal,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+  TouchableWithoutFeedback,
   Dimensions,
   Image,
   ActivityIndicator,
 } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
-import React, { useState, useContext, useEffect } from 'react';
-import DatePicker, { getFormatedDate } from 'react-native-modern-datepicker';
-import { Dropdown } from 'react-native-element-dropdown';
+import {Picker} from '@react-native-picker/picker';
+import React, {useState, useContext, useEffect} from 'react';
+import DatePicker, {getFormatedDate} from 'react-native-modern-datepicker';
+import {Dropdown} from 'react-native-element-dropdown';
 import moment from 'moment';
-import { updateRecord } from './VerifyDetails';
+import {updateRecord} from './VerifyDetails';
 import UserContext from '../../../context/UserContext';
-import { Alert } from 'react-native';
-import { BASE_APP_URL, APP_LINK_NAME, APP_OWNER_NAME, } from '@env';
+import {Alert} from 'react-native';
+import {BASE_APP_URL, APP_LINK_NAME, APP_OWNER_NAME} from '@env';
 import Dialog from 'react-native-dialog';
-import { set } from 'react-hook-form';
+import {set} from 'react-hook-form';
 
-
-const EditVerifyDetails = ({ navigation, route }) => {
-  const { height } = Dimensions.get('window');
+const EditVerifyDetails = ({navigation, route}) => {
+  const {height} = Dimensions.get('window');
   let heightStyles;
   if (height > 900) {
     heightStyles = normalScreen;
@@ -27,7 +34,7 @@ const EditVerifyDetails = ({ navigation, route }) => {
   } else {
     heightStyles = smallScreen;
   }
-  const { user } = route.params;
+  const {user} = route.params;
   if (typeof user === 'string') {
     console.log('inside if stringified');
     // const {user} = route.params;
@@ -51,11 +58,9 @@ const EditVerifyDetails = ({ navigation, route }) => {
     console.log('user in stringified', user);
   }
 
-
-
   if (user.L2_Approval_Status === 'APPROVED') {
     // Alert.alert('Can not edit details once Visitor is L2 approved', 'Please fill another form', [{style:styles.errorText}]);
-    navigation.navigate('VerifyDetails', { user: user, triggerDialog: true });
+    navigation.navigate('VerifyDetails', {user: user, triggerDialog: true});
   }
 
   const [date, setDate] = useState(user.Date_of_Visit);
@@ -81,7 +86,7 @@ const EditVerifyDetails = ({ navigation, route }) => {
   const [showModal, setShowModal] = useState(false);
   const gender = ['Male', 'Female'];
 
-  const { getAccessToken } = useContext(UserContext);
+  const {getAccessToken} = useContext(UserContext);
 
   const handleDateChange = selectedDate => {
     const formattedDate = moment(selectedDate, 'YYYY-MM-DD').format(
@@ -92,28 +97,28 @@ const EditVerifyDetails = ({ navigation, route }) => {
   };
 
   const homeOrOffice = [
-    { label: 'Home', value: 'Home' },
-    { label: 'Office', value: 'Office' },
+    {label: 'Home', value: 'Home'},
+    {label: 'Office', value: 'Office'},
   ];
 
   const singleOrGroup = [
-    { label: 'Single', value: 'Single' },
-    { label: 'Group', value: 'Group' },
+    {label: 'Single', value: 'Single'},
+    {label: 'Group', value: 'Group'},
   ];
 
   const guestCategory = [
-    { label: 'Govt Officials', value: 'Govt Officials' },
-    { label: 'Politician', value: 'Politician' },
-    { label: 'Corporate', value: 'Corporate' },
-    { label: 'Press', value: 'Press' },
-    { label: 'Parent', value: 'Parent' },
-    { label: 'Devotee', value: 'Devotee' },
+    {label: 'Govt Officials', value: 'Govt Officials'},
+    {label: 'Politician', value: 'Politician'},
+    {label: 'Corporate', value: 'Corporate'},
+    {label: 'Press', value: 'Press'},
+    {label: 'Parent', value: 'Parent'},
+    {label: 'Devotee', value: 'Devotee'},
   ];
 
   const guestPriority = [
-    { label: 'P1', value: 'P1' },
-    { label: 'P2', value: 'P2' },
-    { label: 'P3', value: 'P3' },
+    {label: 'P1', value: 'P1'},
+    {label: 'P2', value: 'P2'},
+    {label: 'P3', value: 'P3'},
   ];
 
   const today = new Date();
@@ -137,31 +142,28 @@ const EditVerifyDetails = ({ navigation, route }) => {
       });
 
       const responseData = await response.json();
-      console.log("--------------------------------------------------------------------------------------------------------")
-      console.log("@@@@@@@@@@@@@@@@@", responseData)
+      console.log(
+        '--------------------------------------------------------------------------------------------------------',
+      );
+      console.log('@@@@@@@@@@@@@@@@@', responseData);
 
       if (responseData.code === 3000) {
         if (user.Referrer_Approval === 'PENDING APPROVAL') {
-          setTimeout(() => Alert.alert('Visitor details changed'), 2000)
+          setTimeout(() => Alert.alert('Visitor details changed'), 2000);
           setTimeout(() => navigation.navigate('Pending'), 2000);
         } else if (user.Referrer_Approval === 'APPROVED') {
-          setTimeout(() => Alert.alert('Visitor details changed'), 2000)
+          setTimeout(() => Alert.alert('Visitor details changed'), 2000);
           setTimeout(() => navigation.navigate('Approved'), 2000);
-        }
-        else if (user.Referrer_Approval === 'DENIED') {
-          setTimeout(() => Alert.alert('Visitor details changed'), 2000)
+        } else if (user.Referrer_Approval === 'DENIED') {
+          setTimeout(() => Alert.alert('Visitor details changed'), 2000);
           setTimeout(() => navigation.navigate('Denied'), 2000);
         }
-      }
-      else if (responseData.code === 3001) {
+      } else if (responseData.code === 3001) {
         //  Alert.alert('Can not edit details once Visitor is L2 approved', 'Please fill another form');
         setDialogVisible(true);
         return responseData;
-
       }
-
-    }
-    catch (err) {
+    } catch (err) {
       if (err.message === 'Network request failed')
         Alert.alert(
           'Network Error',
@@ -171,9 +173,8 @@ const EditVerifyDetails = ({ navigation, route }) => {
         Alert.alert('Error: ', err);
         console.log(err);
       }
-      setUpdateLoading(false)
+      setUpdateLoading(false);
     }
-
   };
 
   const onSave = async () => {
@@ -201,10 +202,10 @@ const EditVerifyDetails = ({ navigation, route }) => {
     let people = menCount + womenCount + boysCount + girlsCount;
     console.log('Total people : ', people);
 
-    vehicles.map((vehicle) => {
+    vehicles.map(vehicle => {
       delete vehicle.ID;
       delete vehicle.zc_display_value;
-    })
+    });
 
     const updateField = {
       Date_of_Visit: date,
@@ -219,7 +220,7 @@ const EditVerifyDetails = ({ navigation, route }) => {
       Remarks: remarks,
       Single_or_Group_Visit: isSingle,
       Guest_Category: category,
-      Vehicle_Information: vehicles
+      Vehicle_Information: vehicles,
     };
 
     const updateData = {
@@ -236,71 +237,70 @@ const EditVerifyDetails = ({ navigation, route }) => {
     );
 
     if (response.result[0].code === 3000) {
-      console.log('----------------------------Update Successful---------------------------------');
-      const newUser = { ...user, ...updateData };
+      console.log(
+        '----------------------------Update Successful---------------------------------',
+      );
+      const newUser = {...user, ...updateData};
       console.log('New user data is:', newUser);
-      navigation.navigate('VerifyDetails', { user: { ...user, ...updateField } });
+      navigation.navigate('VerifyDetails', {user: {...user, ...updateField}});
     } else {
       Alert.alert('Error: ', response.code);
     }
   };
 
   const onCancel = () => {
-    navigation.navigate('VerifyDetails', { user: user });
+    navigation.navigate('VerifyDetails', {user: user});
   };
 
   const onPressOk = () => {
     setDialogVisible(false);
     if (user.Referrer_Approval === 'PENDING APPROVAL') {
-      navigation.navigate('Pending')
+      navigation.navigate('Pending');
     } else if (user.Referrer_Approval === 'APPROVED') {
-      navigation.navigate('Approved')
+      navigation.navigate('Approved');
     }
-  }
-
-
-  const handleAddVehicle = () => {
-    setVehicles([...vehicles, { Vehicle_Type: '', Vehicle_Number: '' }]);
   };
 
-  const handleRemoveVehicle = (index) => {
+  const handleAddVehicle = () => {
+    setVehicles([...vehicles, {Vehicle_Type: '', Vehicle_Number: ''}]);
+  };
+
+  const handleRemoveVehicle = index => {
     const updatedVehicles = vehicles.filter((_, i) => i !== index);
     setVehicles(updatedVehicles);
   };
 
   const handleTextChange = (index, field, value) => {
     const updatedVehicles = vehicles.map((vehicle, i) =>
-      i === index ? { ...vehicle, [field]: value } : vehicle
+      i === index ? {...vehicle, [field]: value} : vehicle,
     );
     setVehicles(updatedVehicles);
   };
 
-
-  const [dots, setDots] = useState(""); // State to manage dots animation
+  const [dots, setDots] = useState(''); // State to manage dots animation
 
   // Use an interval to animate the dots
   useEffect(() => {
     let interval;
     if (updateLoading) {
       interval = setInterval(() => {
-        setDots((prev) => (prev.length < 3 ? prev + "." : ""));
+        setDots(prev => (prev.length < 3 ? prev + '.' : ''));
       }, 500); // Adjust the speed as necessary
     } else {
-      setDots("");
+      setDots('');
     }
     return () => clearInterval(interval); // Clean up the interval on unmount
   }, [updateLoading]);
 
-
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView style={{flex: 1}}>
       {/* <View style={styles.header}>
         <Text style={styles.headertxt}>Edit visitor details</Text>
       </View> */}
       <ScrollView
-        style={{ height: '92%s', backgroundColor: '#FFF', fontFamily: 'Inter' }}>
+        style={{height: '92%s', backgroundColor: '#FFF', fontFamily: 'Inter'}}>
         <View style={styles.v}>
-          <Text style={[styles.txt, { marginTop: 20 }]}>Visitor Name</Text>
+          <Text style={[styles.txt, {marginTop: 20}]}>Visitor Name</Text>
           <TextInput
             style={styles.inputtxt}
             value={user.Name_field.zc_display_value}
@@ -316,7 +316,7 @@ const EditVerifyDetails = ({ navigation, route }) => {
           <Text style={styles.txt}>Date of visit</Text>
           <TouchableOpacity onPress={() => setShowModal(true)}>
             <TextInput
-              style={[styles.inputtxt, { color: 'black' }]}
+              style={[styles.inputtxt, {color: 'black'}]}
               value={date}
               editable={false}
             />
@@ -329,7 +329,7 @@ const EditVerifyDetails = ({ navigation, route }) => {
             onRequestClose={() => setShowModal(false)}>
             <TouchableWithoutFeedback onPress={() => setShowModal(false)}>
               <View style={styles.modalContainer}>
-                <TouchableWithoutFeedback onPress={() => { }}>
+                <TouchableWithoutFeedback onPress={() => {}}>
                   <View style={styles.modalContent}>
                     <DatePicker
                       mode="calendar"
@@ -366,7 +366,7 @@ const EditVerifyDetails = ({ navigation, route }) => {
                     <View style={styles.innerCircle} />
                   )}
                 </View>
-                <Text style={{ marginLeft: 10, fontSize: 14 }}>{option}</Text>
+                <Text style={{marginLeft: 10, fontSize: 14}}>{option}</Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -448,7 +448,7 @@ const EditVerifyDetails = ({ navigation, route }) => {
           </View>
         )}
 
-        <View style={styles.v}>
+        {/* <View style={styles.v}>
           <Text style={styles.txt}>
             Is the guest being invited to your Home or Office
           </Text>
@@ -465,6 +465,17 @@ const EditVerifyDetails = ({ navigation, route }) => {
               setIsHome(item.value);
               setIsHomeFocus(false);
             }}
+            
+          />
+        </View> This is the dropdown to edit to Home or Office, the thought for future implementation of this is to only show this dropdown
+ if the user is both an employee and a resident. */}
+
+        <View style={styles.v}>
+          <Text style={styles.txt}>Place of visit:</Text>
+          <TextInput
+            style={styles.dropdownstyle}
+            value={isHome}
+            editable={false}
           />
         </View>
 
@@ -531,7 +542,9 @@ const EditVerifyDetails = ({ navigation, route }) => {
               <Picker
                 selectedValue={vehicle.Vehicle_Type}
                 style={styles.picker}
-                onValueChange={(value) => handleTextChange(index, 'Vehicle_Type', value)}>
+                onValueChange={value =>
+                  handleTextChange(index, 'Vehicle_Type', value)
+                }>
                 <Picker.Item label="Select" value="" />
                 <Picker.Item label="2-Wheeler" value="2-Wheeler" />
                 <Picker.Item label="Car" value="Car" />
@@ -554,25 +567,28 @@ const EditVerifyDetails = ({ navigation, route }) => {
               <TextInput
                 style={styles.vehicleinput}
                 value={vehicle.Vehicle_Number}
-                onChangeText={(text) => handleTextChange(index, 'Vehicle_Number', text)}
+                onChangeText={text =>
+                  handleTextChange(index, 'Vehicle_Number', text)
+                }
               />
               <TouchableOpacity onPress={() => handleRemoveVehicle(index)}>
-                <Image source={require('../../assets/delete.png')} style={styles.removeButton} />
+                <Image
+                  source={require('../../assets/delete.png')}
+                  style={styles.removeButton}
+                />
               </TouchableOpacity>
             </View>
           ))}
-          <TouchableOpacity style={styles.addvehicle} onPress={handleAddVehicle}>
+          <TouchableOpacity
+            style={styles.addvehicle}
+            onPress={handleAddVehicle}>
             <Image
               source={require('../../assets/add.png')}
-              style={{ width: 15, height: 15 }}
+              style={{width: 15, height: 15}}
             />
-            <Text style={{ color: "black", fontSize: 15 }}>Add New</Text>
+            <Text style={{color: 'black', fontSize: 15}}>Add New</Text>
           </TouchableOpacity>
         </View>
-
-
-
-
 
         {/* <View style={styles.btnRoot}>
           {!updateLoading ? (
@@ -592,43 +608,44 @@ const EditVerifyDetails = ({ navigation, route }) => {
           )}
         </View> */}
 
-      <View style={styles.btnRoot}>
-        <TouchableOpacity
-          style={styles.save}
-          onPress={onSave}
-          disabled={updateLoading} // Disable the button when loading
-        >
+        <View style={styles.btnRoot}>
+          <TouchableOpacity
+            style={styles.save}
+            onPress={onSave}
+            disabled={updateLoading} // Disable the button when loading
+          >
             <Text style={styles.btnsave}>Update</Text>
-        </TouchableOpacity>
-      </View>
-
-    <Modal
-        transparent={true}
-        animationType="fade"
-        visible={updateLoading}
-        onRequestClose={() => {}}
-      >
-        <View style={styles.modalBackground}>
-          <ActivityIndicator size="large" color="#fff" />
+          </TouchableOpacity>
         </View>
-      </Modal>
 
+        <Modal
+          transparent={true}
+          animationType="fade"
+          visible={updateLoading}
+          onRequestClose={() => {}}>
+          <View style={styles.modalBackground}>
+            <ActivityIndicator size="large" color="#fff" />
+          </View>
+        </Modal>
       </ScrollView>
-      <Dialog.Container visible={DialogVisible} contentStyle={styles.detailsNotEditableDialogue}>
-        <Dialog.Title style={styles.detailsNotEditableTitle}>Visitor just got / is L2 approved</Dialog.Title>
-        <Dialog.Description>Please fill another form for new details</Dialog.Description>
+      <Dialog.Container
+        visible={DialogVisible}
+        contentStyle={styles.detailsNotEditableDialogue}>
+        <Dialog.Title style={styles.detailsNotEditableTitle}>
+          Visitor just got L2 approved
+        </Dialog.Title>
+        <Dialog.Description>
+          Please fill another form for new details
+        </Dialog.Description>
         <Dialog.Button label="Ok" onPress={onPressOk} />
-
       </Dialog.Container>
     </SafeAreaView>
-
   );
 };
 
 export default EditVerifyDetails;
 
 const styles = StyleSheet.create({
-
   modalBackground: {
     flex: 1,
     justifyContent: 'center',
@@ -638,31 +655,31 @@ const styles = StyleSheet.create({
 
   vehicle: {
     flex: 1,
-    flexDirection: "row",
-    justifyContent: "space-around",
-    alignItems: "center",
-    backgroundColor: "lightgrey",
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    backgroundColor: 'lightgrey',
     marginHorizontal: 15,
     height: 30,
-    borderRadius: 10
+    borderRadius: 10,
   },
   addvehicle: {
     flex: 1,
-    flexDirection: "row",
-    justifyContent: "center",
+    flexDirection: 'row',
+    justifyContent: 'center',
     gap: 5,
-    marginTop: 10
+    marginTop: 10,
   },
   newvehicle: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     marginVertical: 5,
     padding: 10,
     borderRadius: 10,
-    borderColor: "#B21E2B",
+    borderColor: '#B21E2B',
     borderWidth: 1,
     height: 50,
-    marginHorizontal: 20
+    marginHorizontal: 20,
   },
   picker: {
     flex: 2,
@@ -678,7 +695,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginLeft: 10,
     width: 20,
-    height: 20
+    height: 20,
   },
   header: {
     fontFamily: 'Inter',
@@ -751,7 +768,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#b21e2b',
     width: 140,
     height: 40,
-    borderRadius: 10
+    borderRadius: 10,
   },
   cancel: {
     marginLeft: 10,
@@ -834,19 +851,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#b21e2b',
   },
 
-
   detailsNotEditableDialogue: {
     borderRadius: 30,
     backgroundColor: 'pink',
-
   },
 
   detailsNotEditableTitle: {
-
     fontWeight: 'bold',
-
-  }
-
+  },
 });
 
 const mediumScreen = StyleSheet.create({
@@ -873,7 +885,6 @@ const mediumScreen = StyleSheet.create({
 });
 
 const smallScreen = StyleSheet.create({
-
   UpdatingActivityIndicatorContainer: {
     top: 35,
     backgroundColor: '#b21e2b',
@@ -895,7 +906,6 @@ const smallScreen = StyleSheet.create({
     fontSize: 17,
     fontWeight: 'bold',
   },
-
 });
 
 const normalScreen = StyleSheet.create({
@@ -909,7 +919,6 @@ const normalScreen = StyleSheet.create({
     elevation: 5,
   },
 
-
   ActivityIndicator: {
     top: -10,
     right: -60,
@@ -921,5 +930,4 @@ const normalScreen = StyleSheet.create({
     fontSize: 15,
     fontWeight: 'bold',
   },
-
 });

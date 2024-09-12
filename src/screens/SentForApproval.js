@@ -1,12 +1,13 @@
-import {View, Text, Image} from 'react-native';
+import {View, Text, Image, ActivityIndicator} from 'react-native';
 import React from 'react';
 
 const SentForApproval = () => {
   return (
-    <View style={{flex: 1, alignItems: 'center'}}>
+    <View style={{flex: 1, alignItems: 'center', marginTop: '40%'}}>
+      <ActivityIndicator size="large" color="#B21E2B" />
       <Image
         style={{
-          marginTop: '60%',
+          marginTop: '20%',
         }}
         source={require('../../src/assets/Group.png')}
       />
