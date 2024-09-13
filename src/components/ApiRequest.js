@@ -1,5 +1,5 @@
-import { BASE_APP_URL, APP_OWNER_NAME, APP_LINK_NAME } from '@env';
-import { Alert } from 'react-native';
+import {BASE_APP_URL, APP_OWNER_NAME, APP_LINK_NAME} from '@env';
+import {Alert} from 'react-native';
 
 export const getDataWithInt = async (reportName, criteria, value, token) => {
   try {
@@ -57,7 +57,7 @@ export const getDataWithInt = async (reportName, criteria, value, token) => {
 
 export const getDataWithString = async (reportName, criteria, value, token) => {
   try {
-    console.log("Base app url is : ", BASE_APP_URL);
+    console.log('Base app url is : ', BASE_APP_URL);
     console.log('token in getDataWithString: ', token, value);
     const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/${reportName}?criteria=${criteria}=="${value}"`;
     console.log('url', url);
@@ -195,6 +195,38 @@ export const getDataWithTwoString = async (
   }
 };
 
+export const getDataWithTwoInt = async (
+  reportName,
+  criteria1,
+  value1,
+  criteria2,
+  value2,
+  token,
+) => {
+  try {
+    const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/${reportName}?criteria=${criteria1}==${value1}%26%26${criteria2}==${value2}`;
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        Authorization: `Zoho-oauthtoken ${token}`,
+      },
+      params: {
+        criteria: `${criteria1}==${value1}&&${criteria2}==${value2}`,
+      },
+    });
+    return await response.json();
+  } catch (err) {
+    if (err.message === 'Network request failed')
+      Alert.alert(
+        'Network Error',
+        'Failed to fetch data. Please check your network connection and try again.',
+      );
+    else {
+      Alert.alert('Error: ', err);
+      console.log(err);
+    }
+  }
+};
 
 export const getDataWithStringAndInt = async (
   reportName,
@@ -286,7 +318,6 @@ export const postDataWithInt = async (reportName, user_data, token) => {
     }
   }
 };
-
 
 export const patchDataWithInt = async (reportName, modified_data, token) => {
   try {

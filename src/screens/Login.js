@@ -16,7 +16,11 @@ import React, {useState, useContext, useEffect} from 'react';
 import {useForm, Controller} from 'react-hook-form';
 import {auth} from '../auth/firebaseConfig';
 import {signInWithEmailAndPassword, sendEmailVerification} from 'firebase/auth';
-import {getDataWithInt, getDataWithString} from '../components/ApiRequest';
+import {
+  getDataWithInt,
+  getDataWithString,
+  getDataWithTwoInt,
+} from '../components/ApiRequest';
 import UserContext from '../../context/UserContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {BASE_APP_URL, APP_LINK_NAME, APP_OWNER_NAME} from '@env';
@@ -39,6 +43,11 @@ const Login = ({navigation}) => {
     loggedUser,
     setLoggedUser,
     deviceToken,
+    resident,
+
+    employee,
+
+    testResident,
   } = useContext(UserContext);
   const [currentUser, setCurrentUser] = useState(null);
   const [departmentIds, setDepartmentIds] = useState([]);
@@ -77,6 +86,56 @@ const Login = ({navigation}) => {
     console.log('response in fetchDataFromOffice in login: '.res);
   };
 
+  const isTestResident = async id => {
+    const res = await getDataWithTwoInt(
+      'All_Residents',
+      'App_User_lookup',
+      id,
+      'Flats_lookup',
+      '3318254000031368021',
+      accessToken,
+    );
+    if (res && res.data) {
+      console.log('Test resident is true');
+      testResident.current = true;
+    } else {
+      console.log('Test Resident is false');
+      testResident.current = false;
+    }
+  };
+
+  const isResident = async id => {
+    const res = await getDataWithInt(
+      'All_Residents',
+      'App_User_lookup',
+      id,
+      accessToken,
+    );
+    if (res && res.data) {
+      console.log('resident is true');
+      resident.current = true;
+    } else {
+      console.log('resident is false');
+      resident.current = false;
+    }
+  };
+
+  const isEmployee = async id => {
+    const res = await getDataWithInt(
+      'All_Employees',
+      'App_User_lookup',
+      id,
+      accessToken,
+    );
+    if (res && res.data) {
+      console.log('employee is true');
+      employee.current = true;
+    } else {
+      console.log('employee is false');
+      employee.current = false;
+    }
+  };
+
   useEffect(() => {
     const storeData = async () => {
       if (currentUser) {
@@ -88,6 +147,7 @@ const Login = ({navigation}) => {
             role: userType,
             email: currentUser.email,
             deptIds: departmentIds,
+            name: currentUser.L1name,
           }),
         );
         console.log('login data saved into local storage');
@@ -164,7 +224,15 @@ const Login = ({navigation}) => {
       accessToken,
     );
     console.log('Whether user exis or not in login: ', res);
-    if (res && res.data) {
+    await isResident(res.data[0].ID);
+    await isEmployee(res.data[0].ID);
+    console.log(
+      'resident || employee boolean',
+      resident.current,
+      employee.current,
+    );
+    await isTestResident(res.data[0].ID);
+    if (res && res.data && (resident.current || employee.current)) {
       try {
         fetchDataFromOffice(res.data[0].ID);
         const userCredential = await signInWithEmailAndPassword(
@@ -180,6 +248,7 @@ const Login = ({navigation}) => {
           setCurrentUser({
             id: res.data[0].ID,
             email: userCred.email.toLowerCase().trim(),
+            L1name: res.data[0].Name_field,
           });
           const response = await findDeviceToken(res.data[0].ID);
           console.log('response is: ', response);

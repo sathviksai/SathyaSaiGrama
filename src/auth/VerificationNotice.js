@@ -16,6 +16,7 @@ const VerificationNotice = ({ route, navigation }) => {
   const { setUserEmail, setL1ID, accessToken, userType, setUserType, setLoggedUser, deviceToken } = useContext(UserContext)
   const { setUser } = useContext(AuthContext)
   const [departmentIds, setDepartmentIds] = useState([])
+  const {email} = route.params
 
 
   useEffect(() => {
@@ -180,15 +181,15 @@ const VerificationNotice = ({ route, navigation }) => {
       <Text
         style={{
           width: 256,
-          height: 44,
+          height: 38,
           color: '#1F2024',
           textAlign: 'center',
           fontFamily: 'Inter',
-          fontSize: 18,
+          fontSize: 17,
           fontWeight: '900',
           letterSpacing: 0.09,
         }}>
-        We have sent you an email
+        We have sent a verification
       </Text>
       <Text
         style={{
@@ -200,7 +201,7 @@ const VerificationNotice = ({ route, navigation }) => {
           fontWeight: '400',
           lineHeight: 20,
         }}>
-        Click on the email verification link sent to you on userinfor@gmail.com
+ to your email: {'\n'} {email}
       </Text>
       <TouchableOpacity
         style={[styles.register, styles.register1]}

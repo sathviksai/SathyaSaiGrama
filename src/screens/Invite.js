@@ -21,7 +21,8 @@ import axios from 'axios';
 const Invite = ({navigation}) => {
   const {user} = useContext(AuthContext);
 
-  const {userEmail, getAccessToken, loggedUser} = useContext(UserContext);
+  const {userEmail, getAccessToken, loggedUser, employee, resident} =
+    useContext(UserContext);
   const L1ID = loggedUser.userId;
   const [selectedOption, setSelectedOption] = useState(null);
   const [modal, setModal] = useState(false);
@@ -166,11 +167,13 @@ const Invite = ({navigation}) => {
           message: `Please Fill the form using this Link : ${veryshortUrl}`,
         });
         setLoading(false); // stop loading after sharing apps appear
+        setModal(false);
       } else {
         Alert.alert('Select anyone option');
       }
     } catch (error) {
       setLoading(false);
+      setModal(false);
       Alert.alert(error.message);
     }
   };
@@ -243,28 +246,34 @@ const Invite = ({navigation}) => {
                         style={{
                           flexDirection: 'row',
                         }}>
-                        <TouchableOpacity
-                          style={[
-                            styles.HomeButton,
-                            {backgroundColor: '#B21E2B'},
-                          ]}
-                          onPress={() => {
-                            onShare('Home');
-                          }}>
-                          <Text style={[styles.wewe, styles.wewe1]}>Home</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                          style={[
-                            styles.HomeButton,
-                            {backgroundColor: '#FFBE65'},
-                          ]}
-                          onPress={() => {
-                            onShare('Office');
-                          }}>
-                          <Text style={[styles.wewe, styles.wewe2]}>
-                            Office
-                          </Text>
-                        </TouchableOpacity>
+                        {resident.current ? (
+                          <TouchableOpacity
+                            style={[
+                              styles.HomeButton,
+                              {backgroundColor: '#B21E2B'},
+                            ]}
+                            onPress={() => {
+                              onShare('Home');
+                            }}>
+                            <Text style={[styles.wewe, styles.wewe1]}>
+                              Home
+                            </Text>
+                          </TouchableOpacity>
+                        ) : null}
+                        {employee.current ? (
+                          <TouchableOpacity
+                            style={[
+                              styles.HomeButton,
+                              {backgroundColor: '#FFBE65'},
+                            ]}
+                            onPress={() => {
+                              onShare('Office');
+                            }}>
+                            <Text style={[styles.wewe, styles.wewe2]}>
+                              Office
+                            </Text>
+                          </TouchableOpacity>
+                        ) : null}
                       </View>
                       {loading && ( // Display ActivityIndicator if loading
                         <ActivityIndicator
