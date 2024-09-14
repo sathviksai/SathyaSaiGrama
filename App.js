@@ -1,9 +1,9 @@
 import BaseRoute from './navigation/stack-navigation/BaseRoute';
 import UserContext from './context/UserContext';
-import { useContext, useEffect, useState } from 'react';
-import { Appearance, AppearanceProvider } from 'react-native';
-import { DefaultTheme, Provider as PaperProvider } from 'react-native-paper';
-import NetInfo from "@react-native-community/netinfo";
+import {useContext, useEffect, useState} from 'react';
+import {Appearance, AppearanceProvider} from 'react-native';
+import {DefaultTheme, Provider as PaperProvider} from 'react-native-paper';
+import NetInfo from '@react-native-community/netinfo';
 
 import {
   DATABASE_ID,
@@ -11,12 +11,13 @@ import {
   APPWRITE_FUNCTION_PROJECT_ID,
   APPWRITE_API_KEY,
 } from '@env';
-import { StyleSheet, ActivityIndicator, Alert } from 'react-native';
-import { AuthContext, AuthProvider } from './src/auth/AuthProvider';
+import {StyleSheet, ActivityIndicator, Alert} from 'react-native';
+import {AuthContext, AuthProvider} from './src/auth/AuthProvider';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import SplashScreen from './src/screens/SplashScreen';
-import { getDeviceToken } from './src/utils/notificationService';
+import {getDeviceToken} from './src/utils/notificationService';
 import NoNetworkScreen from './src/screens/NoNetworkScreen';
+import CodePush from 'react-native-code-push';
 
 const lightTheme = {
   ...DefaultTheme,
@@ -30,18 +31,16 @@ const lightTheme = {
 
 const App = () => {
   const [isNetworkAvailable, setIsNetworkAvailable] = useState(true);
-  const { user } = useContext(AuthContext);
-useEffect(() => {
-  const unsubscribe = NetInfo.addEventListener(state => {
-    setIsNetworkAvailable(state.isConnected);
-  });
+  const {user} = useContext(AuthContext);
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener(state => {
+      setIsNetworkAvailable(state.isConnected);
+    });
 
-  return () => {
-    unsubscribe();
-
-  }; 
-
-},[]);
+    return () => {
+      unsubscribe();
+    };
+  }, []);
 
   const {
     setAccessToken,
@@ -58,7 +57,7 @@ useEffect(() => {
   //To get zoho access token from Appwrite
   const getAppWriteToken = async () => {
     try {
-      console.log("database id : ", DATABASE_ID);
+      console.log('database id : ', DATABASE_ID);
       let res = await fetch(
         `https://cloud.appwrite.io/v1/databases/${DATABASE_ID}/collections/${COLLECTION_ID}/documents`,
         {
@@ -70,7 +69,7 @@ useEffect(() => {
           },
         },
       );
-      console.log("After api call")
+      console.log('After api call');
       res = await res.json();
       //console.log("Access token in App: ", res.documents[0].Token)
       setAccessToken(res.documents[0].Token);
@@ -118,19 +117,20 @@ useEffect(() => {
   }, [accessToken]);
 
   return (
-      <PaperProvider theme={lightTheme}>
-       {!isNetworkAvailable ? (<NoNetworkScreen />) :  ( loading ? (
-          // <ActivityIndicator size="large" color="#752A26" style={styles.loadingContainer}/>
-          <SplashScreen />
-        ) : (
-          <BaseRoute />
-        ))}  
-
-      </PaperProvider>
+    <PaperProvider theme={lightTheme}>
+      {!isNetworkAvailable ? (
+        <NoNetworkScreen />
+      ) : loading ? (
+        // <ActivityIndicator size="large" color="#752A26" style={styles.loadingContainer}/>
+        <SplashScreen />
+      ) : (
+        <BaseRoute />
+      )}
+    </PaperProvider>
   );
 };
 
-export default App;
+export default CodePush(App);
 
 const styles = StyleSheet.create({
   loadingContainer: {

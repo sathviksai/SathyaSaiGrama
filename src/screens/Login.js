@@ -315,11 +315,11 @@ const Login = ({navigation}) => {
             <KeyboardAvoidingView>
               <Image
                 source={require('../../src/assets/aashram.png')}
-                resizeMode="contain"
+                resizeMode="cover"
                 style={{
                   width: '100%',
                   height: 340,
-                  marginTop: 5,
+                  marginTop: 0,
                 }}
               />
 
@@ -432,7 +432,7 @@ const Login = ({navigation}) => {
                       fontWeight: '600',
                       letterSpacing: 0.12,
                     }}>
-                    Do not have an account?
+                    Don't have an account?
                   </Text>
                   <TouchableOpacity
                     onPress={() => {
