@@ -432,7 +432,7 @@ const Login = ({navigation}) => {
                       fontWeight: '600',
                       letterSpacing: 0.12,
                     }}>
-                    Do not have an account?
+                    Don't have an account?
                   </Text>
                   <TouchableOpacity
                     onPress={() => {
