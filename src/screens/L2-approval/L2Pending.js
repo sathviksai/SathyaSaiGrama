@@ -93,7 +93,7 @@ const L2Pending = ({ navigation }) => {
         <ActivityIndicator size="large" color="#B21E2B" />
       </View>) : (
         <>
-          <Filter setFilteredData={setL2PendingsData} ToFilterData={L2Pendings} />
+          <Filter setFilteredData={setL2PendingsData} ToFilterData={L2Pendings} comingFrom={"L2Pending"}/>
           <FlatList
             data={L2PendingsData}
             renderItem={({ item }) => (

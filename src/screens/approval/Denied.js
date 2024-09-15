@@ -86,7 +86,7 @@ const Denied = ({ navigation }) => {
         <ActivityIndicator size="large" color="#B21E2B" />
       </View>) : (
         <>
-          <Filter setFilteredData={setDeniedsData} ToFilterData={denieds} />
+          <Filter setFilteredData={setDeniedsData} ToFilterData={denieds} comingFrom={"Denied"} />
           <FlatList
             data={deniedsData}
             renderItem={({ item }) => (
@@ -100,6 +100,7 @@ const Denied = ({ navigation }) => {
         </>
       )))}
     </View>
+    {deniedsData?.length<1 && denieds?.length>0  && !loading && <View style={styles.noDeniedTextView}><Text style={{ flex: 10 }}>No Visitors found</Text></View>}
       {!refreshing && denieds === null && !loading && <View style={styles.noDeniedTextView}><Text style={{ flex: 10 }}>No Denied visitors</Text></View>}</>
   );
 };

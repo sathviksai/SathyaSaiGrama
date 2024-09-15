@@ -56,8 +56,6 @@ const Approved = ({ navigation }) => {
       setApprovedsData(null)
       setRefreshing(false);
       setLoading(false);
-
-
     }
     else {
       all_approveds.sort((a, b) => {
@@ -88,7 +86,7 @@ const Approved = ({ navigation }) => {
         <ActivityIndicator size="large" color="#B21E2B" />
       </View>) : (
         <>
-          <Filter setFilteredData={setApprovedsData} ToFilterData={approveds} />
+          <Filter setFilteredData={setApprovedsData} ToFilterData={approveds}  comingFrom={"Approved"}/>
           <FlatList
             data={approvedsData}
             renderItem={({ item }) => (
@@ -103,7 +101,7 @@ const Approved = ({ navigation }) => {
       )))}
     </View>
     {
-        approvedsData?.length<1 && approveds?.length >0  && !loading && <View style={styles.noPendingTextView}><Text style={{ flex: 10 }}>No Visitors found</Text></View>
+        approvedsData?.length<1 && approveds?.length>0  && !loading && <View style={styles.noApprovedTextView}><Text style={{ flex: 10 }}>No Visitors found</Text></View>
       }
       {!refreshing && approveds === null && !loading && <View style={styles.noApprovedTextView}><Text style={{ flex: 10 }}>No Approved visitors</Text></View>}</>
   );

@@ -90,7 +90,7 @@ const L2Approved = ({ navigation }) => {
         <ActivityIndicator size="large" color="#B21E2B" />
       </View>) : (
         <>
-          <Filter setFilteredData={setL2ApprovedsData} ToFilterData={L2Approveds} />
+          <Filter setFilteredData={setL2ApprovedsData} ToFilterData={L2Approveds}  comingFrom={"L2Approved"}/>
           <FlatList
             data={L2ApprovedsData}
             renderItem={({ item }) => (

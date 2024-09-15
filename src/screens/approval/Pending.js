@@ -92,7 +92,7 @@ const Pending = ({ navigation }) => {
           <ActivityIndicator size="large" color="#B21E2B" />
         </View>) : (
           <>
-          <Filter  setFilteredData = {setPendingsData} ToFilterData={pendings}/>
+          <Filter  setFilteredData = {setPendingsData} ToFilterData={pendings} comingFrom={"Pending"}/>
             <FlatList
               data={pendingsData}
               renderItem={({ item }) => (
@@ -106,7 +106,7 @@ const Pending = ({ navigation }) => {
           </>
         )))}
       </View>
-      {
+      { 
         pendingsData?.length<1 && pendings?.length>0 && <View style={styles.noPendingTextView}><Text style={{ flex: 10 }}>No Visitors found</Text></View>
       }
       {!refreshing && pendings === null && !loading && <View style={styles.noPendingTextView}><Text style={{ flex: 10 }}>No Pending visitors</Text></View>}</View>

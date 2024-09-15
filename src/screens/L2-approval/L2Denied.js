@@ -58,8 +58,6 @@ const L2Denied = ({ navigation }) => {
       setL2DeniedsData(null);
       setRefreshing(false);
       setLoading(false);
-
-
     } else {
       all_L2denieds.sort((a, b) => {
         // Parse the date strings into Date objects
@@ -88,7 +86,7 @@ const L2Denied = ({ navigation }) => {
         <ActivityIndicator size="large" color="#B21E2B" />
       </View>) : (
         <>
-          <Filter setFilteredData={setL2DeniedsData} ToFilterData={L2Denieds} />
+          <Filter setFilteredData={setL2DeniedsData} ToFilterData={L2Denieds}  comingFrom={"L2Denied"}/>
           <FlatList
             data={L2DeniedsData}
             renderItem={({ item }) => (
