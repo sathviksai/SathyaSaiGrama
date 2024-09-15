@@ -246,28 +246,34 @@ const Invite = ({navigation}) => {
                         style={{
                           flexDirection: 'row',
                         }}>
-                        <TouchableOpacity
-                          style={[
-                            styles.HomeButton,
-                            {backgroundColor: '#B21E2B'},
-                          ]}
-                          onPress={() => {
-                            onShare('Home');
-                          }}>
-                          <Text style={[styles.wewe, styles.wewe1]}>Home</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                          style={[
-                            styles.HomeButton,
-                            {backgroundColor: '#FFBE65'},
-                          ]}
-                          onPress={() => {
-                            onShare('Office');
-                          }}>
-                          <Text style={[styles.wewe, styles.wewe2]}>
-                            Office
-                          </Text>
-                        </TouchableOpacity>
+                        {resident.current ? (
+                          <TouchableOpacity
+                            style={[
+                              styles.HomeButton,
+                              {backgroundColor: '#B21E2B'},
+                            ]}
+                            onPress={() => {
+                              onShare('Home');
+                            }}>
+                            <Text style={[styles.wewe, styles.wewe1]}>
+                              Home
+                            </Text>
+                          </TouchableOpacity>
+                        ) : null}
+                        {employee.current ? (
+                          <TouchableOpacity
+                            style={[
+                              styles.HomeButton,
+                              {backgroundColor: '#FFBE65'},
+                            ]}
+                            onPress={() => {
+                              onShare('Office');
+                            }}>
+                            <Text style={[styles.wewe, styles.wewe2]}>
+                              Office
+                            </Text>
+                          </TouchableOpacity>
+                        ) : null}
                       </View>
                       {loading && ( // Display ActivityIndicator if loading
                         <ActivityIndicator
