@@ -224,7 +224,7 @@ const Invite = ({navigation}) => {
               </Text>
             </TouchableOpacity>
             <View style={styles.wrapper}>
-              <Modal
+            <Modal
                 animationType="fade"
                 transparent={true}
                 visible={modal}
@@ -246,34 +246,28 @@ const Invite = ({navigation}) => {
                         style={{
                           flexDirection: 'row',
                         }}>
-                        {resident.current ? (
-                          <TouchableOpacity
-                            style={[
-                              styles.HomeButton,
-                              {backgroundColor: '#B21E2B'},
-                            ]}
-                            onPress={() => {
-                              onShare('Home');
-                            }}>
-                            <Text style={[styles.wewe, styles.wewe1]}>
-                              Home
-                            </Text>
-                          </TouchableOpacity>
-                        ) : null}
-                        {employee.current ? (
-                          <TouchableOpacity
-                            style={[
-                              styles.HomeButton,
-                              {backgroundColor: '#FFBE65'},
-                            ]}
-                            onPress={() => {
-                              onShare('Office');
-                            }}>
-                            <Text style={[styles.wewe, styles.wewe2]}>
-                              Office
-                            </Text>
-                          </TouchableOpacity>
-                        ) : null}
+                        <TouchableOpacity
+                          style={[
+                            styles.HomeButton,
+                            {backgroundColor: '#B21E2B'},
+                          ]}
+                          onPress={() => {
+                            onShare('Home');
+                          }}>
+                          <Text style={[styles.wewe, styles.wewe1]}>Home</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          style={[
+                            styles.HomeButton,
+                            {backgroundColor: '#FFBE65'},
+                          ]}
+                          onPress={() => {
+                            onShare('Office');
+                          }}>
+                          <Text style={[styles.wewe, styles.wewe2]}>
+                            Office
+                          </Text>
+                        </TouchableOpacity>
                       </View>
                       {loading && ( // Display ActivityIndicator if loading
                         <ActivityIndicator

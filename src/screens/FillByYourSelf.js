@@ -50,7 +50,6 @@ const FillByYourSelf = ({navigation}) => {
   const [value, setValue] = useState('');
   const [formattedValue, setFormattedValue] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
-  const [disabled, setDisabled] = useState(false);
   const [image, setImage] = useState('Upload Image');
   // const [imageurl, setImageUrl] = useState('');
   // const [RES_ID, setRES_ID] = useState('');
@@ -723,7 +722,7 @@ const FillByYourSelf = ({navigation}) => {
                     setFormattedValue(text);
                   }}
                   countryPickerProps={{withAlphaFilter: true}}
-                  disabled={disabled}
+                  disabled={false}
                   withDarkTheme
                   withShadow
                 />

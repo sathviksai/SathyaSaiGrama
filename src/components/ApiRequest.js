@@ -107,7 +107,6 @@ export const getDataWithIntAndString = async (
       },
     });
     const res = await response.json();
-    console.log('Response in getDataWithIntAndString: ', res);
     return res;
   } catch (err) {
     if (err.message === 'Network request failed')
