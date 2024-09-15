@@ -224,7 +224,7 @@ const Invite = ({navigation}) => {
               </Text>
             </TouchableOpacity>
             <View style={styles.wrapper}>
-              <Modal
+            <Modal
                 animationType="fade"
                 transparent={true}
                 visible={modal}
